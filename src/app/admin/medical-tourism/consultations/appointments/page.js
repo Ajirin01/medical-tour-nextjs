@@ -83,6 +83,7 @@ const ConsultationAppointmentsPage = () => {
   const changePage = (newPage) => {
     router.push(`?page=${newPage}`);
   };
+  
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
