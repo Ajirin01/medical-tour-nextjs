@@ -1,13 +1,27 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_NODE_API_BASE_URL || "http://localhost:5000";
 
+// Helper to add timeout
+async function fetchWithTimeout(resource, options = {}, timeout = 10000) { // default 10s
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const res = await fetch(resource, {
+      ...options,
+      signal: controller.signal,
+    });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
 // Fetch Data (GET)
 export async function fetchData(endpoint, token = null) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-  console.log(token)
-
   try {
-    const res = await fetch(`${API_BASE_URL}/${endpoint}`, { headers });
+    const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, { headers });
 
     if (!res.ok) {
       const errorResponse = await res.json();
@@ -26,35 +40,28 @@ export async function postData(endpoint, data, token = null, isFormData = false)
   const headers = token
     ? {
         Authorization: `Bearer ${token}`,
-        ...(isFormData ? {} : { "Content-Type": "application/json" }),  // Handle content type properly
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
       }
-    : { "Content-Type": "application/json" }; // Default to JSON if no token
-
-  console.log("Headers:", headers); // Debug the headers
-  console.log("Data being sent:", data); // Debug the data being sent
+    : { "Content-Type": "application/json" };
 
   try {
-    const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
       method: "POST",
       headers,
-      body: isFormData ? data : JSON.stringify(data), // Convert body to JSON unless it's FormData
+      body: isFormData ? data : JSON.stringify(data),
     });
-
-    console.log("Response Status:", res.status); // Debug response status
 
     if (!res.ok) {
       const errorResponse = await res.json();
-      console.error("Error response:", errorResponse);  // Debug error response
       throw new Error(errorResponse.message || `Error: ${res.statusText}`);
     }
 
-    return await res.json();  // Parse and return the JSON response
+    return await res.json();
   } catch (error) {
-    console.error("API Post Error:", error);  // Log any error during the request
+    console.error("API Post Error:", error);
     throw error;
   }
 }
-
 
 // Update Data (PUT or PATCH)
 export async function updateData(endpoint, data, token, isFormData = false) {
@@ -66,7 +73,7 @@ export async function updateData(endpoint, data, token, isFormData = false) {
     : {};
 
   try {
-    const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
       method: "PUT",
       headers,
       body: isFormData ? data : JSON.stringify(data),
@@ -89,7 +96,7 @@ export async function deleteData(endpoint, token) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-    const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
       method: "DELETE",
       headers,
     });
