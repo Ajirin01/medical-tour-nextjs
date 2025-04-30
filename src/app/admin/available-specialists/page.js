@@ -1,15 +1,10 @@
-"use client";
+import { Suspense } from "react";
+import ConsultationSpecialistSelectPage from "./ConsultationSpecialistSelectPage";
 
-import OnlineSpecialistsList from "./OnlineSpecialistsList";
-import { useSearchParams } from "next/navigation";
-
-export default function ConsultationSpecialistSelectPage() {
-  const searchParams = useSearchParams();
-  const appointmentId = searchParams.get("appointmentId");
-
+export default function AvailableSpecialistsPage() {
   return (
-    <main className="p-6">
-      <OnlineSpecialistsList appointmentId={appointmentId} />
-    </main>
+    <Suspense fallback={<div>Loading...</div>}>
+      <ConsultationSpecialistSelectPage />
+    </Suspense>
   );
 }
