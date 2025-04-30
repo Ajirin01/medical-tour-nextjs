@@ -24,6 +24,7 @@ const OrdersPage = () => {
 
   const { data: session } = useSession();
   const token = session?.user?.jwt;
+  
   const { addToast } = useToast();
   const alertSuccess = (msg) => addToast(msg, "success");
   const alertError = (msg) => addToast(msg, "error");

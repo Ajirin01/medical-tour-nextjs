@@ -149,7 +149,8 @@ export default function CompleteProfilePage() {
         setError(res.message);
       } else {
         alertSuccess('Profile updated successfully!');
-        router.push('/admin');
+        window.location.href = "/admin"
+        // router.push('/admin');
       }
     } catch (err) {
       alertError(err.message || 'Something went wrong');

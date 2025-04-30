@@ -1,12 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Head from 'next/head'
 import Swiper from 'swiper';
 // import 'swiper/swiper-bundle.min.css'; // Import Swiper's CSS
-import { CheckIcon } from '@heroicons/react/20/solid';
 import { fetchData } from '@/utils/api';
-
+import Link from "next/link";
 
 
 function classNames(...classes) {
@@ -197,7 +195,7 @@ export default function HomePage() {
               <div className="text-center">
                 <h3>Need Immediate Medical Attention?</h3>
                 <p>If you're facing a medical emergency or need urgent care, don't wait. SozoDigiCare connects you with the right medical experts immediately to ensure you get the care you deserve, wherever you are.</p>
-                <a className="cta-btn" href="#appointment">Schedule an Appointment Now</a>
+                <Link className="cta-btn" href="/consultation/book">Connect with a Doctor Now</Link>
               </div>
             </div>
           </div>
@@ -438,69 +436,7 @@ export default function HomePage() {
         </div>
 
         </section>{/* <!-- /Services Section  */}
-
-
-        {/* <!-- Appointment Section  */}
-        <section id="appointment" className="appointment section light-background">
-
-        {/* <!-- Section Title  */}
-        <div className="container section-title" data-aos="fade-up">
-          <h2>Make an Appointment</h2>
-          <p>Get access to top medical professionals and services, no matter where you are in the world.</p>
-        </div>{/* <!-- End Section Title  */}
-
-        <div className="container" data-aos="fade-up" data-aos-delay="100">
-
-          <form action="forms/appointment.php" method="post" role="form" className="php-email-form">
-            <div className="row">
-              <div className="col-md-4 form-group">
-                <input type="text" name="name" className="form-control" id="name" placeholder="Your Name" required="" />
-              </div>
-              <div className="col-md-4 form-group mt-3 mt-md-0">
-                <input type="email" className="form-control" name="email" id="email" placeholder="Your Email" required="" />
-              </div>
-              <div className="col-md-4 form-group mt-3 mt-md-0">
-                <input type="tel" className="form-control" name="phone" id="phone" placeholder="Your Phone" required="" />
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-4 form-group mt-3">
-                <input type="datetime-local" name="date" className="form-control datepicker" id="date" placeholder="Appointment Date" required="" />
-              </div>
-              <div className="col-md-4 form-group mt-3">
-                <select name="department" id="department" className="form-select" required="">
-                  <option value="">Select Department</option>
-                  <option value="General Consultation">General Consultation</option>
-                  <option value="Specialist Consultation">Specialist Consultation</option>
-                  <option value="Emergency Care">Emergency Care</option>
-                  <option value="Lab Services">Lab Services</option>
-                  <option value="Online Drug Store">Online Drug Store</option>
-                </select>
-              </div>
-              <div className="col-md-4 form-group mt-3">
-                <select name="doctor" id="doctor" className="form-select" required="">
-                  <option value="">Select Doctor</option>
-                  <option value="Dr. Jane Smith">Dr. Jane Smith</option>
-                  <option value="Dr. John Doe">Dr. John Doe</option>
-                  <option value="Dr. Emily Davis">Dr. Emily Davis</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group mt-3">
-              <textarea className="form-control" name="message" rows="5" placeholder="Message (Optional)"></textarea>
-            </div>
-            <div className="mt-3">
-              <div className="loading">Loading</div>
-              <div className="error-message"></div>
-              <div className="sent-message">Your appointment request has been sent successfully. Thank you!</div>
-              <div className="text-center"><button type="submit">Make an Appointment</button></div>
-            </div>
-          </form>
-
-        </div>
-
-        </section>{/* <!-- /Appointment Section  */}
+       
 
         {/* <!-- Tabs Section  */}
         <section id="tabs" className="tabs section">
@@ -807,12 +743,11 @@ export default function HomePage() {
 
 
         {/* <!-- Pricing Section  */}
-        <section id="pricing" className="pricing section">
-          {/* Section Title */}
+        {/* <section id="pricing" className="pricing section">
           <div className="container section-title" data-aos="fade-up">
-            <h2>Our Pricing Plans</h2> {/* Hardcoded Title */}
-            <p>Choose the best plan that suits your needs and get access to exclusive medical services.</p> {/* Hardcoded Description */}
-          </div> {/* End Section Title */}
+            <h2>Our Pricing Plans</h2>
+            <p>Choose the best plan that suits your needs and get access to exclusive medical services.</p>
+          </div> 
 
           <div className="container">
             <div className="row gy-3">
@@ -866,7 +801,7 @@ export default function HomePage() {
               })}
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* <!-- /Pricing Section  */}
 
@@ -1119,8 +1054,6 @@ export default function HomePage() {
         </div>
 
         </section>{/* <!-- /Contact Section  */}
-
-
       </main>
 
       <footer id="footer" className="footer light-background">

@@ -47,6 +47,7 @@ export default NextAuth({
         token.role = user.user.role;
         token.name = user.user.name;  // Optional: user name from backend
         token.isHealthQuestionsAnswered = user.user.isHealthQuestionsAnswered ?? false;
+        token.approvalStatus = user.user.approvalStatus ?? "pending";
       }
 
       return token;
@@ -59,8 +60,9 @@ export default NextAuth({
         session.user.email = token.email;
         session.user.role = token.role;
         session.user.name = token.name;
-        session.user.isHealthQuestionsAnswered = token.isHealthQuestionsAnswered ?? false;
+        session.user.approvalStatus = token.approvalStatus ?? "pending";
       }
+      // console.log(session)
       return session;
     },
   },

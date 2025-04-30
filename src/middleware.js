@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { useUser } from "./context/UserContext";
 
 const protectedRoutes = [
   {
@@ -29,34 +28,44 @@ export async function middleware(req) {
   const token = await getToken({ req });
   const { pathname } = req.nextUrl;
 
-//   console.log(token)
-  
-
   if (
     pathname.startsWith("/auth") ||
     pathname.startsWith("/_next") ||
-    pathname === "/unauthorized"
+    pathname === "/unauthorized" ||
+    pathname === "/admin/profile-under-review"
   ) {
     return NextResponse.next();
   }
 
   for (const route of protectedRoutes) {
     if (pathname.startsWith(route.pathPrefix)) {
-      // Role-based access check
+      // First: check role access
       if (!token || !route.requiredRoles.includes(token?.role)) {
         const url = req.nextUrl.clone();
         url.pathname = "/unauthorized";
         return NextResponse.redirect(url);
       }
 
-      // Extra restriction for normal users under /admin*
+      // Second: check if specialist and not approved
+      if (
+        token.role === "specialist" &&
+        !(token.approvalStatus === "approved") &&
+        pathname.startsWith("/admin") && // Make sure we're only on /admin
+        pathname !== "/admin/profile-under-review" // Avoid infinite redirect loop
+      ) {
+        const url = req.nextUrl.clone();
+        url.pathname = "/admin/profile-under-review";
+        return NextResponse.redirect(url);
+      }
+
+      // Third: user health questions check
       if (
         token.role === "user" &&
         pathname.startsWith("/admin") &&
         !token.isHealthQuestionsAnswered
       ) {
         const url = req.nextUrl.clone();
-        url.pathname = "/health-questions"; // or redirect to "/health-questionnaire"
+        url.pathname = "/health-questions";
         return NextResponse.redirect(url);
       }
     }

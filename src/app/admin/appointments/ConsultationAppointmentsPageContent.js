@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlayIcon } from "@heroicons/react/24/outline";
 import { fetchData, deleteData } from "@/utils/api";
 import { useToast } from "@/context/ToastContext";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
@@ -33,18 +33,38 @@ const ConsultationAppointmentsPageContent  = () => {
 
   const loadAppointments = async () => {
     try {
+      // Prepare the query parameters
       const query = new URLSearchParams({
         page,
         ...filters,
-      }).toString();
-
-      const res = await fetchData(`consultation-appointments/all/paginated?${query}`, token);
-      setAppointments(res.data || []);
-      setPagination({ totalPages: res.totalPages, currentPage: res.currentPage });
+      });
+  
+      // Add user-specific filters based on the role
+      if (session?.user?.role === "user") {
+        query.set("user", session?.user?.id);  // Using .set() to ensure the key is correctly added
+      } else if (session?.user?.role === "specialist") {
+        query.set("consultant", session?.user?.id); // Using .set() for consistency
+      }
+  
+      // Fetch the data from the backend API
+      const res = await fetchData(`consultation-appointments/all/paginated?${query.toString()}`, token);
+      // console.log(session?.user?.id)
+      // Handle the response and set data for appointments and pagination
+      if (res && res.data) {
+        setAppointments(res.data); // Update appointments state
+        setPagination({
+          totalPages: res.totalPages || 1, 
+          currentPage: res.currentPage || 1, 
+        });
+      } else {
+        setAppointments([]);
+        setPagination({ totalPages: 1, currentPage: 1 });
+      }
     } catch (err) {
-      console.error("Failed to load appointments", err);
+      console.error("Failed to load appointments:", err);
     }
   };
+  
 
   useEffect(() => {
     if (token) loadAppointments();
@@ -157,8 +177,8 @@ const ConsultationAppointmentsPageContent  = () => {
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Patient</TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Consultant</TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Date</TableCell>
+                <TableCell isHeader className="px-5 py-3 font-medium text-start">Duration(mins)</TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Status</TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-start">Payment</TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Actions</TableCell>
               </TableRow>
             </TableHeader>
@@ -175,20 +195,21 @@ const ConsultationAppointmentsPageContent  = () => {
                     <TableCell className="px-5 py-4">
                       {appointment.date ? format(new Date(appointment.date), "PPPp") : "-"}
                     </TableCell>
+                    <TableCell className="px-5 py-4">
+                      {appointment.duration}
+                    </TableCell>
                     <TableCell className="px-5 py-4 capitalize">
                       {appointment.status}
                     </TableCell>
-                    <TableCell className="px-5 py-4 capitalize">
-                      {appointment.paymentStatus}
-                    </TableCell>
                     <TableCell className="px-5 py-4 flex gap-3">
-                      <Link href={`/admin/medical-tourism/consultations/appointments/edit/${appointment._id}`} className="text-blue-500">
-                        <PencilSquareIcon className="w-5 h-5" />
+                      <Link
+                        href={`/admin/appointments/session/${appointment._id}`}
+                        className="text-blue-500"
+                      >
+                        <PlayIcon className="w-5 h-20 text-green-500" />
                       </Link>
-                      <button className="text-red-500" onClick={() => { setItemToDelete(appointment); setIsDialogOpen(true); }}>
-                        <TrashIcon className="w-5 h-5" />
-                      </button>
                     </TableCell>
+
                   </TableRow>
                 ))
               ) : (

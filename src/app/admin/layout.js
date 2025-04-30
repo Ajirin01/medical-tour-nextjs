@@ -9,6 +9,7 @@ import Backdrop from "@/layout/Backdrop";
 import React from "react";
 
 import { ThemeProvider } from "@/context/admin/ThemeContext";
+import useSocketEmitOnline from "@/hooks/useSocketEmitOnline";
 
 export default function AdminLayout({ children }) {
   return (
@@ -27,6 +28,8 @@ export default function AdminLayout({ children }) {
 // Extracted Admin Layout Content to prevent `useSidebar` error
 function AdminLayoutContent({ children }) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+
+  useSocketEmitOnline();
 
   const mainContentMargin = isMobileOpen
     ? "ml-0"

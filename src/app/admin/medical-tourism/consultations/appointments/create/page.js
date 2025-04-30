@@ -126,13 +126,16 @@ const CreateConsultationAppointmentPage = () => {
 
         <div>
           <label className="block font-medium mb-1">Type</label>
-          <input
-            type="text"
+          <select
             name="type"
             value={form.type}
-            disabled
-            className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-500 dark:bg-gray-800"
-          />
+            onChange={handleChange} // assuming you have a generic handleChange function
+            className="w-full border px-3 py-2 rounded bg-white dark:bg-gray-800 dark:text-white"
+          >
+            <option value="">Select Type</option> {/* Optional placeholder */}
+            <option value="general">General</option>
+            <option value="medicalTourism">Medical Tourism</option>
+          </select>
         </div>
 
         <button

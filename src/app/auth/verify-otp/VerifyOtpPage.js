@@ -94,9 +94,11 @@ export default function VerifyOtpPage() {
       });
 
       if (loginRes?.error) {
+        console.log(loginRes)
         alertError('Login failed after OTP verification');
         setError(loginRes.error);
       } else {
+        console.log(loginRes)
         router.push(loginRes.url); // Redirect to the correct URL
       }
 

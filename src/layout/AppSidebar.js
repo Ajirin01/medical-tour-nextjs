@@ -18,7 +18,8 @@ import {
   OrderIcon,
   ShippingIcon,
   PlaneIcon,
-  CalenderIcon
+  CalenderIcon,
+  UserIcon
 } from "../icons/index";
 
 const AppSidebar = () => {
@@ -152,6 +153,13 @@ const AppSidebar = () => {
       },
       // availability
       {
+        icon: <UserIcon />,
+        name: "Specialists",
+        path: "/admin/specialists",
+        roles: ["admin"]
+      },
+      // availability
+      {
         icon: <CalenderIcon />,
         name: "Availabilities",
         path: "/admin/availabilities",
@@ -262,18 +270,32 @@ const AppSidebar = () => {
       {
         icon: <ShippingIcon />,
         name: "Shipping Addresses",
-        path: "/admin/shipping-addresses" 
+        path: "/admin/shipping-addresses" ,
+        roles: ["admin", "user"]
       },
       // medical tourisms
       {
         icon: <PlaneIcon />,
         name: "Medical Tourism",
         subItems: [
-          { name: "Packages", path: "/admin/medical-tourism/packages" },
-          { name: "Appointments", path: "/admin/medical-tourism/consultations/appointments" },
-          { name: "Documentations", path: "/admin/medical-tourism/consultations/documentations" }
+          { name: "Packages", path: "/admin/medical-tourism/packages"},
+          { name: "Appointments", path: "/admin/medical-tourism/consultations/appointments"},
+          { name: "Documentations", path: "/admin/medical-tourism/consultations/documentations"}
         ],
         roles: ["admin", "consultant"]
+      },
+      // Appointments
+      {
+        icon: <CalenderIcon />,
+        name: "Appointments",
+        path: "/admin/appointments",
+        roles: ["admin", "specialist", "user"]
+      },
+      {
+        icon: <CalenderIcon />,
+        name: "Appointments",
+        path: "/admin/medical-tourism/consultations/appointments",
+        roles: ["admin"]
       },
     ];
 

@@ -12,6 +12,7 @@ export default function RootLayout({ children }) {
   
   // Check if we're on the homepage
   const isHomepage = pathname === "/";
+  const isAdmin = pathname.startsWith("/admin");
 
   return (
     <html lang="en">
@@ -50,7 +51,9 @@ export default function RootLayout({ children }) {
             <ToastProvider>
               <CartProvider>
                 {/* Conditionally render Navbar only on homepage */}
-                {isHomepage && <Navbar />}
+                {/* {isHomepage && <Navbar />} */}
+                {/* <Navbar /> */}
+                {!isAdmin && <Navbar />}
                 {children} {/* Children will render as usual */}
               </CartProvider>
             </ToastProvider>

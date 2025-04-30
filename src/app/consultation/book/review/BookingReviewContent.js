@@ -83,8 +83,9 @@ export default function ReviewAppointmentPage() {
         consultant: consultant._id,
         date: dateTimeISO,
         duration: appointmentData.duration,
-        type: 'medicalTourism',
+        type: appointmentData.type || 'medicalTourism',
         paymentStatus: 'pending',
+        consultMode: appointmentData.consultMode,
       };
   
       // Save appointment details to sessionStorage for later use
@@ -127,7 +128,7 @@ export default function ReviewAppointmentPage() {
           <p><strong>Name:</strong> {appointmentData.name}</p>
           <p><strong>Email:</strong> {appointmentData.email}</p>
           <p><strong>Phone:</strong> {appointmentData.phone}</p>
-          <p><strong>Date:</strong> {appointmentData.preferredDate}</p>
+          <p><strong>Date:</strong> {appointmentData.date}</p>
           <p><strong>Time Slot:</strong> {appointmentData.timeSlot}</p>
           <p><strong>Duration:</strong> {appointmentData.duration} minutes</p>
           <p><strong>Estimated Cost:</strong> ${appointmentData.cost}</p>
