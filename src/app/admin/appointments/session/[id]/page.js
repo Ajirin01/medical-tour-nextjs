@@ -4,6 +4,8 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { fetchData } from "@/utils/api";
 import { useSession } from "next-auth/react";
+import io from "socket.io-client";
+
 
 const SessionPage = () => {
   const { id } = useParams();
@@ -22,6 +24,9 @@ const SessionPage = () => {
   const { data: session } = useSession();
   const token = session?.user?.jwt;
 
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ["websocket"] });
+
+
   useEffect(() => {
     const loadAppointment = async () => {
       try {
@@ -36,6 +41,23 @@ const SessionPage = () => {
 
     if (id && token) loadAppointment();
   }, [id, token]);
+
+  useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
+      transports: ["websocket"],
+    });
+  
+    socket.on("call-rejected", ({ appointmentId, specialistId }) => {
+      alert("The specialist rejected your consultation. Please choose another available specialist.");
+      console.log("Hello")
+      // Redirect or show available specialists again
+      router.push(`/admin/appointments/select-specialist/${appointmentId}`);
+    });
+  
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const loadHealthQuestions = async (userId) => {
     try {
