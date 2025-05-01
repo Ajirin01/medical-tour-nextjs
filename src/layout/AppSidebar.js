@@ -397,7 +397,7 @@ const AppSidebar = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link href="/">
+        <a href="/">
             <img
               width={154}
               height={32}
@@ -412,7 +412,7 @@ const AppSidebar = () => {
               src="/images/logo/logo-dark.png"
               alt="Logo"
             />
-          </Link>
+          </a>
       </div>
       <div className="flex flex-col overflow-y-auto no-scrollbar">
         <nav className="mb-6">

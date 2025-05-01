@@ -159,12 +159,12 @@ export default function Navbar() {
 
             {session ? (
               <>
-                <Link
+                <a
                   href="/admin"
                   className="block w-full px-4 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-500 mb-2 text-center"
                 >
                   Dashboard
-                </Link>
+                </a>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
                   className="block w-full px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 text-center"

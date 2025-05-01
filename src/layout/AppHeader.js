@@ -84,7 +84,7 @@ const AppHeader = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link href="/" className="lg:hidden">
+          <a href="/" className="lg:hidden">
             <img
               width={154}
               height={32}
@@ -99,7 +99,7 @@ const AppHeader = () => {
               src="/images/logo/logo-dark.png"
               alt="Logo"
             />
-          </Link>
+          </a>
 
           <button
             onClick={toggleApplicationMenu}

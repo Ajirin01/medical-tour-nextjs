@@ -40,13 +40,13 @@ export default function AuthDropdown() {
               {session ? (
                 <>
                   <li>
-                    <Link
+                    <a
                       href="/admin"
                       onClick={closeDropdown}
                       className="block px-4 py-2 hover:bg-gray-100"
                     >
                       Dashboard
-                    </Link>
+                    </a>
                   </li>
                   <li>
                     <button
