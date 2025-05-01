@@ -235,6 +235,14 @@ const ConsultationAppointmentsPageContent  = () => {
                                 Available Doctors
                               </Link>
                             </MenuItem>
+                            { session?.user?.role === "admin" &&<MenuItem>
+                              <Link
+                                href={`/admin/medical-tourism/consultations/appointments/edit/${appointment._id}`}
+                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                ✏️ Edit Appointment
+                              </Link>
+                            </MenuItem>}
                           </div>
                         </MenuItems>
                       </Menu>

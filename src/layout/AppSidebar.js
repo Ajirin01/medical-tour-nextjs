@@ -293,10 +293,17 @@ const AppSidebar = () => {
       },
       {
         icon: <CalenderIcon />,
-        name: "Appointments",
+        name: "Tourism Appointments",
         path: "/admin/medical-tourism/consultations/appointments",
         roles: ["admin"]
       },
+
+      {
+        icon: <CalenderIcon />,
+        name: "Consult a Doctor",
+        path: "/consultation/book",
+        roles: ["user"]
+      }
     ];
 
     return filterByRole(items);

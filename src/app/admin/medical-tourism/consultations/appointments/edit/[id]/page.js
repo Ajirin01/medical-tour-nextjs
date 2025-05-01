@@ -13,6 +13,7 @@ const EditConsultationAppointmentPage = () => {
     date: "",
     duration: "",
     type: "medicalTourism",
+    status: "pending"
   });
 
   const [patients, setPatients] = useState([]);
@@ -33,10 +34,12 @@ const EditConsultationAppointmentPage = () => {
         ]);
 
         const patientsList = usersRes.filter((user) => (user.role === "user" || user.role === "patient"));
-        const consultantsList = usersRes.filter((user) => (user.role === "consultant" || user.role === "admin"));
+        const consultantsList = usersRes.filter((user) => (user.role === "consultant" || user.role === "specialist" || user.role === "admin"));
 
         setPatients(patientsList);
         setConsultants(consultantsList);
+
+        // console.log(appointmentRes)
 
         if (appointmentRes) {
           setForm({
@@ -45,6 +48,7 @@ const EditConsultationAppointmentPage = () => {
             date: appointmentRes.date ? appointmentRes.date.slice(0, 16) : "",
             duration: appointmentRes.duration?.toString() || "",
             type: appointmentRes.type || "medicalTourism",
+            status: appointmentRes.status || "pending", // add this
           });
         }
       } catch (err) {
@@ -69,7 +73,8 @@ const EditConsultationAppointmentPage = () => {
       const updatePayload = {
         consultant: form.consultant,
         date: form.date,
-        duration: parseInt(form.duration), // Make sure it's an integer
+        duration: parseInt(form.duration),
+        status: form.status, // include status
       };
       await updateData(`consultation-appointments/${id}`, updatePayload, token);
       addToast("Appointment updated successfully!", "success");
@@ -165,6 +170,25 @@ const EditConsultationAppointmentPage = () => {
             className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-500 dark:bg-gray-800"
           />
         </div>
+
+        {/* Status */}
+        <div>
+          <label className="block font-medium mb-1">Status</label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded text-gray-600 dark:bg-gray-900 dark:text-gray-300"
+          >
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
 
         <button
           type="submit"
