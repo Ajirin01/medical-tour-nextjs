@@ -234,6 +234,17 @@ export default function HomePage() {
               <p>
                 At SozoDigiCare, we believe in a future where healthcare is accessible to all, regardless of their circumstances. Our mission is to provide essential healthcare services through a seamless and immediate connection to medical professionals, ensuring better health outcomes for marginalized communities worldwide.
               </p>
+
+              <div className="flex justify-center mt-8">
+                <Link
+                  className="cta-btn px-6 py-3 rounded-full text-white font-semibold bg-cyan-600 hover:bg-cyan-700 shadow-lg border-2 border-cyan-400 hover:shadow-cyan-500/50 transition-all duration-300 animate-pulse"
+                  href="/auth/sign-up?role=specialist"
+                >
+                  Join Our Medical Experts today
+                </Link>
+              </div>
+
+
             </div>
           </div>
 

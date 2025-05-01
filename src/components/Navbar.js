@@ -63,7 +63,13 @@ export default function Navbar() {
     <header className="bg-blue-600 text-white">
       {/* Announcement Bar */}
       <div className="bg-indigo-600 text-white text-center py-2 text-sm">
-        Get free delivery on orders over $100
+        {/* Get free delivery on orders over $100 */}
+        <Link
+          className="cta-btn text-white font-semibold transition-all duration-300 animate-pulse"
+          href="/auth/sign-up?role=specialist"
+        >
+          Join Our Medical Experts today
+        </Link>
       </div>
       
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">

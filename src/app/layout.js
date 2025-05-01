@@ -27,8 +27,8 @@ export default function RootLayout({ children }) {
             <meta name="keywords" content="medical tourism, healthcare, services" />
 
             {/* Add favicons specific to the homepage */}
-            <link href="assets/img/favicon.png" rel="icon" />
-            <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+            <link href="/images/favicon.png" rel="icon" />
+            {/* <link href="/apple-touch-icon.png" rel="apple-touch-icon" /> */}
 
             {/* Fonts for the homepage */}
             <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet" />
