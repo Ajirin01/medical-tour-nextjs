@@ -22,8 +22,8 @@ export default function RootLayout({ children }) {
             {/* Add metadata specific to the homepage */}
             <meta charSet="utf-8" />
             <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-            <title>Index - Medicio Bootstrap Template</title>
-            <meta name="description" content="Medical Tourism App - Homepage" />
+            <title>SozoDigiCare</title>
+            <meta name="description" content="Welcome to SozoDigiCare" />
             <meta name="keywords" content="medical tourism, healthcare, services" />
 
             {/* Add favicons specific to the homepage */}

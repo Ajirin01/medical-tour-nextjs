@@ -35,20 +35,32 @@ export default function ReviewAppointmentPage() {
   }, [searchParams])
 
   useEffect(() => {
-    const fetchConsultant = async () => {
+    const appointmentId = searchParams.get('appointmentId');
+  
+    const fetchAppointmentOrConsultant = async () => {
       try {
-        const res = await fetchData("users/get-all/no-pagination?role=admin", token);
-        console.log(res);
-        setConsultant(res[0]); // Assuming res is an array and you want the first consultant
+        if (appointmentId) {
+          const apptRes = await fetchData(`/appointments/${appointmentId}`, token);
+          if (apptRes) {
+            setConsultant(apptRes.consultant); // use consultant from the fetched appointment
+          }
+        } else {
+          // No appointmentId → fallback to fetching default consultant
+          const res = await fetchData("users/get-all/no-pagination?role=admin", token);
+          if (res?.length) {
+            setConsultant(res[0]);
+          }
+        }
       } catch (err) {
-        console.error('Error fetching consultant:', err);
+        console.error('Error fetching consultant/appointment:', err);
       }
     };
   
     if (token) {
-      fetchConsultant(); // Call the async function to fetch consultant
+      fetchAppointmentOrConsultant();
     }
-  }, [token]); // Dependency array - runs when `token` changes
+  }, [token, searchParams]);
+  
   
 
   function convertTo24Hour(timeStr) {

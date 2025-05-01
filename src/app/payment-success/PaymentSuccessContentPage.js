@@ -58,6 +58,20 @@ const PaymentSuccessContentPage = () => {
         throw new Error('No order data found');
       }
   
+      // If appointment already exists, skip creation
+      if (orderData.appointmentId) {
+        setPaymentStatus('Appointment confirmed!');
+        addToast('Appointment already exists. Redirecting...', 'info');
+  
+        if (orderData?.type === "general") {
+          router.push(`/admin/available-specialists?appointmentId=${orderData._id}`);
+        } else {
+          router.push(`/admin/appointments`);
+        }
+        return;
+      }
+  
+      // Otherwise, create a new appointment
       const payload = {
         patient: orderData.patient,
         consultant: orderData.consultant,
@@ -70,18 +84,14 @@ const PaymentSuccessContentPage = () => {
       };
   
       const res = await postData('consultation-appointments/create/custom', payload, token);
-
   
       if (res.appointment) {
         const appointmentId = res.appointment._id;
-
-      console.log(res)
-
+  
         setPaymentStatus('Appointment booked successfully!');
         addToast('Appointment booked successfully!', 'success');
   
         if (orderData?.type === "general") {
-          // redirect with the new appointment ID
           router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
         } else {
           router.push(`/admin/appointments`);
@@ -96,8 +106,6 @@ const PaymentSuccessContentPage = () => {
       setSubmitting(false);
     }
   };
-  
-  
 
   // if (error) {
   //   return <div className="text-center text-red-600 font-semibold p-4 bg-red-100 border border-red-600 rounded-md">{error}</div>;
