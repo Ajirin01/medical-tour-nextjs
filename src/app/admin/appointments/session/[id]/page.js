@@ -1,11 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { fetchData, updateData } from "@/utils/api";
 import { useSession } from "next-auth/react";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserContext";
 
 
 const SessionPage = () => {
@@ -29,10 +30,42 @@ const SessionPage = () => {
   const [sessionEnded, setSessionEnded] = useState(false);
   const [endingSession, setEndingSession] = useState(false);
 
-
   const { data: session } = useSession();
   const token = session?.user?.jwt;
   const userRole = session?.user?.role;
+
+  const { user } = useUser()
+
+  const socketRef = useRef();
+
+  const iframeRef = useRef(null);
+
+  const sendCommandToIframe = (type) => {
+    console.log("starting video")
+    iframeRef.current?.contentWindow?.postMessage({ type }, "*");
+  };
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (appointment?.status === "pending" && !sessionEnded) {
+        socketRef.current.emit("session-ended", { appointmentId: appointment._id, specialist: session.user });
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [appointment, sessionEnded]);
+
+  useEffect(() => {
+    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
+      transports: ["websocket"],
+    });
+  
+    // setup events...
+  
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     const loadAppointment = async () => {
@@ -50,32 +83,42 @@ const SessionPage = () => {
   }, [id, token]);
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
-      transports: ["websocket"],
-    });
-
-    socket.on("call-rejected", ({ appointmentId, specialistId }) => {
+    // const specialistId = appointment.consultant
+    socketRef.current.on("call-rejected", ({ appointmentId, specialistId }) => {
+      console.log("call-rejected event received", appointmentId, specialistId);
       alert("The specialist rejected your consultation. Please choose another available specialist.");
-      router.push(`/admin/appointments/select-specialist/${appointmentId}`);
+      router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
     });
 
-    socket.on("session-ended", ({ appointmentId }) => {
+    socketRef.current.on("call-timeout", ({ appointmentId, specialistId }) => {
+      alert("Call timed out. The specialist did not respond.");
+      router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
+    });
+    
+    socketRef.current.on("specialist-disconnected", ({ appointmentId, specialistId }) => {
+      alert("The specialist disconnected unexpectedly. Please try another.");
+      router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
+    });
+
+    socketRef.current.on("session-ended", ({ appointmentId }) => {
       if (appointment?._id === appointmentId) {
         setSessionEnded(true);
         setIsTimerRunning(false);
-        window.location.href = `/admin/appointments/select-specialist/${appointmentId}`
+        window.location.href = `/admin/available-specialists?appointmentId=${appointmentId}`
       }
     });
 
     return () => {
-      socket.disconnect();
+      socketRef.current.disconnect();
     };
   }, []);
 
   // Timer logic
   useEffect(() => {
     if (!appointment || !appointment.duration) return;
-  
+
+    
+
     const sessionKey = `sessionStartTime-${appointment._id}`;
 
     // If the appointment is completed, no need to run the timer
@@ -155,7 +198,12 @@ const SessionPage = () => {
       const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
         transports: ["websocket"],
       });
-      socket.emit("session-ended", { appointmentId: appointment._id });
+      // socketRef.current.emit("session-ended", { appointmentId: appointment._id });
+
+      socketRef.current.emit("session-ended", { 
+        appointmentId: appointment._id,
+        specialist: user  // make sure it has _id, firstName, etc.
+      });
   
       // Update appointment status
       await updateData(`consultation-appointments/update/custom/${appointment._id}`, {status: "completed"}, token)
@@ -191,10 +239,14 @@ const SessionPage = () => {
       return (
         <div className="relative w-full h-[80vh] rounded-xl overflow-hidden shadow-lg border border-gray-300">
           <iframe
+            ref={iframeRef}
             src={videoUrl}
             title="Consultation Video Chat"
             className="w-full h-full"
             allow="camera; microphone; fullscreen; speaker; display-capture"
+            onLoad={() => {
+              sendCommandToIframe("START_CALL");
+            }}
           />
         </div>
       );
