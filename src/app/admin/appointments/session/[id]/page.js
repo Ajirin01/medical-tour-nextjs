@@ -8,11 +8,14 @@ import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 
+import { RotateCcw } from "lucide-react";
+import Link from "next/link";
+
 
 const SessionPage = () => {
   const { id } = useParams();
   const router = useRouter();
-  const videoUrl = `https://nodejs-video-chat.onrender.com/?room=${id}`;
+  const videoUrl = `https://videowidget.sozodigicare.com/?room=${id}`;
 
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -113,60 +116,67 @@ const SessionPage = () => {
     };
   }, []);
 
-  // Timer logic
+  // timer logic
   useEffect(() => {
     if (!appointment || !appointment.duration) return;
-
-    
-
+  
     const sessionKey = `sessionStartTime-${appointment._id}`;
-
-    // If the appointment is completed, no need to run the timer
+  
+    // Handle if appointment is already completed
     if (appointment.status === "completed") {
       localStorage.removeItem(sessionKey);
       setSessionEnded(true);
       setIsTimerRunning(false);
       return;
     }
-
-    let startTime = localStorage.getItem(sessionKey);
-
-    startTime = parseInt(localStorage.getItem(sessionKey), 10);
-
-    
-    // If session start time is missing or invalid (0) and appointment is pending, reset it
-    if (!startTime || startTime === 0) {
-      if (appointment.status === "pending") {
-        startTime = Date.now();
-        localStorage.setItem(sessionKey, startTime);
-      }
+  
+    let startTime = parseInt(localStorage.getItem(sessionKey), 10);
+  
+    if ((!startTime || isNaN(startTime)) && appointment.status === "pending") {
+      startTime = Date.now();
+      localStorage.setItem(sessionKey, startTime);
     }
   
     const sessionStartTime = parseInt(startTime, 10);
     const sessionDurationMs = appointment.duration * 60 * 1000;
-
     const sessionEndTime = sessionStartTime + sessionDurationMs;
-
   
     const updateTimer = () => {
       const now = Date.now();
       const diff = Math.max(0, sessionEndTime - now);
-      setRemainingTime(Math.ceil(diff / 1000));
+      const remainingSeconds = Math.ceil(diff / 1000);
+      setRemainingTime(remainingSeconds);
   
       if (diff <= 0) {
         setIsTimerRunning(false);
         setSessionEnded(true);
         clearInterval(timerId);
+        handleEndSession();
       }
     };
   
     setIsTimerRunning(true);
-
-    const timerId = setInterval(updateTimer, 1000);
-    updateTimer(); // immediately update the timer
   
-    return () => clearInterval(timerId);
+    const timerId = setInterval(updateTimer, 1000);
+    updateTimer(); // Run immediately
+  
+    // Listen for session-ended from server (e.g., specialist ended session)
+    socketRef.current.on("session-ended", ({ appointmentId }) => {
+      if (appointment?._id === appointmentId) {
+        clearInterval(timerId);
+        setSessionEnded(true);
+        setIsTimerRunning(false);
+        handleEndSession();
+      }
+    });
+  
+    // Cleanup
+    return () => {
+      clearInterval(timerId);
+      socketRef.current.off("session-ended");
+    };
   }, [appointment]);
+  
   
 
   const loadHealthQuestions = async (userId) => {
@@ -263,9 +273,13 @@ const SessionPage = () => {
             <button className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
               Rate Session
             </button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <Link
+              href={`/admin/appointments/retake/${appointment._id}`}
+              className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+            >
+              <RotateCcw className="w-4 h-4 text-white" />
               Retake Session
-            </button>
+            </Link>
           </div>
         </div>
       );
