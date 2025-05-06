@@ -12,7 +12,7 @@ export default function Document() {
       <body>
         <Main />
         <NextScript />
-        {/* Register the service worker */}
+        {/* Register the service worker */} 
         <script
           dangerouslySetInnerHTML={{
             __html: `
