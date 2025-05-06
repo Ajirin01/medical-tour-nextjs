@@ -44,7 +44,7 @@ const ConsultationAppointmentsPageContent  = () => {
   
       // Add user-specific filters based on the role
       if (session?.user?.role === "user") {
-        query.set("user", session?.user?.id);  // Using .set() to ensure the key is correctly added
+        query.set("patient", session?.user?.id);  // Using .set() to ensure the key is correctly added
       } else if (session?.user?.role === "specialist") {
         query.set("consultant", session?.user?.id); // Using .set() for consistency
       }
@@ -94,7 +94,7 @@ const ConsultationAppointmentsPageContent  = () => {
 
   const applyFilters = () => {
     router.push("?page=1");
-    loadAppointments();
+    // loadAppointments();
   };
 
   const clearFilters = () => {
@@ -214,7 +214,6 @@ const ConsultationAppointmentsPageContent  = () => {
                         </div>
 
                         <MenuItems
-                          transition
                           className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                         >
                           <div className="py-1">

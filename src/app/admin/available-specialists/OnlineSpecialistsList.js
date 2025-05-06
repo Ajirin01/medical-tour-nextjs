@@ -6,6 +6,10 @@ import { updateData } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
+import Lottie from "lottie-react";
+import emptyAnimation from "@/assets/lottie/empty-state.json"; // Replace with your file
+
+
 export default function OnlineSpecialistsList({ appointmentId }) {
   const { data: session } = useSession();
   const [specialists, setSpecialists] = useState([]);
@@ -53,7 +57,13 @@ export default function OnlineSpecialistsList({ appointmentId }) {
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">Online Specialists</h3>
       {specialists.length === 0 ? (
-        <p className="text-sm text-gray-500">No specialists are online right now.</p>
+        <div className="flex flex-col items-center justify-center text-center text-gray-500 space-y-4 py-12">
+          <div className="w-48 h-48">
+            <Lottie animationData={emptyAnimation} loop />
+          </div>
+          <p className="text-lg font-medium">No specialists are online right now</p>
+          <p className="text-sm text-gray-400">Please check back later or refresh the page.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {specialists.map((sp) => (

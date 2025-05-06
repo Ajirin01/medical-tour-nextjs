@@ -394,18 +394,30 @@ export default function HealthQuestionnaireForm() {
             <div className="mt-2">
               <label className="inline-flex items-center">
                 <input
-                  type="checkbox"
-                  checked={section[key]}
-                  onChange={() => handleChange(sectionKey, key, !section[key])}
-                  className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                  type="radio"
+                  name={key}
+                  checked={section[key] === true}
+                  onChange={() => handleChange(sectionKey, key, true)}
+                  className="h-4 w-4 text-blue-500 border-gray-300"
                 />
                 <span className="ml-2">Yes</span>
+              </label>
+              <label className="inline-flex items-center ml-4">
+                <input
+                  type="radio"
+                  name={key}
+                  checked={section[key] === false}
+                  onChange={() => handleChange(sectionKey, key, false)}
+                  className="h-4 w-4 text-blue-500 border-gray-300"
+                />
+                <span className="ml-2">No</span>
               </label>
             </div>
           </div>
         ))}
       </div>
     );
+    
   };
 
   return (

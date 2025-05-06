@@ -25,7 +25,7 @@ export default function LoginPage() {
     if (res.error) {
       setError(res.error);
     } else {
-      router.push("/"); // Redirect to homepage or dashboard
+      router.push("/admin"); // Redirect to homepage or dashboard
     }
   };
 
@@ -44,7 +44,7 @@ export default function LoginPage() {
           <div className="w-full max-w-md space-y-8 p-6 bg-white rounded-lg shadow-md">
             <div className="text-center">
               <img
-                alt="Your Company"
+                alt="Sozodigicare"
                 src="/images/logo/logo.png"
                 className="mx-auto h-10 w-auto"
               />

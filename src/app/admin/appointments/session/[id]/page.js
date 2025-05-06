@@ -2,11 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { fetchData, updateData } from "@/utils/api";
+import { fetchData, updateData, postData } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
+
+import { useToast } from "@/context/ToastContext";
 
 import { RotateCcw } from "lucide-react";
 import Link from "next/link";
@@ -33,6 +35,16 @@ const SessionPage = () => {
   const [sessionEnded, setSessionEnded] = useState(false);
   const [endingSession, setEndingSession] = useState(false);
 
+  const [showRatingForm, setShowRatingForm] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showRatingField, setShowRatingField] = useState(false)
+
+  const [activeVideoSession, setActiveVideoSession] = useState(null)
+
+  const { addToast } = useToast()
+
   const { data: session } = useSession();
   const token = session?.user?.jwt;
   const userRole = session?.user?.role;
@@ -48,10 +60,39 @@ const SessionPage = () => {
     iframeRef.current?.contentWindow?.postMessage({ type }, "*");
   };
 
+  const handleRateSession = async () => {
+    const storedSession = localStorage.getItem('activeVideoSession');
+    const session = storedSession ? JSON.parse(storedSession) : null;
+
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        session: session._id,
+        user: session.user._id,
+        rating,
+        comment,
+      };
+      const res = await postData('session-feedback', payload, token);
+      addToast('Thank you for your feedback!', 'success');
+      setShowRatingField(false);
+    } catch (err) {
+      console.error(err);
+      addToast('Failed to submit feedback', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  useEffect( () => {
+    const activeVideoSession = localStorage.getItem('activeVideoSession');
+    if(activeVideoSession) setActiveVideoSession(activeVideoSession)
+  } )
+
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (appointment?.status === "pending" && !sessionEnded) {
-        socketRef.current.emit("session-ended", { appointmentId: appointment._id, specialist: session.user });
+        socketRef.current.emit("session-ended", { appointmentId: appointment.session.appointment._id, specialist: session.user });
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -63,8 +104,6 @@ const SessionPage = () => {
       transports: ["websocket"],
     });
   
-    // setup events...
-  
     return () => {
       socketRef.current.disconnect();
     };
@@ -73,7 +112,15 @@ const SessionPage = () => {
   useEffect(() => {
     const loadAppointment = async () => {
       try {
-        const res = await fetchData(`consultation-appointments/get/custom/${id}`, token);
+        const res = await fetchData(`video-sessions/${id}`, token);
+        console.log(res);
+  
+        // Check if the appointment status is 'pending' before updating
+        if (res && res.session && res.session.appointment.status === "pending") {
+          await updateData(`video-sessions/${id}`, { startTime: new Date().toISOString() }, token);
+        }
+  
+        // Set the appointment data in state
         setAppointment(res);
       } catch (err) {
         console.error("Failed to fetch appointment", err);
@@ -81,12 +128,14 @@ const SessionPage = () => {
         setLoading(false);
       }
     };
-
-    if (id && token) loadAppointment();
+  
+    if (id && token) {
+      loadAppointment();
+    }
   }, [id, token]);
 
   useEffect(() => {
-    // const specialistId = appointment.consultant
+    // const specialistId = appointment.session.appointment.consultant
     socketRef.current.on("call-rejected", ({ appointmentId, specialistId }) => {
       console.log("call-rejected event received", appointmentId, specialistId);
       alert("The specialist rejected your consultation. Please choose another available specialist.");
@@ -103,27 +152,54 @@ const SessionPage = () => {
       router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
     });
 
-    socketRef.current.on("session-ended", ({ appointmentId }) => {
-      if (appointment?._id === appointmentId) {
-        setSessionEnded(true);
-        setIsTimerRunning(false);
-        window.location.href = `/admin/available-specialists?appointmentId=${appointmentId}`
-      }
-    });
-
     return () => {
       socketRef.current.disconnect();
     };
   }, []);
 
+  const appointmentRef = useRef(appointment);
+
+  useEffect(() => {
+    appointmentRef.current = appointment;
+  }, [appointment]);
+
+  useEffect(()=> {
+    if(appointmentRef.current?.session && appointmentRef.current?.session?.appointment?.status === "completed" && !appointmentRef.current?.session?.feedback){
+      setShowRatingField(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    const socket = socketRef.current;
+  
+    const handleSessionEnded = ({ specialist, appointmentId }) => {
+      const currentAppointment = appointmentRef.current;
+      if ((currentAppointment?.session?.appointment?._id === appointmentId) && (currentAppointment?.session?.appointment?.patient?._id === session?.user?.id)) {
+        setSessionEnded(true);
+        setIsTimerRunning(false);
+        setShowRatingField(true)
+        handleEndSession();
+        addToast("Specialist ended the session", "info", 5000)
+      }
+    };
+  
+    socket.on("session-ended", handleSessionEnded);
+  
+    // Cleanup listener on unmount
+    return () => {
+      socket.off("session-ended", handleSessionEnded);
+    };
+  }, []);
+  
+
   // timer logic
   useEffect(() => {
-    if (!appointment || !appointment.duration) return;
+    if (!appointment || !appointment.session.appointment.duration) return;
   
-    const sessionKey = `sessionStartTime-${appointment._id}`;
+    const sessionKey = `sessionStartTime-${appointment.session.appointment._id}`;
   
     // Handle if appointment is already completed
-    if (appointment.status === "completed") {
+    if (appointment.session.appointment.status === "completed") {
       localStorage.removeItem(sessionKey);
       setSessionEnded(true);
       setIsTimerRunning(false);
@@ -132,22 +208,51 @@ const SessionPage = () => {
   
     let startTime = parseInt(localStorage.getItem(sessionKey), 10);
   
-    if ((!startTime || isNaN(startTime)) && appointment.status === "pending") {
+    if ((!startTime || isNaN(startTime)) && appointment.session.appointment.status === "pending") {
       startTime = Date.now();
       localStorage.setItem(sessionKey, startTime);
     }
   
-    const sessionStartTime = parseInt(startTime, 10);
-    const sessionDurationMs = appointment.duration * 60 * 1000;
+    const sessionStartTime = parseInt(startTime, 10) + 2 * 60 * 1000; //2 mininus extra added for prep and all
+    const sessionDurationMs = appointment.session.appointment.duration * 60 * 1000;
     const sessionEndTime = sessionStartTime + sessionDurationMs;
+  
+    let notified = {
+      70: false,
+      80: false,
+      90: false,
+      95: false,
+    };
   
     const updateTimer = () => {
       const now = Date.now();
-      const diff = Math.max(0, sessionEndTime - now);
-      const remainingSeconds = Math.ceil(diff / 1000);
-      setRemainingTime(remainingSeconds);
+      const elapsedTimeMs = now - sessionStartTime; // Time that has already passed in milliseconds
+      const elapsedPercentage = (elapsedTimeMs / sessionDurationMs) * 100; // Calculate the percentage of elapsed time
   
-      if (diff <= 0) {
+      // Calculate the remaining time
+      const remainingTimeMs = Math.max(0, sessionEndTime - now);
+      const remainingSeconds = Math.ceil(remainingTimeMs / 1000);
+      setRemainingTime(remainingSeconds);
+
+      const remainingMinutes = Math.ceil(remainingSeconds / 60);
+  
+      // Check the elapsed time percentage and show toast if needed
+      if (elapsedPercentage >= 70 && !notified[70]) {
+        notified[70] = true;
+        addToast(`Only ${remainingMinutes} minute(s) left in your session`, 'error', 10000);
+      } else if (elapsedPercentage >= 80 && !notified[80]) {
+        notified[80] = true;
+        addToast(`Only ${remainingMinutes} minute(s) left in your session`, 'error', 10000);
+      } else if (elapsedPercentage >= 90 && !notified[90]) {
+        notified[90] = true;
+        addToast(`Only ${remainingMinutes} minute(s) left in your session`, 'error', 10000);
+      } else if (elapsedPercentage >= 95 && !notified[95]) {
+        notified[95] = true;
+        addToast(`Only ${remainingMinutes} minute(s) left in your session`, 'error', 10000);
+      }
+  
+      // If the session time is up, stop the timer and handle end session
+      if (remainingTimeMs <= 0) {
         setIsTimerRunning(false);
         setSessionEnded(true);
         clearInterval(timerId);
@@ -160,24 +265,9 @@ const SessionPage = () => {
     const timerId = setInterval(updateTimer, 1000);
     updateTimer(); // Run immediately
   
-    // Listen for session-ended from server (e.g., specialist ended session)
-    socketRef.current.on("session-ended", ({ appointmentId }) => {
-      if (appointment?._id === appointmentId) {
-        clearInterval(timerId);
-        setSessionEnded(true);
-        setIsTimerRunning(false);
-        handleEndSession();
-      }
-    });
-  
-    // Cleanup
-    return () => {
-      clearInterval(timerId);
-      socketRef.current.off("session-ended");
-    };
+    return () => clearInterval(timerId); // Clean up on component unmount
   }, [appointment]);
-  
-  
+
 
   const loadHealthQuestions = async (userId) => {
     try {
@@ -193,44 +283,49 @@ const SessionPage = () => {
 
   const handleOpenQuestions = async () => {
     if (appointment?.patient?._id) {
-      await loadHealthQuestions(appointment.patient._id);
+      await loadHealthQuestions(appointment.session.appointment.patient._id);
       setShowQuestions(true);
     }
   };
 
   const handleEndSession = async () => {
-    if (!appointment?._id || !token) return;
-  
+    const currentAppointment = appointmentRef.current;
+    if (!currentAppointment?.session._id || !token) return;
     try {
       setEndingSession(true);
-  
-      // Emit event to notify patient the session ended
-      const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
-        transports: ["websocket"],
-      });
-      // socketRef.current.emit("session-ended", { appointmentId: appointment._id });
-
       socketRef.current.emit("session-ended", { 
-        appointmentId: appointment._id,
-        specialist: user  // make sure it has _id, firstName, etc.
+        specialist: user,
+        appointmentId: currentAppointment.session.appointment._id,
       });
   
       // Update appointment status
-      await updateData(`consultation-appointments/update/custom/${appointment._id}`, {status: "completed"}, token)
-  
+      await updateData(`consultation-appointments/update/custom/${currentAppointment.session.appointment._id}`, {status: "completed"}, token)
+      
+      const endTime = new Date().toISOString();
+      const startTime = new Date(currentAppointment.session.startTime);
+      const durationInMinutes = Math.round((new Date() - startTime) / 60000);
+
+      await updateData(
+        `video-sessions/${currentAppointment.session._id}`,
+        {
+          endTime,
+          durationInMinutes
+        },
+        token
+      );
+
       setSessionEnded(true);
       setIsTimerRunning(false);
     } catch (err) {
       console.error("Failed to end session", err);
     } finally {
-      const sessionKey = `sessionStartTime-${appointment._id}`;
+      const sessionKey = `sessionStartTime-${currentAppointment.session.appointment._id}`;
       localStorage.removeItem(sessionKey);
       setSessionEnded(true);
       setIsTimerRunning(false);
       setEndingSession(false);
     }
   };
-  
 
   if (loading) {
     return <div className="text-center mt-10 text-gray-600">Loading session...</div>;
@@ -240,12 +335,13 @@ const SessionPage = () => {
     return <div className="text-center mt-10 text-red-500">Appointment not found</div>;
   }
 
-  const patient = appointment.patient;
+  const patient = appointment.session.user;
+  const specialist = appointment.session.specialist;
 
 
   // Conditionally render based on appointment status
   const renderVideoSection = () => {
-    if (appointment.status === "pending" && !sessionEnded) {
+    if (appointment.session.appointment.status === "pending" && !sessionEnded) {
       return (
         <div className="relative w-full h-[80vh] rounded-xl overflow-hidden shadow-lg border border-gray-300">
           <iframe
@@ -262,30 +358,69 @@ const SessionPage = () => {
       );
     }
 
-    if ((appointment.status === "completed" || sessionEnded) && session?.user?.role === "user") {
+    if ((appointment.session.appointment.status === "completed" || sessionEnded) && session?.user?.role === "user") {
       return (
         <div className="text-center p-10 bg-white dark:bg-gray-800 rounded-lg shadow-md">
           <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Session Ended</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4">
             Thank you for attending the consultation. Please take a moment to rate your experience or book a follow-up session.
           </p>
-          <div className="flex justify-center gap-4">
-            <button className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
-              Rate Session
-            </button>
+          
+          <div className="flex flex-col items-center gap-4">
+            {showRatingField && (
+              !showRatingForm ? (
+                <button
+                  onClick={() => setShowRatingForm(true)}
+                  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                >
+                  Rate Session
+                </button>
+              ) : (
+                <div className="w-full max-w-md space-y-4 text-left">
+                  <label className="block text-sm text-gray-700 dark:text-gray-300">
+                    Rating (1 to 5):
+                    <input
+                      type="number"
+                      value={rating}
+                      min={1}
+                      max={5}
+                      onChange={(e) => setRating(Number(e.target.value))}
+                      className="w-full mt-1 px-3 py-2 rounded border border-gray-300 dark:bg-gray-700 dark:text-white"
+                    />
+                  </label>
+                  <label className="block text-sm text-gray-700 dark:text-gray-300">
+                    Comment:
+                    <textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      className="w-full mt-1 px-3 py-2 rounded border border-gray-300 dark:bg-gray-700 dark:text-white"
+                    />
+                  </label>
+                  <button
+                    onClick={handleRateSession}
+                    disabled={isSubmitting}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Rating'}
+                  </button>
+                </div>
+              )
+            )}
+
             <Link
-              href={`/admin/appointments/retake/${appointment._id}`}
+              href={`/admin/appointments/retake/${appointment.session.appointment._id}`}
               className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
             >
               <RotateCcw className="w-4 h-4 text-white" />
               Retake Session
             </Link>
           </div>
+
         </div>
       );
     }
     
-    if((appointment.status === "completed" || sessionEnded) && (session?.user?.role === "specialist" || session?.user?.role === "consultant")){
+    if((appointment.session.appointment.status === "completed" || sessionEnded) && (session?.user?.role === "specialist" || session?.user?.role === "consultant")){
       return (
         <div className="text-center p-10 bg-white dark:bg-gray-800 rounded-lg shadow-md">
           <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Session Ended</h2>
@@ -304,9 +439,15 @@ const SessionPage = () => {
       <h1 className="text-2xl font-semibold text-center text-gray-800 dark:text-gray-300 mb-2">
         Consultation Video Session
       </h1>
-      <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
-        Patient: {(patient?.firstName + " " + patient?.lastName) || "Unknown"} | Date: {new Date(appointment.date).toLocaleString()}
-      </p>
+      { session?.user?.role === "specialist" || session?.user?.role === "consultant" ? (  
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+          Patient: {(patient?.firstName + " " + patient?.lastName) || "Unknown"} | Date: {new Date(appointment.session.appointment.date).toLocaleString()}
+        </p>
+      ) : (
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+          Consultant: {(specialist?.firstName + " " + specialist?.lastName) || "Unknown"} | Date: {new Date(appointment.session.appointment.date).toLocaleString()}
+        </p>
+      )}
   
       {isTimerRunning && remainingTime !== null && (
         <p className="text-center text-3xl font-bold text-red-600 mb-4">
@@ -316,7 +457,7 @@ const SessionPage = () => {
   
       {renderVideoSection()}
   
-      {((userRole === "specialist" || userRole === "consultant") && appointment.status === "pending") && !sessionEnded ? (
+      {((userRole === "specialist" || userRole === "consultant") && appointment.session.appointment.status === "pending") && !sessionEnded ? (
         <div className="flex justify-center mt-4">
           <button
             onClick={handleEndSession}
@@ -329,7 +470,7 @@ const SessionPage = () => {
       ) : null}
   
       {/* Other buttons for specialists/consultants */}
-      { (((userRole === "specialist" || userRole === "consultant") && appointment.status === "pending") && !sessionEnded) && 
+      { (((userRole === "specialist" || userRole === "consultant") && appointment.session.appointment.status === "pending") && !sessionEnded) && 
         <div className="flex justify-center gap-4 mt-6">
           <button
             onClick={handleOpenQuestions}

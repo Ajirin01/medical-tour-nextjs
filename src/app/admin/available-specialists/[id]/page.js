@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { fetchData } from "@/utils/api";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
+import { MapPin, GraduationCap } from "lucide-react";
 import io from "socket.io-client";
 
 export default function StartConsultationPage() {
@@ -11,6 +12,9 @@ export default function StartConsultationPage() {
   const [isInviting, setIsInviting] = useState(false);  // To track the invitation process
   const [sessionStarted, setSessionStarted] = useState(false); // To track when the session starts
   const [invitationRejected, setInvitationRejected] = useState(false); // To track rejection status
+
+  const [appointment, setAppointment] = useState(null)
+
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -49,13 +53,31 @@ export default function StartConsultationPage() {
 
   useEffect(() => {
     if (!socketRef.current || !appointmentId) return;
-  
+
+    fetchData(`consultation-appointments/${appointmentId}`)
+    .then(( appointment ) => {
+      setAppointment(appointment);
+    })
+    .catch((error) => {
+      console.error("Failed to fetch appointment:", error);
+      // Optionally show a toast or error message to user
+    });
+
     const socket = socketRef.current;
   
     const handleSpecialistJoined = (data) => {
       if (data.appointmentId === appointmentId) {
         setSessionStarted(true);
-        router.push(`/admin/appointments/session/${appointmentId}`);
+
+        socketRef.current.on("session-created", ({appointmentId,  session}) =>{
+          console.log("session-created")
+          // Store the session locally for the specialist
+          localStorage.setItem("activeVideoSession", JSON.stringify(session));
+          window.location.href = `/admin/appointments/session/${session._id}`
+        });
+
+        // window.location.href = `/admin/appointments/session/${appointmentId}`
+        // router.push(`/admin/appointments/session/${appointmentId}`);
       }
     };
   
@@ -125,12 +147,15 @@ export default function StartConsultationPage() {
               {specialist.firstName + " " + specialist.lastName}
             </h4>
             <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {specialist.specialty}
+              <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                <GraduationCap className="w-3 h-3 mr-1" /> {specialist.specialty}
               </p>
               <div className="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              {/* <p className="text-sm text-gray-500 dark:text-gray-400">
                 {specialist.address.city}, {specialist.address.state}, {specialist.address.country}
+              </p> */}
+              <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                <MapPin className="w-3 h-3 mr-1" /> {specialist.address.country}
               </p>
             </div>
           </div>
@@ -150,27 +175,29 @@ export default function StartConsultationPage() {
           </div>
         </div>
 
-        <button
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-indigo-300 bg-white px-4 py-3 text-sm font-medium text-indigo-700 shadow-theme-xs hover:bg-indigo-50 hover:text-indigo-800 dark:border-indigo-700 dark:bg-indigo-800 dark:text-white dark:hover:bg-white/[0.03] dark:hover:text-white-200 lg:inline-flex lg:w-auto"
-          onClick={handleStartCall}
-        >
-          <svg
-            className="fill-current"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+        {(appointment && appointment.status !== "completed") &&
+          <button
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-indigo-300 bg-white px-4 py-3 text-sm font-medium text-indigo-700 shadow-theme-xs hover:bg-indigo-50 hover:text-indigo-800 dark:border-indigo-700 dark:bg-indigo-800 dark:text-white dark:hover:bg-white/[0.03] dark:hover:text-white-200 lg:inline-flex lg:w-auto"
+            onClick={handleStartCall}
           >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1v3.5a1 1 0 01-1 1C11.61 21 3 12.39 3 2.5a1 1 0 011-1H7.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.2 2.2z"
-              fill="currentColor"
-            />
-          </svg>
-          Call
-        </button>
+            <svg
+              className="fill-current"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1v3.5a1 1 0 01-1 1C11.61 21 3 12.39 3 2.5a1 1 0 011-1H7.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.2 2.2z"
+                fill="currentColor"
+              />
+            </svg>
+            Call
+          </button>
+        }
 
         {isInviting && !invitationRejected && (
           <div className="mt-5 text-center text-lg text-gray-500">
