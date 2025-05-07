@@ -10,6 +10,8 @@ import { useUser } from '@/context/UserContext';
 import specialistCategories from '@/utils/specialistCategories';
 import specialistSpecialties from '@/utils/specialistSpecialties';
 
+import DoctorSignatureInput from '@/components/DoctorSignatureInput';
+
 export default function ProfileFormPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,6 +40,7 @@ export default function ProfileFormPage() {
   });
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [practicingLicenseFile, setPracticingLicenseFile] = useState(null);
+  const [signatureFile, setSignatureFile] = useState(null);
   const [role, setRole] = useState(null);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -91,8 +94,21 @@ export default function ProfileFormPage() {
     }
   };
 
+  const dataURLtoFile = (dataurl, filename) => {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
   const handleFileChange = e => setProfileImageFile(e.target.files[0]);
   const handleLicenseChange = e => setPracticingLicenseFile(e.target.files[0]);
+  
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -120,6 +136,13 @@ export default function ProfileFormPage() {
     // files
     if (profileImageFile)      payload.append('profileImage', profileImageFile);
     if (practicingLicenseFile) payload.append('practicingLicense', practicingLicenseFile);
+
+    if (formData.signatureImage) {
+      const signatureFile = dataURLtoFile(formData.signatureImage, 'signature.png');
+      payload.append('signature', signatureFile);
+    }
+
+    // if (signatureFile) payload.append('signature', signatureFile);
 
     try {
         // console.log(formData)
@@ -253,6 +276,11 @@ export default function ProfileFormPage() {
                 className="w-full"
                 // required={!isEditMode}
               />
+            </div>
+
+            <div>
+              <label className="block mb-1">Signature (image)</label>
+              <DoctorSignatureInput onSignature={(dataURL) => setFormData({ ...formData, signatureImage: dataURL })} />
             </div>
           </>
         )}

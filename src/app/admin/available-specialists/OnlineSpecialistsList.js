@@ -5,9 +5,12 @@ import io from "socket.io-client";
 import { updateData } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import dynamic from 'next/dynamic';
 
-import Lottie from "lottie-react";
+// import Lottie from "lottie-react";
 import emptyAnimation from "@/assets/lottie/empty-state.json"; // Replace with your file
+
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
 
 export default function OnlineSpecialistsList({ appointmentId }) {

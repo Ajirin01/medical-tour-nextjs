@@ -56,6 +56,7 @@ import BeakerIcon from "./beaker.svg";
 import OrderIcon from "./order.svg";
 import ShippingIcon from "./shipping.svg";
 import PlaneIcon from "./plane.svg";
+import PillIcon from "./pill.svg"
 
 export {
   DownloadIcon,
@@ -115,5 +116,6 @@ export {
   BeakerIcon,
   OrderIcon,
   ShippingIcon,
-  PlaneIcon
+  PlaneIcon,
+  PillIcon
 };

@@ -19,7 +19,8 @@ import {
   ShippingIcon,
   PlaneIcon,
   CalenderIcon,
-  UserIcon
+  UserIcon,
+  PillIcon
 } from "../icons/index";
 
 const AppSidebar = () => {
@@ -303,6 +304,13 @@ const AppSidebar = () => {
         name: "Consult a Doctor",
         path: "/consultation/book",
         roles: ["user"]
+      },
+
+      {
+        icon: <PillIcon />,
+        name: "Doctor Prescriptions",
+        path: "/admin/doctor-prescriptions",
+        roles: ["user", "specialist", "admin"]
       }
     ];
 

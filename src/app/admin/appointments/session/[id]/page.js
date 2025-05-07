@@ -43,6 +43,18 @@ const SessionPage = () => {
 
   const [activeVideoSession, setActiveVideoSession] = useState(null)
 
+  const [sessionNotes, setSessionNotes] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [savingPrescription, setsavingPrescription] = useState(false);
+
+  const [newPrescription, setNewPrescription] = useState({
+    medication: '',
+    dosage: '',
+    frequency: '',
+  });
+
   const { addToast } = useToast()
 
   const { data: session } = useSession();
@@ -98,6 +110,35 @@ const SessionPage = () => {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [appointment, sessionEnded]);
+
+  // load documentation when dialog is opened
+  useEffect(() => {
+    const fetchDocumentation = async () => {
+      if (!appointmentRef.current?.session?._id || !token) return;
+  
+      try {
+        setSessionNotes("loading...");
+        const response = await fetchData(
+          `video-sessions/${appointmentRef.current.session._id}`,
+          token
+        );
+        // console.log(response.success && response.session)
+        if (response.success && response.session) {
+          setSessionNotes(response.session.sessionNotes || '');
+        } else {
+          setSessionNotes('');
+        }
+      } catch (error) {
+        console.error('Failed to fetch documentation:', error);
+        setSessionNotes('');
+      }
+    };
+  
+    if (showDocs) {
+      fetchDocumentation();
+    }
+  }, [showDocs]);
+  
 
   useEffect(() => {
     socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
@@ -190,6 +231,32 @@ const SessionPage = () => {
       socket.off("session-ended", handleSessionEnded);
     };
   }, []);
+
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      if (!appointmentRef.current?.session?._id || !token) return;
+  
+      try {
+        const response = await fetchData(
+          `video-sessions/${appointmentRef.current.session._id}`,
+          token
+        );
+        if (response.success && response.session) {
+          setPrescriptions(response.session.prescriptions || []);
+        } else {
+          setPrescriptions([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch prescriptions:', error);
+        setPrescriptions([]);
+      }
+    };
+  
+    if (showPrescriptions) {
+      fetchPrescriptions();
+    }
+  }, [showPrescriptions]);
+  
   
 
   // timer logic
@@ -282,8 +349,9 @@ const SessionPage = () => {
   };
 
   const handleOpenQuestions = async () => {
-    if (appointment?.patient?._id) {
-      await loadHealthQuestions(appointment.session.appointment.patient._id);
+    // console.log("Question clicked", appointment.session)
+    if (appointment.session.appointment.patient) {
+      await loadHealthQuestions(appointment.session.appointment.patient);
       setShowQuestions(true);
     }
   };
@@ -326,6 +394,73 @@ const SessionPage = () => {
       setEndingSession(false);
     }
   };
+
+  const handleSaveNotes = async () => {
+    const currentAppointment = appointmentRef.current;
+    if (!currentAppointment?.session?._id || !token) return;
+  
+    try {
+      setSavingNotes(true);
+      await updateData(
+        `video-sessions/${currentAppointment.session._id}`,
+        { sessionNotes },
+        token
+      );
+      addToast("Notes saved successfully!", "success");
+      setShowDocs(false);
+    } catch (err) {
+      console.error("Failed to save notes", err);
+      addToast("Failed to save notes.", "error");
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
+  const handleAddPrescription = async () => {
+    setsavingPrescription(true)
+    if (
+      !newPrescription.medication ||
+      !newPrescription.dosage ||
+      !newPrescription.frequency
+    ) {
+      alert('Please fill all fields');
+      return;
+    }
+  
+    const updatedPrescriptions = [...prescriptions, newPrescription];
+
+    // console.log(updatedPrescriptions)
+  
+    try {
+      await updateData(
+        `video-sessions/${appointmentRef.current.session._id}`,
+        { prescriptions: updatedPrescriptions },
+        token
+      );
+      setPrescriptions(updatedPrescriptions);
+      setNewPrescription({ medication: '', dosage: '', frequency: '' });
+    } catch (error) {
+      console.error('Failed to add prescription:', error);
+    }finally{
+      setsavingPrescription(false)
+    }
+  };
+  
+  const handleDeletePrescription = async (index) => {
+    const updatedPrescriptions = prescriptions.filter((_, i) => i !== index);
+  
+    try {
+      await updateData(
+        `video-sessions/${appointmentRef.current.session._id}`,
+        { prescriptions: updatedPrescriptions },
+        token
+      );
+      setPrescriptions(updatedPrescriptions);
+    } catch (error) {
+      console.error('Failed to delete prescription:', error);
+    }
+  };
+  
 
   if (loading) {
     return <div className="text-center mt-10 text-gray-600">Loading session...</div>;
@@ -532,31 +667,95 @@ const SessionPage = () => {
         </Dialog>
       )}
   
+      {/* notes */}
       {showDocs && (
         <Dialog title="Consultation Documentation" onClose={() => setShowDocs(false)}>
-          <textarea className="w-full h-32 p-2 border rounded" placeholder="Enter notes here..." />
-          <button className="mt-4 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-            Save Notes
+          <textarea
+            className="w-full h-32 p-2 border rounded"
+            placeholder="Enter notes here..."
+            value={sessionNotes}
+            onChange={(e) => setSessionNotes(e.target.value)}
+          />
+          <button
+            className="mt-4 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+            onClick={handleSaveNotes}
+            disabled={savingNotes}
+          >
+            {savingNotes ? 'Saving...' : 'Save Notes'}
           </button>
         </Dialog>
       )}
   
+      {/* prescription */}
       {showPrescriptions && (
         <Dialog title="Prescriptions" onClose={() => setShowPrescriptions(false)}>
-          <input className="w-full mb-2 p-2 border rounded" placeholder="Medication" />
-          <input className="w-full mb-2 p-2 border rounded" placeholder="Dosage" />
-          <input className="w-full mb-2 p-2 border rounded" placeholder="Frequency" />
-          <button className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-            Add Prescription
+          {/* Existing prescriptions */}
+          {prescriptions.length > 0 ? (
+            <div className="mb-4">
+              {prescriptions.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 border-b mb-2"
+                >
+                  <div>
+                    <p className="font-semibold">{item.medication}</p>
+                    <p className="text-sm text-gray-600">
+                      {item.dosage} – {item.frequency}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleDeletePrescription(index)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 mb-4">No prescriptions yet.</p>
+          )}
+
+          {/* New prescription form */}
+          <input
+            className="w-full mb-2 p-2 border rounded"
+            placeholder="Medication"
+            value={newPrescription.medication}
+            onChange={(e) =>
+              setNewPrescription({ ...newPrescription, medication: e.target.value })
+            }
+          />
+          <input
+            className="w-full mb-2 p-2 border rounded"
+            placeholder="Dosage"
+            value={newPrescription.dosage}
+            onChange={(e) =>
+              setNewPrescription({ ...newPrescription, dosage: e.target.value })
+            }
+          />
+          <input
+            className="w-full mb-2 p-2 border rounded"
+            placeholder="Frequency"
+            value={newPrescription.frequency}
+            onChange={(e) =>
+              setNewPrescription({ ...newPrescription, frequency: e.target.value })
+            }
+          />
+          <button
+            className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            onClick={handleAddPrescription}
+          >
+            {savingPrescription ? 'Adding Prescription...' : 'Add Prescription'}
           </button>
         </Dialog>
       )}
+
     </div>
   );
 };
 
 const Dialog = ({ title, children, onClose }) => (
-  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+  <div className="fixed inset-0 z-999999 bg-black bg-opacity-50 flex justify-center items-center">
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-lg w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold dark:text-white">{title}</h2>
