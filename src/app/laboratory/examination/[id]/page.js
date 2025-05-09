@@ -33,7 +33,7 @@ export default function ExaminationDetails() {
   }, [id]);
 
   return (
-    <div className="bg-white relative">
+    <div className="relative">
       {/* Loading Overlay */}
       {isLoading && <LoadingOverlay isLoading={isLoading} />}
 

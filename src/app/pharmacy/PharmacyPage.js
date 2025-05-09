@@ -38,10 +38,10 @@ export default function Pharmacy() {
   }
 
   return (
-    <main className="p-6 bg-white min-h-screen relative">
+    <main className="p-6 min-h-screen relative">
       {loading && <LoadingOverlay isLoading={loading} />}
 
-      <div className={`bg-white ${loading ? "opacity-50 pointer-events-none" : ""}`}>
+      <div className={`${loading ? "opacity-50 pointer-events-none" : ""}`}>
         <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
           <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-6">
             Available Medications

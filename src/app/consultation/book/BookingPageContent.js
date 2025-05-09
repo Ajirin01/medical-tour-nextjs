@@ -418,7 +418,7 @@ export default function ConsultationBookingPageContent() {
                   disabled={submitting || (consultMode === 'appointment' && !selectedSlot)}
                   className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting...' : 'Book Appointment'}
+                  {submitting ? 'Submitting...' : 'Review'}
                 </button>
               </div>
             </form>

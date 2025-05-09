@@ -6,6 +6,7 @@ import { CartProvider } from "@/context/CartContext";
 import AuthSessionProvider from "./SessionProvider";
 import { ToastProvider } from "@/context/ToastContext";
 import { UserProvider } from "@/context/UserContext";
+import AuthWatcher from "@/components/AuthWatcher";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -16,7 +17,14 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className="bg-gray-100">
+      <body className="bg-gray-100" 
+      style={{
+        backgroundImage: "url('/images/Medical-tourism.jpg')",
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+      }}
+      >
         {isHomepage && (
           <>
             {/* Add metadata specific to the homepage */}
@@ -47,6 +55,7 @@ export default function RootLayout({ children }) {
         )}
 
         <AuthSessionProvider>
+          <AuthWatcher /> 
           <UserProvider>
             <ToastProvider>
               <CartProvider>

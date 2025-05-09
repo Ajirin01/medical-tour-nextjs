@@ -57,6 +57,11 @@ import OrderIcon from "./order.svg";
 import ShippingIcon from "./shipping.svg";
 import PlaneIcon from "./plane.svg";
 import PillIcon from "./pill.svg"
+import CallSessionIcon from "./call-session.svg"
+import FeedbackIcon from "./feedback.svg"
+import GalleryIcon from "./gallery.svg"
+import HospitalIcon from "./hospital.svg";
+import BlogIcon from "./blog.svg"
 
 export {
   DownloadIcon,
@@ -117,5 +122,10 @@ export {
   OrderIcon,
   ShippingIcon,
   PlaneIcon,
-  PillIcon
+  PillIcon,
+  CallSessionIcon,
+  FeedbackIcon,
+  GalleryIcon,
+  HospitalIcon,
+  BlogIcon
 };

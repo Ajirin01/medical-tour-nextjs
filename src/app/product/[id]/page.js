@@ -37,7 +37,7 @@ export default function ProductDetails() {
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   return (
-    <div className="bg-white relative">
+    <div className="relative">
       {/* Loading Overlay */}
       {isLoading && <LoadingOverlay isLoading={isLoading} />}
 

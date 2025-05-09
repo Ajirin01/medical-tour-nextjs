@@ -10,6 +10,9 @@ import {
   SquaresPlusIcon,
   PlayCircleIcon,
   PhoneIcon,
+  InformationCircleIcon,
+  QuestionMarkCircleIcon,
+  CameraIcon
  } from "@heroicons/react/24/outline";
 import { Hospital, UserCheck, Stethoscope } from 'lucide-react';
 import { useSession, signOut } from "next-auth/react"; // Authentication
@@ -27,30 +30,53 @@ const solutions = [
   {
     name: 'Hospitals',
     description: 'Discover accredited hospitals offering top-tier medical care',
-    href: '/medical-tourism/hospitals',
+    href: '/#hospitals',
     icon: Hospital, // Could signify stats or insights about hospitals
   },
   {
     name: 'Doctors',
     description: 'Browse specialists and top-rated doctors for your treatment',
-    href: '/medical-tourism/doctors',
+    href: '/#doctors',
     icon: UserCheck, // Could imply personal care or credentials
   },
   {
     name: 'Treatments',
     description: 'Learn about procedures and treatment options we offer',
-    href: '/medical-tourism/treatments',
+    href: '/#treatments',
     icon: Stethoscope, // Represents transformation or recovery
   }
 ]
 
+const aboutUs = [
+  {
+    name: 'Overview',
+    description: 'Learn about our medical tourism services and top healthcare providers.',
+    href: '/#about',
+    icon: InformationCircleIcon, // Clear, general info symbol
+  },
+  {
+    name: 'Gallery',
+    description: 'View photos of our healthcare destinations and patient experiences.',
+    href: '/#gallery',
+    icon: CameraIcon, // Icon representing photo collection
+  },
+  {
+    name: 'Frequently asked questions',
+    description: 'Find answers to common questions about our services and medical tourism.',
+    href: '/#faq',
+    icon: QuestionMarkCircleIcon, // Appropriate for FAQ
+  }
+];
+
+
 const actions = [
   { name: 'Watch demo', href: '#', icon: PlayCircleIcon },
-  { name: 'Contact sales', href: '#', icon: PhoneIcon },
+  { name: 'Contact sales', href: '/#contact', icon: PhoneIcon },
 ]
 
 const navigation = [
   { name: "Medical Tourism", comp: DropdownPopover},
+  { name: "About Us", comp: DropdownPopover },
   { name: "Laboratory", href: "/laboratory" },
   { name: "Pharmacy", href: "/pharmacy" }
 ];
@@ -102,17 +128,22 @@ export default function Navbar() {
               <item.comp
                 key={item.name}
                 title={item.name}
-                items={solutions}
+                items={item.name === "About Us" ? aboutUs : solutions}
                 callsToAction={actions}
                 buttonStyle="inline-flex items-center gap-x-1 text-sm font-semibold hover:cursor-pointer !text-white"
               />
             ) : (
-              <Link key={item.name} href={item.href} className="text-sm font-semibold">
+              <Link
+                key={item.name}
+                href={item.href}
+                className="text-sm font-semibold hover:underline"
+              >
                 {item.name}
               </Link>
             )
           )}
         </PopoverGroup>
+
 
         {/* Authentication Links */}
 

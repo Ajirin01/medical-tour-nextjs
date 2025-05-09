@@ -20,7 +20,12 @@ import {
   PlaneIcon,
   CalenderIcon,
   UserIcon,
-  PillIcon
+  PillIcon,
+  CallSessionIcon,
+  FeedbackIcon,
+  GalleryIcon,
+  HospitalIcon,
+  BlogIcon
 } from "../icons/index";
 
 const AppSidebar = () => {
@@ -311,7 +316,42 @@ const AppSidebar = () => {
         name: "Doctor Prescriptions",
         path: "/admin/doctor-prescriptions",
         roles: ["user", "specialist", "admin"]
-      }
+      },
+
+      {
+        icon: <CallSessionIcon />,
+        name: "Call Sessions",
+        path: "/admin/call-sessions",
+        roles: ["user", "specialist", "admin"]
+      },
+
+      {
+        icon: <FeedbackIcon />,
+        name: "Feedbacks",
+        path: "/admin/feedbacks",
+        roles: ["admin"]
+      },
+
+      {
+        icon: <GalleryIcon />,
+        name: "Galleries",
+        path: "/admin/galleries",
+        roles: ["admin"]
+      },
+
+      {
+        icon: <HospitalIcon />,
+        name: "Hospitals",
+        path: "/admin/hospitals",
+        roles: ["admin"]
+      },
+
+      {
+        icon: <BlogIcon />,
+        name: "Blogs",
+        path: "/admin/blogs",
+        roles: ["admin"]
+      },
     ];
 
     return filterByRole(items);

@@ -158,7 +158,7 @@ export default function ReviewAppointmentPage() {
             disabled={submitting}
             className="px-6 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 font-semibold disabled:opacity-50"
           >
-            {submitting ? 'Booking...' : 'Confirm & Book'}
+            {submitting ? 'Booking...' : 'Confirm'}
           </button>
         </div>
       </div>

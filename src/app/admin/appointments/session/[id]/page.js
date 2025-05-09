@@ -83,7 +83,7 @@ const SessionPage = () => {
         session: session._id,
         user: session.user._id,
         rating,
-        comment,
+        feedbackText: comment,
       };
       const res = await postData('session-feedback', payload, token);
       addToast('Thank you for your feedback!', 'success');

@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import {jwtDecode} from "jwt-decode";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_NODE_API_BASE_URL;
 
 export default NextAuth({
@@ -26,10 +28,8 @@ export default NextAuth({
 
           const user = await res.json();
 
-          // Check if the user has a valid token
           if (!user.token) throw new Error("No token returned");
 
-          // Return the user object with token and other necessary details
           return { ...user };
         } catch (error) {
           throw new Error(error.message || "Authentication failed");
@@ -37,37 +37,60 @@ export default NextAuth({
       },
     }),
   ],
+  
+  // 👇 Add this block here
+  session: {
+    strategy: "jwt",
+    maxAge: 60*60*24, // 1 minute for quick testing, adjust as needed
+  },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        // Store user data and token in JWT
         token.id = user.user._id;
-        token.jwt = user.token;  // Store JWT token
+        token.jwt = user.token;
         token.email = user.user.email;
         token.role = user.user.role;
-        token.name = user.user.name;  // Optional: user name from backend
+        token.name = user.user.name;
         token.isHealthQuestionsAnswered = user.user.isHealthQuestionsAnswered ?? false;
         token.approvalStatus = user.user.approvalStatus ?? "pending";
+
+        try {
+          const decoded = jwtDecode(user.token);
+          token.exp = decoded.exp;
+        } catch (e) {
+          console.error("Failed to decode JWT:", e);
+          token.exp = null;
+        }
+      }
+
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (token?.exp && token.exp < currentTime) {
+        token.error = "RefreshAccessTokenError";
       }
 
       return token;
     },
+
     async session({ session, token }) {
       if (token) {
-        // Attach token data to the session
         session.user.id = token.id;
         session.user.jwt = token.jwt;
         session.user.email = token.email;
         session.user.role = token.role;
         session.user.name = token.name;
         session.user.approvalStatus = token.approvalStatus ?? "pending";
+        session.error = token.error ?? null;
       }
-      // console.log(session)
+
       return session;
     },
   },
+
   pages: {
-    signIn: "/login", // Custom sign-in page
+    signIn: "/login",
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 });
+

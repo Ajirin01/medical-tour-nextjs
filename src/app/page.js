@@ -387,7 +387,7 @@ export default function HomePage() {
                 <div className="icon">
                   <i className="fas fa-pills"></i>
                 </div>
-                <a href="#" className="stretched-link">
+                <a href="/pharmacy" className="stretched-link">
                   <h3>Online Drug Store</h3>
                 </a>
                 <p>Access prescription medications and over-the-counter drugs with the convenience of online ordering.</p>
@@ -411,7 +411,7 @@ export default function HomePage() {
                 <div className="icon">
                   <i className="fas fa-dna"></i>
                 </div>
-                <a href="#" className="stretched-link">
+                <a href="/laboratory" className="stretched-link">
                   <h3>Lab Services</h3>
                 </a>
                 <p>Access diagnostic tests and lab services with prompt results to support your medical needs.</p>
@@ -450,7 +450,7 @@ export default function HomePage() {
        
 
         {/* <!-- Tabs Section  */}
-        <section id="tabs" className="tabs section">
+        <section id="treatments" className="tabs section">
           <div className="container" data-aos="fade-up" data-aos-delay="100">
             <div className="row">
               <div className="col-lg-3">
@@ -752,232 +752,168 @@ export default function HomePage() {
         </section>
         {/* <!-- /Gallery Section */}
 
+        {/* <!-- Faq Section  --> */}
+        <section className="faq section light-background">
 
-        {/* <!-- Pricing Section  */}
-        {/* <section id="pricing" className="pricing section">
-          <div className="container section-title" data-aos="fade-up">
-            <h2>Our Pricing Plans</h2>
-            <p>Choose the best plan that suits your needs and get access to exclusive medical services.</p>
-          </div> 
+          {/* <!-- Section Title  --> */}
+          <div id="faq" className="container section-title" data-aos="fade-up">
+            <h2>Frequently Asked Questions</h2>
+            <p>Find answers to some of the most common questions regarding SozoDigicare services.</p>
+          </div>{/* <!-- End Section Title  */}
 
           <div className="container">
-            <div className="row gy-3">
-              {packages.map((_package, index) => {
-                const isActive = activeIndex === index;
+            <div className="row justify-content-center">
+              <div className="col-lg-10" data-aos="fade-up" data-aos-delay="100">
+                <div className="faq-container">
 
-                return (
-                  <div
-                    key={_package._id}
-                    className="col-xl-3 col-lg-6"
-                    data-aos="fade-up"
-                    data-aos-delay={`${(index + 1) * 100}`}
-                  >
-                    <div
-                      className={classNames(
-                        'pricing-item',
-                        isActive ? 'bg-gray-900 text-white' : 'bg-white text-gray-900',
-                        'rounded-3xl p-8 ring-1 ring-gray-900/10 sm:p-10'
-                      )}
-                    >
-                      <h3 className={classNames(isActive ? 'text-indigo-400' : 'text-indigo-600')}>
-                        {_package.name}
-                      </h3>
-                      <h4>
-                        <sup>$</sup>{Number(_package.price).toFixed(0)} <span>/ month</span>
-                      </h4>
-                      <ul className="mt-4">
-                        {(_package.services || []).map((service, serviceIndex) => (
-                          <li key={serviceIndex} className="flex gap-x-3">
-                            <CheckIcon className={classNames('h-6 w-5', isActive ? 'text-indigo-400' : 'text-indigo-600')} />
-                            {service}
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="btn-wrap mt-8">
-                        <a
-                          href={`medical-tourism/package/${_package._id}`}
-                          className={classNames(
-                            'btn-buy',
-                            isActive
-                              ? 'bg-indigo-500 text-white hover:bg-indigo-400'
-                              : 'text-indigo-600 ring-1 ring-indigo-200 hover:bg-gray-900 hover:text-white hover:ring-gray-900/0'
-                          )}
-                        >
-                          View Package
-                        </a>
-                      </div>
+                  {/* FAQ Item 1 */}
+                  <div className="faq-item">
+                    <h3>What is Sozo Digicare Limited?</h3>
+                    <div className="faq-content">
+                      <p>We are an online telehealth platform fully compliant with regulatory standards, including GDPR and the guidelines of the Medical Council of Ireland. Our platform features secure, user-friendly tools for appointment scheduling, encrypted video consultations, electronic prescriptions, and protected medical record storage. Through integration with advanced digital tools, including Artificial Intelligence, and strategic partnerships with independent healthcare providers and pharmacies, we enhance service delivery and accessibility. We prioritize ongoing quality monitoring and actively incorporate user feedback to ensure continuous improvement and maintain trust in our service.</p>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section> */}
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-        {/* <!-- /Pricing Section  */}
+                  {/* FAQ Item 2 */}
+                  <div className="faq-item">
+                    <h3>How does Sozo Digicare work?</h3>
+                    <div className="faq-content">
+                      <p>First, complete a health questionnaire, and schedule an appointment immediately or for a future convenient date. Our appointment/consultation sessions are in blocks of 15 or 30 minutes. Once your consultation is complete, your prescription can be sent to your preferred pharmacy.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-        {/* <!-- Faq Section  --> */}
-        <section id="faq" className="faq section light-background">
+                  {/* FAQ Item 3 */}
+                  <div className="faq-item">
+                    <h3>Does Sozo Digicare work for all patients?</h3>
+                    <div className="faq-content">
+                      <p>Since our doctors cannot physically examine you or access your full medical history, they take extra precautions compared to an in-person GP visit. We follow strict prescribing guidelines to ensure your safety, which means we can only issue a prescription when it is clinically appropriate. If, based on your symptoms or health history, our clinicians determine that an online consultation is not the best option for you, we will advise seeing a GP in person and work on referring you to one of our independent healthcare providers.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-        {/* <!-- Section Title  --> */}
-        <div className="container section-title" data-aos="fade-up">
-          <h2>Frequently Asked Questions</h2>
-          <p>Find answers to some of the most common questions regarding SozoDigicare services.</p>
-        </div>{/* <!-- End Section Title  */}
+                  {/* FAQ Item 4 */}
+                  <div className="faq-item">
+                    <h3>How quickly will Sozo Digicare confirm your appointment or consultation?</h3>
+                    <div className="faq-content">
+                      <p>We work on scheduling an appointment immediately or for a future convenient date as you request. Once you complete your pre-consultation form, you will receive an email confirmation after the consultation.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-        <div className="container">
-          <div className="row justify-content-center">
-            <div className="col-lg-10" data-aos="fade-up" data-aos-delay="100">
-              <div className="faq-container">
+                  {/* FAQ Item 5 */}
+                  <div className="faq-item">
+                    <h3>Hours of service?</h3>
+                    <div className="faq-content">
+                      <p>The Sozo Digicare service is open 24 hours a day, 365 days a year ensuring you have access to medical care whenever you need it, be it day, night, or even the weekends. If you are looking to collect a prescription from a late-night pharmacy after 8pm please email contact@SozoDigicare.ie and we will do our very best to help.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 1 */}
-                <div className="faq-item">
-                  <h3>What is Sozo Digicare Limited?</h3>
-                  <div className="faq-content">
-                    <p>We are an online telehealth platform fully compliant with regulatory standards, including GDPR and the guidelines of the Medical Council of Ireland. Our platform features secure, user-friendly tools for appointment scheduling, encrypted video consultations, electronic prescriptions, and protected medical record storage. Through integration with advanced digital tools, including Artificial Intelligence, and strategic partnerships with independent healthcare providers and pharmacies, we enhance service delivery and accessibility. We prioritize ongoing quality monitoring and actively incorporate user feedback to ensure continuous improvement and maintain trust in our service.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 6 */}
+                  <div className="faq-item">
+                    <h3>Accessible from anywhere in Ireland?</h3>
+                    <div className="faq-content">
+                      <p>We have partner pharmacies and independent healthcare providers across Ireland.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 2 */}
-                <div className="faq-item">
-                  <h3>How does Sozo Digicare work?</h3>
-                  <div className="faq-content">
-                    <p>First, complete a health questionnaire, and schedule an appointment immediately or for a future convenient date. Our appointment/consultation sessions are in blocks of 15 or 30 minutes. Once your consultation is complete, your prescription can be sent to your preferred pharmacy.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 7 */}
+                  <div className="faq-item">
+                    <h3>What makes Sozo Digicare.ie different from other online doctor services in Ireland?</h3>
+                    <div className="faq-content">
+                      <p>Our commitment to accessible, affordable, round-the-clock care, experienced Irish-registered doctors, and a range of specialized services sets us apart.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 3 */}
-                <div className="faq-item">
-                  <h3>Does Sozo Digicare work for all patients?</h3>
-                  <div className="faq-content">
-                    <p>Since our doctors cannot physically examine you or access your full medical history, they take extra precautions compared to an in-person GP visit. We follow strict prescribing guidelines to ensure your safety, which means we can only issue a prescription when it is clinically appropriate. If, based on your symptoms or health history, our clinicians determine that an online consultation is not the best option for you, we will advise seeing a GP in person and work on referring you to one of our independent healthcare providers.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 8 */}
+                  <div className="faq-item">
+                    <h3>How can I ensure confidentiality and security during an online consultation?</h3>
+                    <div className="faq-content">
+                      <p>We prioritize your privacy with encrypted communication channels, ensuring that all consultations are confidential and secure. Video Consultations are done via HIPAA compliant video call mediums.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 4 */}
-                <div className="faq-item">
-                  <h3>How quickly will Sozo Digicare confirm your appointment or consultation?</h3>
-                  <div className="faq-content">
-                    <p>We work on scheduling an appointment immediately or for a future convenient date as you request. Once you complete your pre-consultation form, you will receive an email confirmation after the consultation.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 9 */}
+                  <div className="faq-item">
+                    <h3>What types of online doctor consultations do you provide?</h3>
+                    <div className="faq-content">
+                      <p>We provide a range of consultations, including general health check-ups, mental health support, dermatology, diabetes management, and more, all available via video consultation online.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 5 */}
-                <div className="faq-item">
-                  <h3>Hours of service?</h3>
-                  <div className="faq-content">
-                    <p>The Sozo Digicare service is open 24 hours a day, 365 days a year ensuring you have access to medical care whenever you need it, be it day, night, or even the weekends. If you are looking to collect a prescription from a late-night pharmacy after 8pm please email contact@SozoDigicare.ie and we will do our very best to help.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 10 */}
+                  <div className="faq-item">
+                    <h3>What is the cost of an online doctor consultation in Ireland?</h3>
+                    <div className="faq-content">
+                      <p>Our online consultations start at €35.99, offering affordable and transparent pricing for various services.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 6 */}
-                <div className="faq-item">
-                  <h3>Accessible from anywhere in Ireland?</h3>
-                  <div className="faq-content">
-                    <p>We have partner pharmacies and independent healthcare providers across Ireland.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 11 */}
+                  <div className="faq-item">
+                    <h3>Can I get a sick leave certificate through an online doctor consultation?</h3>
+                    <div className="faq-content">
+                      <p>Yes, you can request a sick leave certificate during your consultation, subject to the doctor's assessment.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 7 */}
-                <div className="faq-item">
-                  <h3>What makes Sozo Digicare.ie different from other online doctor services in Ireland?</h3>
-                  <div className="faq-content">
-                    <p>Our commitment to accessible, affordable, round-the-clock care, experienced Irish-registered doctors, and a range of specialized services sets us apart.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 12 */}
+                  <div className="faq-item">
+                    <h3>Do you offer emergency consultations online?</h3>
+                    <div className="faq-content">
+                      <p>For urgent medical concerns, we offer emergency consultations. However, in case of life-threatening emergencies, it's crucial to call an ambulance immediately.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 8 */}
-                <div className="faq-item">
-                  <h3>How can I ensure confidentiality and security during an online consultation?</h3>
-                  <div className="faq-content">
-                    <p>We prioritize your privacy with encrypted communication channels, ensuring that all consultations are confidential and secure. Video Consultations are done via HIPAA compliant video call mediums.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 13 */}
+                  <div className="faq-item">
+                    <h3>How quickly will my prescription be processed?</h3>
+                    <div className="faq-content">
+                      <p>We will send your prescription to your preferred pharmacy or the nearest pharmacy to your desired location. We will let you know by email through our partner pharmacies once it is ready for pick-up or once dispatched.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 9 */}
-                <div className="faq-item">
-                  <h3>What types of online doctor consultations do you provide?</h3>
-                  <div className="faq-content">
-                    <p>We provide a range of consultations, including general health check-ups, mental health support, dermatology, diabetes management, and more, all available via video consultation online.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 14 */}
+                  <div className="faq-item">
+                    <h3>How are prescriptions sent to the pharmacy?</h3>
+                    <div className="faq-content">
+                      <p>Sozo Digicare does not dispense or deliver prescription medication. If the doctor prescribes medication, the prescription is submitted electronically through a secure service called Healthmail to the pharmacy of your choice. If you select “Home Delivery” we will forward the prescription to one of our partner pharmacies for delivery.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 10 */}
-                <div className="faq-item">
-                  <h3>What is the cost of an online doctor consultation in Ireland?</h3>
-                  <div className="faq-content">
-                    <p>Our online consultations start at €35.99, offering affordable and transparent pricing for various services.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 15 */}
+                  <div className="faq-item">
+                    <h3>What if I am having an issue at the pharmacy?</h3>
+                    <div className="faq-content">
+                      <p>Please advise the pharmacy that the prescription has been sent to the pharmacy's Healthmail email address. If for some reason they have not received it, send an email to contact@SozoDigicare.ie and we will rectify the issue immediately.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 11 */}
-                <div className="faq-item">
-                  <h3>Can I get a sick leave certificate through an online doctor consultation?</h3>
-                  <div className="faq-content">
-                    <p>Yes, you can request a sick leave certificate during your consultation, subject to the doctor's assessment.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
+                  {/* FAQ Item 16 */}
+                  <div className="faq-item">
+                    <h3>Will I be contacted by Sozo Digicare when my prescription is ready?</h3>
+                    <div className="faq-content">
+                      <p>Yes, we will automatically notify you via email and text once your prescription is ready for pick-up or home delivery.</p>
+                    </div>
+                    <i className="faq-toggle bi bi-chevron-right"></i>
+                  </div>{/* <!-- End Faq Item */}
 
-                {/* FAQ Item 12 */}
-                <div className="faq-item">
-                  <h3>Do you offer emergency consultations online?</h3>
-                  <div className="faq-content">
-                    <p>For urgent medical concerns, we offer emergency consultations. However, in case of life-threatening emergencies, it's crucial to call an ambulance immediately.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
-
-                {/* FAQ Item 13 */}
-                <div className="faq-item">
-                  <h3>How quickly will my prescription be processed?</h3>
-                  <div className="faq-content">
-                    <p>We will send your prescription to your preferred pharmacy or the nearest pharmacy to your desired location. We will let you know by email through our partner pharmacies once it is ready for pick-up or once dispatched.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
-
-                {/* FAQ Item 14 */}
-                <div className="faq-item">
-                  <h3>How are prescriptions sent to the pharmacy?</h3>
-                  <div className="faq-content">
-                    <p>Sozo Digicare does not dispense or deliver prescription medication. If the doctor prescribes medication, the prescription is submitted electronically through a secure service called Healthmail to the pharmacy of your choice. If you select “Home Delivery” we will forward the prescription to one of our partner pharmacies for delivery.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
-
-                {/* FAQ Item 15 */}
-                <div className="faq-item">
-                  <h3>What if I am having an issue at the pharmacy?</h3>
-                  <div className="faq-content">
-                    <p>Please advise the pharmacy that the prescription has been sent to the pharmacy's Healthmail email address. If for some reason they have not received it, send an email to contact@SozoDigicare.ie and we will rectify the issue immediately.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
-
-                {/* FAQ Item 16 */}
-                <div className="faq-item">
-                  <h3>Will I be contacted by Sozo Digicare when my prescription is ready?</h3>
-                  <div className="faq-content">
-                    <p>Yes, we will automatically notify you via email and text once your prescription is ready for pick-up or home delivery.</p>
-                  </div>
-                  <i className="faq-toggle bi bi-chevron-right"></i>
-                </div>{/* <!-- End Faq Item */}
-
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
         </section> {/* <!-- End Faq Section --> */}
 
