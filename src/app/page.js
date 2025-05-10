@@ -7,7 +7,7 @@ import Swiper from 'swiper';
 import { fetchData } from '@/utils/api';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
-import FaqSection from '@/components/FAQS';
+import FaqSection from '@/components/FAQs';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
