@@ -77,6 +77,7 @@ const actions = [
 const navigation = [
   { name: "Medical Tourism", comp: DropdownPopover},
   { name: "About Us", comp: DropdownPopover },
+  { name: "Blog", href: "/blog" },
   { name: "Laboratory", href: "/laboratory" },
   { name: "Pharmacy", href: "/pharmacy" }
 ];
@@ -179,7 +180,7 @@ export default function Navbar() {
                 <item.comp
                   key={item.name}
                   title={item.name}
-                  items={solutions}
+                  items={item.name === "About Us" ? aboutUs : solutions}
                   callsToAction={actions}
                   buttonStyle="inline-flex items-center gap-x-1 text-sm font-semibold ml-3 hover:cursor-pointer !text-white"
                 />

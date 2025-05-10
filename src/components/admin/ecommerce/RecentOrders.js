@@ -1,62 +1,40 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import { useEffect, useState } from "react";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import Badge from "../ui/badge/Badge";
 import Image from "next/image";
-
-const tableData = [
-  {
-    id: 1,
-    name: "Blood Test Package",
-    variants: "2 Variants",
-    category: "Lab Service",
-    price: "$150.00",
-    status: "Completed",
-    image: "/images/lab-test.jpg",
-  },
-  {
-    id: 2,
-    name: "Consultation with Dr. Smith",
-    variants: "1 Variant",
-    category: "Medical Consultation",
-    price: "$200.00",
-    status: "Pending",
-    image: "/images/consult.jpg",
-  },
-  {
-    id: 3,
-    name: "MRI Scan",
-    variants: "1 Variant",
-    category: "Lab Service",
-    price: "$800.00",
-    status: "Completed",
-    image: "/images/meds.jpg",
-  },
-  {
-    id: 4,
-    name: "Surgery Consultation with Dr. Lee",
-    variants: "1 Variant",
-    category: "Medical Consultation",
-    price: "$300.00",
-    status: "Canceled",
-    image: "/images/consult.jpg",
-  },
-  {
-    id: 5,
-    name: "ECG Test",
-    variants: "1 Variant",
-    category: "Lab Service",
-    price: "$120.00",
-    status: "Completed",
-    image: "/images/lab-test.jpg",
-  },
-];
+import { fetchData } from "@/utils/api";  // Assuming you have this API utility
+import { useSession } from "next-auth/react";
 
 export default function RecentOrders() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const { data: session } = useSession()
+  const token = session?.user?.jwt
+
+  // Fetch orders from the backend
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        // Replace with the actual API endpoint for fetching orders
+        const data = await fetchData("/orders/filter/by?limit=5", token); // You can add pagination/query params as needed
+        setOrders(data.orders);  // Assuming 'orders' is the key in the response
+        console.log(data.orders)
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setLoading(false);
+      }
+    };
+
+    if(token) fetchOrders();
+  }, [token]);
+
+  // Loader for the table data
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -65,16 +43,8 @@ export default function RecentOrders() {
             Recent Medical & Lab Orders
           </h3>
         </div>
-
-        <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-            Filter
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-            See all
-          </button>
-        </div>
       </div>
+
       <div className="max-w-full overflow-x-auto">
         <Table>
           <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
@@ -95,41 +65,50 @@ export default function RecentOrders() {
           </TableHeader>
 
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {tableData.map((service) => (
-              <TableRow key={service.id}>
+            {orders.map((order) => (
+              <TableRow key={order._id}>
                 <TableCell className="py-3">
                   <div className="flex items-center gap-3">
                     <div className="h-[50px] w-[50px] overflow-hidden rounded-md">
-                      <Image width={50} height={50} src={service.image} className="h-[50px] w-[50px]" alt={service.name} />
+                      <img
+                        width={50}
+                        height={50}
+                        src={order.items[0]?.product?.photo ? `${process.env.NEXT_PUBLIC_NODE_BASE_URL}/${order.items[0]?.product?.photo}` : "/images/placeholder.png"}
+                        className="h-[50px] w-[50px]"
+                        alt={order.items[0]?.product?.name || "Product"}
+                      />
                     </div>
                     <div>
                       <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {service.name}
+                        {order.items.map((item) => item.product?.name).join(", ")}
                       </p>
                       <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                        {service.variants}
+                        {order.items.length} {order.category === 'LabService' ? 'Tests' : 'Variants'}
                       </span>
                     </div>
                   </div>
                 </TableCell>
+
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {service.category}
+                  {order.category}
                 </TableCell>
+
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {service.price}
+                  ${order.totalAmount.toFixed(2)}
                 </TableCell>
+
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   <Badge
                     size="sm"
                     color={
-                      service.status === "Completed"
+                      order.status === "Completed"
                         ? "success"
-                        : service.status === "Pending"
+                        : order.status === "Pending"
                         ? "warning"
                         : "error"
                     }
                   >
-                    {service.status}
+                    {order.status}
                   </Badge>
                 </TableCell>
               </TableRow>

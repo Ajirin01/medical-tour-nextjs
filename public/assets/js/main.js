@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", function() {
   /**
    * Apply .scrolled class to the body as the page is scrolled down
    */
+  const header = document.querySelector('#header');
+
   function toggleScrolled() {
     const selectBody = document.querySelector('body');
     const selectHeader = document.querySelector('#header');
@@ -11,8 +13,11 @@ document.addEventListener("DOMContentLoaded", function() {
     window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
   }
 
-  document.addEventListener('scroll', toggleScrolled);
-  window.addEventListener('load', toggleScrolled);
+  if (header) {
+    document.addEventListener('scroll', toggleScrolled);
+    window.addEventListener('load', toggleScrolled);
+  }
+  
 
   /**
    * Mobile nav toggle

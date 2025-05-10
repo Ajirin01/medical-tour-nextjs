@@ -242,7 +242,7 @@ const AppSidebar = () => {
           },
           { name: "Services", path: "/admin/laboratories/services", roles: ["labAdmin", "labEmployee", "admin"] },
           { name: "Results", path: "/admin/laboratories/results", roles: ["labAdmin", "labEmployee", "admin"] },
-          { name: "My Results", path: "/admin/laboratories/my-results", roles: ["user"] },
+          // { name: "My Results", path: "/admin/laboratories/my-results", roles: ["user"] },
         ],
         roles: ["admin", "labAdmin", "labEmployee", "user"]
       },

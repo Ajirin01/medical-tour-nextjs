@@ -63,7 +63,7 @@ export default function DemographicCard() {
         </div>
       </div>
 
-      <div className="space-y-5">
+      {/* <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="items-center w-full rounded-full max-w-8">
@@ -125,7 +125,7 @@ export default function DemographicCard() {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import '/aos.css'; // Import AOS styles
+import AOS from 'aos';
+import { useEffect, useState } from 'react';
 import Swiper from 'swiper';
-// import 'swiper/swiper-bundle.min.css'; // Import Swiper's CSS
 import { fetchData } from '@/utils/api';
-import Link from "next/link";
-
+import Link from 'next/link';
+import Footer from '@/components/Footer';
+import FaqSection from '@/components/FAQS';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -13,20 +15,18 @@ function classNames(...classes) {
 
 export default function HomePage() {
   const [isClient, setIsClient] = useState(false);
-
   const [activeTab, setActiveTab] = useState(1);
+  const [packages, setPackages] = useState([]);
+  const [galleries, setGalleries] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
+  const [specialists, setSpecialists] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // This ensures that the active tab is consistent between the client and server
-    setActiveTab(1); // Or you can use props or other logic to set the initial tab
-  }, []);
-
-  useEffect(() => {
-    setIsClient(true); // Ensure we are on the client side
-  }, []);
-
-  useEffect(() => {
-    AOS.init(); // Initialize AOS on client-side only
+    setActiveTab(1);
+    setIsClient(true);
+    AOS.init();
   }, []);
 
   useEffect(() => {
@@ -44,30 +44,14 @@ export default function HomePage() {
         clickable: true,
       },
       breakpoints: {
-        320: {
-          slidesPerView: 1,
-          spaceBetween: 0,
-        },
-        768: {
-          slidesPerView: 3,
-          spaceBetween: 20,
-        },
-        1200: {
-          slidesPerView: 5,
-          spaceBetween: 20,
-        },
+        320: { slidesPerView: 1, spaceBetween: 0 },
+        768: { slidesPerView: 3, spaceBetween: 20 },
+        1200: { slidesPerView: 5, spaceBetween: 20 },
       },
     });
 
-    return () => {
-      // Cleanup Swiper when component unmounts
-      swiper.destroy();
-    };
+    return () => swiper.destroy();
   }, []);
-
-  const [packages, setPackages] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -77,17 +61,53 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    async function fetchGalleries() {
+      try {
+        const data = await fetchData('galleries/get-all/no-pagination');
+        setGalleries(data || []);
+        console.log(data)
+      } catch (error) {
+        console.error('Failed to fetch galleries:', error);
+      }
+    }
+
+    async function fetchHospitals() {
+      try {
+        const data = await fetchData('hospitals');
+        setHospitals(data.data || []);
+        console.log(data.data)
+      } catch (error) {
+        console.error('Failed to fetch hospitals:', error);
+      }
+    }
+
+    async function fetchDoctors() {
+      try {
+        const data = await fetchData('users/get-all/doctors/no-pagination');
+        setSpecialists(data || []);
+        console.log("doctors", data)
+      } catch (error) {
+        console.error('Failed to fetch doctors:', error);
+      }
+    }
+
     async function fetchPackages() {
       try {
         const data = await fetchData('tour/get-all/no-pagination');
         setPackages(data);
+        console.log(data)
       } catch (error) {
         console.error('Failed to fetch packages:', error);
       }
     }
 
+    fetchDoctors();
+    fetchGalleries();
+    fetchHospitals();
     fetchPackages();
   }, []);
+
+  if (!isClient) return <div>Loading...</div>;
 
   return (
     <>
@@ -484,11 +504,11 @@ export default function HomePage() {
                         <div className="col-lg-8 details order-2 order-lg-1">
                           <h3>{department}</h3>
                           <p className="fst-italic">
-                            {department === "Cardiology" && "Cardiology focuses on diagnosing and treating heart conditions, offering expertise in various heart-related treatments and care."}
-                            {department === "Neurology" && "Neurology deals with the diagnosis and treatment of disorders related to the nervous system, including conditions like epilepsy, stroke, and Parkinson's disease."}
-                            {department === "Hepatology" && "Hepatology specializes in the care of patients with liver diseases, including hepatitis, cirrhosis, and liver transplantation."}
-                            {department === "Pediatrics" && "Pediatrics provides care for children, from infancy to adolescence, ensuring proper growth, development, and preventive care."}
-                            {department === "Ophthalmologists" && "Ophthalmology is focused on diagnosing and treating eye conditions, including vision problems, glaucoma, cataracts, and retinal disorders."}
+                            {department === "Cardiology" && "Cardiology focuses on diagnosing and treating heart conditions..."}
+                            {department === "Neurology" && "Neurology deals with the diagnosis and treatment of disorders..."}
+                            {department === "Hepatology" && "Hepatology specializes in the care of patients with liver diseases..."}
+                            {department === "Pediatrics" && "Pediatrics provides care for children, from infancy to adolescence..."}
+                            {department === "Ophthalmologists" && "Ophthalmology is focused on diagnosing and treating eye conditions..."}
                           </p>
                         </div>
                         <div className="col-lg-4 text-center order-1 order-lg-2">
@@ -612,83 +632,42 @@ export default function HomePage() {
         </div>{/* <!-- End Section Title  */}
 
         <div className="container">
-
           <div className="row gy-4">
-
-            <div className="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
-              <div className="team-member">
-                <div className="member-img">
-                  <img src="assets/img/doctors/doctors-1.jpg" className="img-fluid" alt="Dr. Michael Thompson" />
-                  <div className="social">
-                    <a href="https://twitter.com/DrMichaelThompson"><i className="bi bi-twitter-x"></i></a>
-                    <a href="https://facebook.com/DrMichaelThompson"><i className="bi bi-facebook"></i></a>
-                    <a href="https://instagram.com/DrMichaelThompson"><i className="bi bi-instagram"></i></a>
-                    <a href="https://linkedin.com/in/DrMichaelThompson"><i className="bi bi-linkedin"></i></a>
+            {specialists.map((spec, idx) => (
+              <div
+                className="col-lg-3 col-md-6 d-flex align-items-stretch"
+                data-aos="fade-up"
+                data-aos-delay={100 * (idx + 1)}
+                key={spec._id}
+              >
+                <div className="team-member">
+                  <div className="member-img">
+                    <img
+                      src={
+                        spec.profileImage
+                          ? `${process.env.NEXT_PUBLIC_NODE_BASE_URL}${spec.profileImage}`
+                          : spec.gender === "female"
+                            ? "/images/placeholder-female.jpg"
+                            : "/images/placeholder-male.jpg"
+                      }
+                      className="img-fluid"
+                      alt={`${spec.firstName} ${spec.lastName}`}
+                      onError={(e) => {
+                        e.target.onerror = null; // Prevent infinite loop
+                        e.target.src = spec.gender === "female"
+                          ? "/images/placeholder-female.jpg"
+                          : "/images/placeholder-male.jpg";
+                      }}
+                    />
+                  </div>
+                  <div className="member-info">
+                    <h4>{`Dr. ${spec.firstName} ${spec.lastName}`}</h4>
+                    <span>{spec.specialty || "Medical Specialist"}</span>
                   </div>
                 </div>
-                <div className="member-info">
-                  <h4>Dr. Michael Thompson</h4>
-                  <span>Chief Medical Officer</span>
-                </div>
               </div>
-            </div>{/* <!-- End Team Member  */}
-
-            <div className="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
-              <div className="team-member">
-                <div className="member-img">
-                  <img src="assets/img/doctors/doctors-2.jpg" className="img-fluid" alt="Dr. Sarah Johnson" />
-                  <div className="social">
-                    <a href="https://twitter.com/DrSarahJohnson"><i className="bi bi-twitter-x"></i></a>
-                    <a href="https://facebook.com/DrSarahJohnson"><i className="bi bi-facebook"></i></a>
-                    <a href="https://instagram.com/DrSarahJohnson"><i className="bi bi-instagram"></i></a>
-                    <a href="https://linkedin.com/in/DrSarahJohnson"><i className="bi bi-linkedin"></i></a>
-                  </div>
-                </div>
-                <div className="member-info">
-                  <h4>Dr. Sarah Johnson</h4>
-                  <span>Anesthesiologist</span>
-                </div>
-              </div>
-            </div>{/* <!-- End Team Member  */}
-
-            <div className="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="300">
-              <div className="team-member">
-                <div className="member-img">
-                  <img src="assets/img/doctors/doctors-3.jpg" className="img-fluid" alt="Dr. William Anderson" />
-                  <div className="social">
-                    <a href="https://twitter.com/DrWilliamAnderson"><i className="bi bi-twitter-x"></i></a>
-                    <a href="https://facebook.com/DrWilliamAnderson"><i className="bi bi-facebook"></i></a>
-                    <a href="https://instagram.com/DrWilliamAnderson"><i className="bi bi-instagram"></i></a>
-                    <a href="https://linkedin.com/in/DrWilliamAnderson"><i className="bi bi-linkedin"></i></a>
-                  </div>
-                </div>
-                <div className="member-info">
-                  <h4>Dr. William Anderson</h4>
-                  <span>Cardiologist</span>
-                </div>
-              </div>
-            </div>{/* <!-- End Team Member  */}
-
-            <div className="col-lg-3 col-md-6 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="400">
-              <div className="team-member">
-                <div className="member-img">
-                  <img src="assets/img/doctors/doctors-4.jpg" className="img-fluid" alt="Dr. Amanda Jepson" />
-                  <div className="social">
-                    <a href="https://twitter.com/DrAmandaJepson"><i className="bi bi-twitter-x"></i></a>
-                    <a href="https://facebook.com/DrAmandaJepson"><i className="bi bi-facebook"></i></a>
-                    <a href="https://instagram.com/DrAmandaJepson"><i className="bi bi-instagram"></i></a>
-                    <a href="https://linkedin.com/in/DrAmandaJepson"><i className="bi bi-linkedin"></i></a>
-                  </div>
-                </div>
-                <div className="member-info">
-                  <h4>Dr. Amanda Jepson</h4>
-                  <span>Neurosurgeon</span>
-                </div>
-              </div>
-            </div>{/* <!-- End Team Member  */}
-
+            ))}
           </div>
-
         </div>
 
         </section>{/* <!-- /Doctors Section */}
@@ -705,50 +684,23 @@ export default function HomePage() {
           <div className="container" data-aos="fade-up" data-aos-delay="100">
             <div className="swiper init-swiper">
               <div className="swiper-wrapper align-items-center">
-                <div className="swiper-slide">
-                  <a className="glightbox" data-gallery="images-gallery" href="assets/img/gallery/gallery-1.jpg">
-                    <img src="assets/img/gallery/gallery-1.jpg" className="img-fluid" alt="" />
-                  </a>
-                </div>
-                <div className="swiper-slide">
-                  <a className="glightbox" data-gallery="images-gallery" href="assets/img/gallery/gallery-2.jpg">
-                    <img src="assets/img/gallery/gallery-2.jpg" className="img-fluid" alt="" />
-                  </a>
-                </div>
-                <div className="swiper-slide">
-                  <a className="glightbox" data-gallery="images-gallery" href="assets/img/gallery/gallery-3.jpg">
-                    <img src="assets/img/gallery/gallery-3.jpg" className="img-fluid" alt="" />
-                  </a>
-                </div>
-                <div className="swiper-slide">
-                  <a className="glightbox" data-gallery="images-gallery" href="assets/img/gallery/gallery-4.jpg">
-                    <img src="assets/img/gallery/gallery-4.jpg" className="img-fluid" alt="" />
-                  </a>
-                </div>
-                <div className="swiper-slide">
-                  <a className="glightbox" data-gallery="images-gallery" href="assets/img/gallery/gallery-5.jpg">
-                    <img src="assets/img/gallery/gallery-5.jpg" className="img-fluid" alt="" />
-                  </a>
-                </div>
-                <div className="swiper-slide">
-                  <a className="glightbox" data-gallery="images-gallery" href="assets/img/gallery/gallery-6.jpg">
-                    <img src="assets/img/gallery/gallery-6.jpg" className="img-fluid" alt="" />
-                  </a>
-                </div>
-                <div className="swiper-slide">
-                  <a className="glightbox" data-gallery="images-gallery" href="assets/img/gallery/gallery-7.jpg">
-                    <img src="assets/img/gallery/gallery-7.jpg" className="img-fluid" alt="" />
-                  </a>
-                </div>
-                <div className="swiper-slide">
-                  <a className="glightbox" data-gallery="images-gallery" href="assets/img/gallery/gallery-8.jpg">
-                    <img src="assets/img/gallery/gallery-8.jpg" className="img-fluid" alt="" />
-                  </a>
-                </div>
+                {galleries.map((item, index) => (
+                  <div className="swiper-slide" key={index}>
+                    <a
+                      className="glightbox"
+                      data-gallery="images-gallery"
+                      href={`${process.env.NEXT_PUBLIC_NODE_BASE_URL}/${item.photo}`}
+                      title={item.title}
+                    >
+                      <img src={`${process.env.NEXT_PUBLIC_NODE_BASE_URL}/${item.photo}`} className="img-fluid" alt={item.title || ''} />
+                    </a>
+                  </div>
+                ))}
               </div>
               <div className="swiper-pagination"></div>
             </div>
           </div>
+
         </section>
         {/* <!-- /Gallery Section */}
 
@@ -761,159 +713,7 @@ export default function HomePage() {
             <p>Find answers to some of the most common questions regarding SozoDigicare services.</p>
           </div>{/* <!-- End Section Title  */}
 
-          <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-lg-10" data-aos="fade-up" data-aos-delay="100">
-                <div className="faq-container">
-
-                  {/* FAQ Item 1 */}
-                  <div className="faq-item">
-                    <h3>What is Sozo Digicare Limited?</h3>
-                    <div className="faq-content">
-                      <p>We are an online telehealth platform fully compliant with regulatory standards, including GDPR and the guidelines of the Medical Council of Ireland. Our platform features secure, user-friendly tools for appointment scheduling, encrypted video consultations, electronic prescriptions, and protected medical record storage. Through integration with advanced digital tools, including Artificial Intelligence, and strategic partnerships with independent healthcare providers and pharmacies, we enhance service delivery and accessibility. We prioritize ongoing quality monitoring and actively incorporate user feedback to ensure continuous improvement and maintain trust in our service.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 2 */}
-                  <div className="faq-item">
-                    <h3>How does Sozo Digicare work?</h3>
-                    <div className="faq-content">
-                      <p>First, complete a health questionnaire, and schedule an appointment immediately or for a future convenient date. Our appointment/consultation sessions are in blocks of 15 or 30 minutes. Once your consultation is complete, your prescription can be sent to your preferred pharmacy.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 3 */}
-                  <div className="faq-item">
-                    <h3>Does Sozo Digicare work for all patients?</h3>
-                    <div className="faq-content">
-                      <p>Since our doctors cannot physically examine you or access your full medical history, they take extra precautions compared to an in-person GP visit. We follow strict prescribing guidelines to ensure your safety, which means we can only issue a prescription when it is clinically appropriate. If, based on your symptoms or health history, our clinicians determine that an online consultation is not the best option for you, we will advise seeing a GP in person and work on referring you to one of our independent healthcare providers.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 4 */}
-                  <div className="faq-item">
-                    <h3>How quickly will Sozo Digicare confirm your appointment or consultation?</h3>
-                    <div className="faq-content">
-                      <p>We work on scheduling an appointment immediately or for a future convenient date as you request. Once you complete your pre-consultation form, you will receive an email confirmation after the consultation.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 5 */}
-                  <div className="faq-item">
-                    <h3>Hours of service?</h3>
-                    <div className="faq-content">
-                      <p>The Sozo Digicare service is open 24 hours a day, 365 days a year ensuring you have access to medical care whenever you need it, be it day, night, or even the weekends. If you are looking to collect a prescription from a late-night pharmacy after 8pm please email contact@SozoDigicare.ie and we will do our very best to help.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 6 */}
-                  <div className="faq-item">
-                    <h3>Accessible from anywhere in Ireland?</h3>
-                    <div className="faq-content">
-                      <p>We have partner pharmacies and independent healthcare providers across Ireland.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 7 */}
-                  <div className="faq-item">
-                    <h3>What makes Sozo Digicare.ie different from other online doctor services in Ireland?</h3>
-                    <div className="faq-content">
-                      <p>Our commitment to accessible, affordable, round-the-clock care, experienced Irish-registered doctors, and a range of specialized services sets us apart.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 8 */}
-                  <div className="faq-item">
-                    <h3>How can I ensure confidentiality and security during an online consultation?</h3>
-                    <div className="faq-content">
-                      <p>We prioritize your privacy with encrypted communication channels, ensuring that all consultations are confidential and secure. Video Consultations are done via HIPAA compliant video call mediums.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 9 */}
-                  <div className="faq-item">
-                    <h3>What types of online doctor consultations do you provide?</h3>
-                    <div className="faq-content">
-                      <p>We provide a range of consultations, including general health check-ups, mental health support, dermatology, diabetes management, and more, all available via video consultation online.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 10 */}
-                  <div className="faq-item">
-                    <h3>What is the cost of an online doctor consultation in Ireland?</h3>
-                    <div className="faq-content">
-                      <p>Our online consultations start at €35.99, offering affordable and transparent pricing for various services.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 11 */}
-                  <div className="faq-item">
-                    <h3>Can I get a sick leave certificate through an online doctor consultation?</h3>
-                    <div className="faq-content">
-                      <p>Yes, you can request a sick leave certificate during your consultation, subject to the doctor's assessment.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 12 */}
-                  <div className="faq-item">
-                    <h3>Do you offer emergency consultations online?</h3>
-                    <div className="faq-content">
-                      <p>For urgent medical concerns, we offer emergency consultations. However, in case of life-threatening emergencies, it's crucial to call an ambulance immediately.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 13 */}
-                  <div className="faq-item">
-                    <h3>How quickly will my prescription be processed?</h3>
-                    <div className="faq-content">
-                      <p>We will send your prescription to your preferred pharmacy or the nearest pharmacy to your desired location. We will let you know by email through our partner pharmacies once it is ready for pick-up or once dispatched.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 14 */}
-                  <div className="faq-item">
-                    <h3>How are prescriptions sent to the pharmacy?</h3>
-                    <div className="faq-content">
-                      <p>Sozo Digicare does not dispense or deliver prescription medication. If the doctor prescribes medication, the prescription is submitted electronically through a secure service called Healthmail to the pharmacy of your choice. If you select “Home Delivery” we will forward the prescription to one of our partner pharmacies for delivery.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 15 */}
-                  <div className="faq-item">
-                    <h3>What if I am having an issue at the pharmacy?</h3>
-                    <div className="faq-content">
-                      <p>Please advise the pharmacy that the prescription has been sent to the pharmacy's Healthmail email address. If for some reason they have not received it, send an email to contact@SozoDigicare.ie and we will rectify the issue immediately.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                  {/* FAQ Item 16 */}
-                  <div className="faq-item">
-                    <h3>Will I be contacted by Sozo Digicare when my prescription is ready?</h3>
-                    <div className="faq-content">
-                      <p>Yes, we will automatically notify you via email and text once your prescription is ready for pick-up or home delivery.</p>
-                    </div>
-                    <i className="faq-toggle bi bi-chevron-right"></i>
-                  </div>{/* <!-- End Faq Item */}
-
-                </div>
-              </div>
-            </div>
-          </div>
+          <FaqSection />
 
         </section> {/* <!-- End Faq Section --> */}
 
@@ -1003,87 +803,8 @@ export default function HomePage() {
         </section>{/* <!-- /Contact Section  */}
       </main>
 
-      <footer id="footer" className="footer light-background">
-        <div className="container footer-top">
-          <div className="row gy-4">
-            <div className="col-lg-4 col-md-6 footer-about">
-              <a href="index.html" className="logo d-flex align-items-center">
-                <span className="sitename">SozoDigiCare</span>
-              </a>
-              <div className="footer-contact pt-3">
-                <p>A108 Adam Street</p>
-                <p>New York, NY 535022</p>
-                <p className="mt-3"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
-                <p><strong>Email:</strong> <span>info@example.com</span></p>
-              </div>
-              <div className="social-links d-flex mt-4">
-                <a href=""><i className="bi bi-twitter-x"></i></a>
-                <a href=""><i className="bi bi-facebook"></i></a>
-                <a href=""><i className="bi bi-instagram"></i></a>
-                <a href=""><i className="bi bi-linkedin"></i></a>
-              </div>
-            </div>
-
-            <div className="col-lg-2 col-md-3 footer-links">
-              <h4>Useful Links</h4>
-              <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About us</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="#">Terms of service</a></li>
-                <li><a href="#">Privacy policy</a></li>
-              </ul>
-            </div>
-
-            <div className="col-lg-2 col-md-3 footer-links">
-              <h4>Our Services</h4>
-              <ul>
-                <li><a href="#">Medical Tourism Packages</a></li>
-                <li><a href="#">Consultation Appointments</a></li>
-                <li><a href="#">Health Consultations</a></li>
-                <li><a href="#">Medical Expertise Access</a></li>
-                <li><a href="#">Health Equity Solutions</a></li>
-              </ul>
-            </div>
-
-
-            <div className="col-lg-2 col-md-3 footer-links">
-              <h4>Our Vision</h4>
-              <ul>
-                <li><a href="#">Global Health Equity</a></li>
-                <li><a href="#">Accessible Medical Care</a></li>
-                <li><a href="#">Empowering Marginalized Communities</a></li>
-                <li><a href="#">Cross-Border Medical Solutions</a></li>
-                <li><a href="#">Personalized Healthcare</a></li>
-              </ul>
-            </div>
-
-            <div className="col-lg-2 col-md-3 footer-links">
-              <h4>Our Approach</h4>
-              <ul>
-                <li><a href="#">Holistic Health Support</a></li>
-                <li><a href="#">Expert Medical Guidance</a></li>
-                <li><a href="#">Seamless Patient Experience</a></li>
-                <li><a href="#">Financial Assistance for Care</a></li>
-                <li><a href="#">Innovative Healthcare Solutions</a></li>
-              </ul>
-            </div>
-
-
-          </div>
-        </div>
-
-        <div className="container copyright text-center mt-4">
-          <p>© <span>Copyright</span> <strong className="px-1 sitename">SozoDigiCare</strong> <span>All Rights Reserved</span></p>
-          <div className="credits">
-            Developed by <a href="https://digi-realm.com/">Digi-Realm City Solution</a>
-          </div>
-        </div>
-
-      </footer>
-
       {/* <!-- Scroll Top  */}
-      <a href="#" id="scroll-top" className="scroll-top d-flex align-items-center justify-content-center"><i className="bi bi-arrow-up-short"></i></a>
+      <a href="#" id="scroll-top" className="scroll-top d-flex text-white align-items-center justify-content-center"><i className="bi bi-arrow-up-short"></i></a>
 
       {/* <!-- Preloader  */}
       {/* <div id="preloader"></div> */}

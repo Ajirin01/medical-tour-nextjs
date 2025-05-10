@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
-// import Chart from "react-apexcharts";
-// import { ApexOptions } from "apexcharts";
+import React, { useState, useEffect } from "react";
 import ChartTab from "../common/ChartTab";
 import dynamic from "next/dynamic";
+import { fetchData } from "@/utils/api"
+import { useSession } from "next-auth/react";
 
 // Dynamically import the ReactApexChart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
@@ -11,26 +11,61 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 });
 
 export default function StatisticsChart() {
+  const [sessionData, setSessionData] = useState(null);
+  const [prescriptionData, setPrescriptionData] = useState(null);
+
+  const { data: session } = useSession()
+  const token = session?.user?.jwt
+
+  // Fetch video session statistics
+  const fetchSessionData = async () => {
+    try {
+      const response = await fetchData("video-sessions/by-user/all", token); // Adjust to your actual endpoint
+      const sessions = response.sessions;
+      console.log(response.sessions)
+      // Prepare data for chart (e.g., sessions count by month)
+      const sessionCountsByMonth = Array(12).fill(0);
+      const prescriptionCountsByMonth = Array(12).fill(0);
+
+      sessions.forEach((session) => {
+        const month = new Date(session.createdAt).getMonth(); // Get month from the session date
+        sessionCountsByMonth[month]++;
+
+        if (session.prescriptions && session.prescriptions.length > 0) {
+          prescriptionCountsByMonth[month]++;
+        }
+      });
+
+      setSessionData(sessionCountsByMonth);
+      setPrescriptionData(prescriptionCountsByMonth);
+    } catch (error) {
+      console.error("Error fetching session data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSessionData();
+  }, []);
+
   const options = {
     legend: {
-      show: false, // Hide legend
+      show: false,
       position: "top",
       horizontalAlign: "left",
     },
-    colors: ["#465FFF", "#9CB9FF"], // Define line colors
+    colors: ["#465FFF", "#9CB9FF"], 
     chart: {
       fontFamily: "Outfit, sans-serif",
       height: 310,
-      type: "line", // Set the chart type to 'line'
+      type: "line",
       toolbar: {
-        show: false, // Hide chart toolbar
+        show: false,
       },
     },
     stroke: {
-      curve: "straight", // Define the line style (straight, smooth, or step)
-      width: [2, 2], // Line width for each dataset
+      curve: "straight",
+      width: [2, 2],
     },
-
     fill: {
       type: "gradient",
       gradient: {
@@ -39,36 +74,36 @@ export default function StatisticsChart() {
       },
     },
     markers: {
-      size: 0, // Size of the marker points
-      strokeColors: "#fff", // Marker border color
+      size: 0,
+      strokeColors: "#fff",
       strokeWidth: 2,
       hover: {
-        size: 6, // Marker size on hover
+        size: 6,
       },
     },
     grid: {
       xaxis: {
         lines: {
-          show: false, // Hide grid lines on x-axis
+          show: false,
         },
       },
       yaxis: {
         lines: {
-          show: true, // Show grid lines on y-axis
+          show: true,
         },
       },
     },
     dataLabels: {
-      enabled: false, // Disable data labels
+      enabled: false,
     },
     tooltip: {
-      enabled: true, // Enable tooltip
+      enabled: true,
       x: {
-        format: "dd MMM yyyy", // Format for x-axis tooltip
+        format: "dd MMM yyyy",
       },
     },
     xaxis: {
-      type: "category", // Category-based x-axis
+      type: "category",
       categories: [
         "Jan",
         "Feb",
@@ -84,24 +119,24 @@ export default function StatisticsChart() {
         "Dec",
       ],
       axisBorder: {
-        show: false, // Hide x-axis border
+        show: false,
       },
       axisTicks: {
-        show: false, // Hide x-axis ticks
+        show: false,
       },
       tooltip: {
-        enabled: false, // Disable tooltip for x-axis points
+        enabled: false,
       },
     },
     yaxis: {
       labels: {
         style: {
-          fontSize: "12px", // Adjust font size for y-axis labels
-          colors: ["#6B7280"], // Color of the labels
+          fontSize: "12px",
+          colors: ["#6B7280"],
         },
       },
       title: {
-        text: "", // Remove y-axis title
+        text: "",
         style: {
           fontSize: "0px",
         },
@@ -111,14 +146,15 @@ export default function StatisticsChart() {
 
   const series = [
     {
-      name: "Sales",
-      data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235],
+      name: "Sessions",
+      data: sessionData || Array(12).fill(0), // Default to empty array if data is not yet fetched
     },
     {
-      name: "Revenue",
-      data: [40, 30, 50, 40, 55, 40, 70, 100, 110, 120, 150, 140],
+      name: "Prescriptions",
+      data: prescriptionData || Array(12).fill(0), // Default to empty array if data is not yet fetched
     },
   ];
+
   return (
     <div className="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
       <div className="flex flex-col gap-5 mb-6 sm:flex-row sm:justify-between">
@@ -127,7 +163,7 @@ export default function StatisticsChart() {
             Statistics
           </h3>
           <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">
-            Target you’ve set for each month
+            Video sessions and prescriptions stats for each month
           </p>
         </div>
         <div className="flex items-start w-full gap-3 sm:justify-end">
