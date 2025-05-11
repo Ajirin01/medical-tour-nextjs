@@ -167,7 +167,7 @@ export default function HomePage() {
 
           <div className="row gy-4">
 
-            <div className="col-xl-3 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="100">
+            <div className="col-xl-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="100">
               <div className="service-item position-relative">
                 <div className="icon"><i className="fas fa-user-md icon"></i></div>
                 <h4><a href="" className="stretched-link">Expert Medical Consultations</a></h4>
@@ -175,7 +175,7 @@ export default function HomePage() {
               </div>
             </div>{/* <!-- End Service Item  */}
 
-            <div className="col-xl-3 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="200">
+            <div className="col-xl-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="200">
               <div className="service-item position-relative">
                 <div className="icon"><i className="fas fa-hospital-alt icon"></i></div>
                 <h4><a href="" className="stretched-link">Medical Tourism</a></h4>
@@ -183,19 +183,11 @@ export default function HomePage() {
               </div>
             </div>{/* <!-- End Service Item  */}
 
-            <div className="col-xl-3 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="300">
+            <div className="col-xl-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="300">
               <div className="service-item position-relative">
                 <div className="icon"><i className="fas fa-stethoscope icon"></i></div>
                 <h4><a href="" className="stretched-link">Remote Health Monitoring</a></h4>
                 <p>Stay on top of your health with our remote monitoring services, offering ongoing care and health tracking through digital tools.</p>
-              </div>
-            </div>{/* <!-- End Service Item  */}
-
-            <div className="col-xl-3 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="400">
-              <div className="service-item position-relative">
-                <div className="icon"><i className="fas fa-pills icon"></i></div>
-                <h4><a href="" className="stretched-link">Affordable Medication</a></h4>
-                <p>Get access to necessary medications at affordable rates through our partnered pharmacies and healthcare providers.</p>
               </div>
             </div>{/* <!-- End Service Item  */}
 
@@ -272,110 +264,6 @@ export default function HomePage() {
         </section>{/* <!-- /About Section  */}
 
 
-        {/* <!-- Stats Section  */}
-        <section id="stats" className="stats section">
-
-          <div className="container" data-aos="fade-up" data-aos-delay="100">
-
-            <div className="row gy-4">
-
-              <div className="col-lg-3 col-md-6">
-                <div className="stats-item d-flex align-items-center w-100 h-100">
-                  <i className="fas fa-user-md flex-shrink-0"></i>
-                  <div>
-                    <span data-purecounter-start="0" data-purecounter-end="25" data-purecounter-duration="1" className="purecounter"></span>
-                    <p>Doctors</p>
-                  </div>
-                </div>
-              </div>{/* <!-- End Stats Item  */}
-
-              <div className="col-lg-3 col-md-6">
-                <div className="stats-item d-flex align-items-center w-100 h-100">
-                  <i className="far fa-hospital flex-shrink-0"></i>
-                  <div>
-                    <span data-purecounter-start="0" data-purecounter-end="15" data-purecounter-duration="1" className="purecounter"></span>
-                    <p>Departments</p>
-                  </div>
-                </div>
-              </div>{/* <!-- End Stats Item  */}
-
-              <div className="col-lg-3 col-md-6">
-                <div className="stats-item d-flex align-items-center w-100 h-100">
-                  <i className="fas fa-flask flex-shrink-0"></i>
-                  <div>
-                    <span data-purecounter-start="0" data-purecounter-end="8" data-purecounter-duration="1" className="purecounter"></span>
-                    <p>Research Labs</p>
-                  </div>
-                </div>
-              </div>{/* <!-- End Stats Item  */}
-
-              <div className="col-lg-3 col-md-6">
-                <div className="stats-item d-flex align-items-center w-100 h-100">
-                  <i className="fas fa-award flex-shrink-0"></i>
-                  <div>
-                    <span data-purecounter-start="0" data-purecounter-end="150" data-purecounter-duration="1" className="purecounter"></span>
-                    <p>Awards</p>
-                  </div>
-                </div>
-              </div>{/* <!-- End Stats Item  */}
-
-            </div>
-
-          </div>
-
-        </section>{/* <!-- /Stats Section  */}
-
-        {/* <!-- Features Section  */}
-        <section id="features" className="features section">
-
-        <div className="container">
-
-          <div className="row justify-content-around gy-4">
-            <div className="features-image col-lg-6" data-aos="fade-up" data-aos-delay="100"><img src="assets/img/features.jpg" alt="" /></div>
-
-            <div className="col-lg-5 d-flex flex-column justify-content-center" data-aos="fade-up" data-aos-delay="200">
-              <h3>Connecting You to World-Class Healthcare</h3>
-              <p>At SozoDigiCare, we provide you with seamless access to essential healthcare services through a global network of medical professionals. We bridge the gap between patients and the healthcare they need, no matter their location or circumstances.</p>
-
-              <div className="icon-box d-flex position-relative" data-aos="fade-up" data-aos-delay="300">
-                <i className="fa-solid fa-hand-holding-medical flex-shrink-0"></i>
-                <div>
-                  <h4><a href="" className="stretched-link">Immediate Medical Support</a></h4>
-                  <p>Access to urgent care with a click, ensuring you never have to wait for life-saving medical attention.</p>
-                </div>
-              </div>{/* <!-- End Icon Box  */}
-
-              <div className="icon-box d-flex position-relative" data-aos="fade-up" data-aos-delay="400">
-                <i className="fa-solid fa-suitcase-medical flex-shrink-0"></i>
-                <div>
-                  <h4><a href="" className="stretched-link">Expert Medical Professionals</a></h4>
-                  <p>Connect with certified medical experts who are ready to provide world-class consultation and care.</p>
-                </div>
-              </div>{/* <!-- End Icon Box  */}
-
-              <div className="icon-box d-flex position-relative" data-aos="fade-up" data-aos-delay="500">
-                <i className="fa-solid fa-staff-snake flex-shrink-0"></i>
-                <div>
-                  <h4><a href="" className="stretched-link">Global Network</a></h4>
-                  <p>Breaking down geographical barriers, our extensive global network ensures you get the best care, regardless of your location.</p>
-                </div>
-              </div>{/* <!-- End Icon Box  */}
-
-              <div className="icon-box d-flex position-relative" data-aos="fade-up" data-aos-delay="600">
-                <i className="fa-solid fa-lungs flex-shrink-0"></i>
-                <div>
-                  <h4><a href="" className="stretched-link">Comprehensive Healthcare Services</a></h4>
-                  <p>From routine checkups to emergency interventions, we offer a full range of services designed to meet your needs.</p>
-                </div>
-              </div>{/* <!-- End Icon Box  */}
-
-            </div>
-          </div>
-
-        </div>
-
-        </section>{/* <!-- /Features Section  */}
-
         {/* <!-- Services Section  */}
         <section id="services" className="services section">
 
@@ -399,9 +287,9 @@ export default function HomePage() {
                 </a>
                 <p>Get emergency medical assistance with just a click, ensuring you never wait for urgent care.</p>
               </div>
-            </div>{/* <!-- End Service Item  */}
+            </div>
 
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            {/* <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
               <div className="service-item position-relative">
                 <div className="icon">
                   <i className="fas fa-pills"></i>
@@ -411,7 +299,7 @@ export default function HomePage() {
                 </a>
                 <p>Access prescription medications and over-the-counter drugs with the convenience of online ordering.</p>
               </div>
-            </div>{/* <!-- End Service Item  */}
+            </div> */}
 
             <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
               <div className="service-item position-relative">
@@ -423,9 +311,9 @@ export default function HomePage() {
                 </a>
                 <p>Consult with experienced medical professionals from around the world, regardless of your location.</p>
               </div>
-            </div>{/* <!-- End Service Item  */}
+            </div>
 
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            {/* <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
               <div className="service-item position-relative">
                 <div className="icon">
                   <i className="fas fa-dna"></i>
@@ -435,9 +323,9 @@ export default function HomePage() {
                 </a>
                 <p>Access diagnostic tests and lab services with prompt results to support your medical needs.</p>
               </div>
-            </div>{/* <!-- End Service Item  */}
+            </div> */}
 
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+            {/* <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
               <div className="service-item position-relative">
                 <div className="icon">
                   <i className="fas fa-wheelchair"></i>
@@ -447,7 +335,7 @@ export default function HomePage() {
                 </a>
                 <p>Specialized services for patients requiring mobility support, including equipment and care assistance.</p>
               </div>
-            </div>{/* <!-- End Service Item  */}
+            </div> */}
 
             <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
               <div className="service-item position-relative">
@@ -459,7 +347,7 @@ export default function HomePage() {
                 </a>
                 <p>Efficient medical record management, ensuring you always have access to your health history when you need it.</p>
               </div>
-            </div>{/* <!-- End Service Item  */}
+            </div>
 
           </div>
 

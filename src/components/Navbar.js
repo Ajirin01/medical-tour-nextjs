@@ -78,8 +78,8 @@ const navigation = [
   { name: "Medical Tourism", comp: DropdownPopover},
   { name: "About Us", comp: DropdownPopover },
   { name: "Blog", href: "/blog" },
-  { name: "Laboratory", href: "/laboratory" },
-  { name: "Pharmacy", href: "/pharmacy" }
+  // { name: "Laboratory", href: "/laboratory" },
+  // { name: "Pharmacy", href: "/pharmacy" }
 ];
 
 export default function Navbar() {
@@ -225,7 +225,7 @@ export default function Navbar() {
       </Dialog>
 
       {/* SubNav with MiniCart */}
-      <SubNav />
+      {/* <SubNav /> */}
     </header>
   );
 }

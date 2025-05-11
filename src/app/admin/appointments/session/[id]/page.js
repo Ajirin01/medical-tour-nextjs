@@ -25,7 +25,6 @@ const SessionPage = () => {
 
   const { id } = useParams();
   const router = useRouter();
-  const videoUrl = `https://videowidget.sozodigicare.com/?room=${id}`;
 
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +58,8 @@ const SessionPage = () => {
 
   const [specialistToken, setSpecialistToken] = useState(null);
   const [patientToken, setPatientToken] = useState(null);
+
+  const videoRef = useRef();
 
   const [newPrescription, setNewPrescription] = useState({
     medication: '',
@@ -120,7 +121,6 @@ const SessionPage = () => {
       setPatientToken(sessionData?.session?.patientToken || sessionData?.patientToken);
     }
   }, []); // Empty dependency array to run this once when the component mounts
-
 
 
   useEffect(() => {
@@ -278,8 +278,7 @@ const SessionPage = () => {
       fetchPrescriptions();
     }
   }, [showPrescriptions]);
-  
-  
+
 
   // timer logic
   useEffect(() => {
@@ -378,6 +377,12 @@ const SessionPage = () => {
     }
   };
 
+  const handleEndCall = () => {
+    if (videoRef.current) {
+      videoRef.current.endCall();
+    }
+  };
+
   const handleEndSession = async () => {
     const currentAppointment = appointmentRef.current;
     if (!currentAppointment?.session._id || !token) return;
@@ -405,6 +410,7 @@ const SessionPage = () => {
       );
 
       setSessionEnded(true);
+      handleEndCall()
       setIsTimerRunning(false);
     } catch (err) {
       console.error("Failed to end session", err);
@@ -412,6 +418,7 @@ const SessionPage = () => {
       const sessionKey = `sessionStartTime-${currentAppointment.session.appointment._id}`;
       localStorage.removeItem(sessionKey);
       setSessionEnded(true);
+      handleEndCall()
       setIsTimerRunning(false);
       setEndingSession(false);
     }
@@ -482,7 +489,6 @@ const SessionPage = () => {
       console.error('Failed to delete prescription:', error);
     }
   };
-  
 
   if (loading) {
     return <div className="text-center mt-10 text-gray-600">Loading session...</div>;
@@ -501,17 +507,7 @@ const SessionPage = () => {
     if (appointment.session.appointment.status === "pending" && !sessionEnded) {
       return (
         <div className="relative w-full h-[80vh] rounded-xl overflow-hidden shadow-lg border border-gray-300">
-          {/* <iframe
-            ref={iframeRef}
-            src={videoUrl}
-            title="Consultation Video Chat"
-            className="w-full h-full"
-            allow="camera; microphone; fullscreen; speaker; display-capture"
-            onLoad={() => {
-              sendCommandToIframe("START_CALL");
-            }}
-          /> */}
-          <AgoraVideoChat agoraAppId={agoraAppId} agoraToken={userRole === "specialist"? specialistToken : patientToken} agoraChannelName={id} />
+          <AgoraVideoChat ref={videoRef} agoraAppId={agoraAppId} agoraToken={userRole === "specialist"? specialistToken : patientToken} agoraChannelName={id} />
         </div>
       );
     }
