@@ -10,22 +10,33 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [ isSubmitting, setIsSubmitting ] = useState(false)
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-
+    setIsSubmitting(true)
+  
     const res = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
-
-    if (res.error) {
-      setError(res.error);
+  
+    if (res?.error) {
+      let friendlyMessage = "An unexpected error occurred. Please try again.";
+  
+      if (res.error.toLowerCase().includes("credentials")) {
+        friendlyMessage = "Incorrect email or password.";
+      } else if (res.error.toLowerCase().includes("network")) {
+        friendlyMessage = "Network error. Please check your connection.";
+      }
+  
+      setError(friendlyMessage);
+      setIsSubmitting(false)
     } else {
-      router.push("/admin"); // Redirect to homepage or dashboard
+      router.push("/admin");
     }
   };
 
@@ -89,7 +100,7 @@ export default function LoginPage() {
                   type="submit"
                   className="w-full rounded-md bg-indigo-600 px-4 py-2 text-white font-semibold hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                  Sign in
+                  { isSubmitting ? "Signing in..." : "Sign in"}
                 </button>
               </div>
             </form>

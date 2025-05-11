@@ -27,17 +27,17 @@ export const EcommerceMetrics = () => {
     async function fetchMetrics() {
       try {
         const [patientsRes, specialistsRes, ordersRes] = await Promise.all([
-          fetchData("users/get-all/no-pagination?role=user", token),
-          fetchData("users/get-all/no-pagination?role=specialist", token),
-          fetchData("orders/filter/by", token),
+          userRole === "admin" && fetchData("users/get-all/no-pagination?role=user", token),
+          userRole !== "user" && fetchData("users/get-all/no-pagination?role=specialist", token),
+          userRole !== "specialist" && fetchData("orders/filter/by", token),
         ]);
 
         console.log(patientsRes, specialistsRes, ordersRes)
 
         setMetrics({
-          patients: patientsRes.length || 0,
-          specialists: specialistsRes.length || 0,
-          orders: ordersRes.orders.length || 0,
+          patients: patientsRes?.length || 0,
+          specialists: specialistsRes?.length || 0,
+          orders: ordersRes?.orders?.length || 0,
         });
       } catch (error) {
         console.error("Failed to load metrics", error);

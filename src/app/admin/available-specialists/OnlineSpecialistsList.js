@@ -12,7 +12,6 @@ import emptyAnimation from "@/assets/lottie/empty-state.json"; // Replace with y
 
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
-
 export default function OnlineSpecialistsList({ appointmentId }) {
   const { data: session } = useSession();
   const [specialists, setSpecialists] = useState([]);
@@ -39,7 +38,7 @@ export default function OnlineSpecialistsList({ appointmentId }) {
   }, []);
 
   const handleSelect = async (specialist) => {
-    if (specialist._id === selectedSpecialistId) return;
+    if (specialist._id === selectedSpecialistId || !appointmentId) return;
 
     setSelectedSpecialistId(specialist._id);
 
@@ -72,7 +71,7 @@ export default function OnlineSpecialistsList({ appointmentId }) {
           {specialists.map((sp) => (
             <Link
               key={sp._id}
-              href={`/admin/available-specialists/${sp._id}?appointmentId=${appointmentId}`}
+              href={`/admin/available-specialists/${sp._id}?appointmentId=${appointmentId || ""}`}
               onClick={() => handleSelect(sp)}
               className={`block cursor-pointer p-4 rounded-xl border ${
                 selectedSpecialistId === sp._id

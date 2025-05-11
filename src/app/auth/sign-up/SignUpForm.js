@@ -41,25 +41,35 @@ export default function SignUpPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    // console.log(formData)
-    // return
+  
     try {
       const res = await postData('users/register', formData);
-      console.log(res)
-      if (res.userId) {
-        alertSuccess("Sign-Up successful, please check your email for otp!")
+  
+      if (res?.userId) {
+        alertSuccess("Sign-up successful! Please check your email for the OTP.");
         router.push(`/auth/verify-otp?email=${formData.email}`);
       } else {
-        setError(res.message || 'Registration failed');
+        const knownErrors = {
+          "email already exists": "An account with this email already exists.",
+          "invalid input": "Please make sure all required fields are filled correctly.",
+        };
+  
+        const message =
+          knownErrors[res?.message?.toLowerCase()] ||
+          'Registration failed. Please try again.';
+  
+        setError(message);
+        alertError(message);
       }
     } catch (err) {
-      setError('Something went wrong. Please try again.');
-      alertError('Registration failed!')
+      console.error("Registration error:", err);
+      setError('Something went wrong. Please try again later.');
+      alertError('Registration failed!');
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div

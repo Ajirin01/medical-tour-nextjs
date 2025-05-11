@@ -112,10 +112,10 @@ export default function CompleteProfilePage() {
     setSubmitting(true);
     setError(null);
   
-    // Validate required fields for specialist
+    // Validate required fields for specialists
     if (role === 'specialist') {
       if (!formData.licenseNumber || !formData.specialty || !profileImageFile || !practicingLicenseFile) {
-        setError("Specialists must provide license number, specialty, and a profile image.");
+        setError("Please fill in all required fields for specialists, including license number, specialty, profile image, and practicing license.");
         setSubmitting(false);
         return;
       }
@@ -144,17 +144,18 @@ export default function CompleteProfilePage() {
     try {
       const res = await updateData(`users/complete/profile?email=${email}`, payload, token, true);
   
-      if (res.status > 201) {
-        alertError(res.message || 'Failed to update profile');
-        setError(res.message);
+      if (!res || res.status > 201) {
+        const friendlyMessage = res?.message || 'We couldn’t update your profile at the moment. Please try again later.';
+        alertError(friendlyMessage);
+        setError(friendlyMessage);
       } else {
         alertSuccess('Profile updated successfully!');
-        window.location.href = "/admin"
-        // router.push('/admin');
+        window.location.href = "/admin"; // Optionally use router.push if you're inside a Next.js route
       }
     } catch (err) {
-      alertError(err.message || 'Something went wrong');
-      setError(err.message);
+      console.error("Profile update failed:", err);
+      setError("Something went wrong while updating your profile. Please try again later.");
+      alertError("Profile update failed.");
     } finally {
       setSubmitting(false);
     }

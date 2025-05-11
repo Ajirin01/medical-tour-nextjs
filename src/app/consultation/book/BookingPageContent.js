@@ -1,14 +1,16 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import 'react-calendar/dist/Calendar.css'
-import { fetchData } from '@/utils/api'
+import { fetchData, postData } from '@/utils/api'
 import { useUser } from '@/context/UserContext'
 import { useSession } from "next-auth/react";
 import FullCalendar from '@fullcalendar/react'
 import interactionPlugin from '@fullcalendar/interaction' // optional but useful
 import dayGridPlugin from '@fullcalendar/daygrid'
+import { useToast } from '@/context/ToastContext'
+import { ClockIcon, DollarSignIcon, CheckCircleIcon } from "lucide-react";
 // import Link from "next/link";
 
 
@@ -21,6 +23,15 @@ export default function ConsultationBookingPageContent() {
   const [selectedSlot, setSelectedSlot] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [calculatedCost, setCalculatedCost] = useState(0)
+
+  const searchParams = useSearchParams()
+
+
+  const [ consultant, setConsultant] = useState()
+  const { addToast } = useToast()
+
+  const alertSuccess = (msg) => addToast(msg, 'success')
+  const alertError = (msg) => addToast(msg, 'error')
 
   const [consultMode, setConsultMode] = useState('appointment'); // 'appointment' | 'now'
 
@@ -99,6 +110,118 @@ export default function ConsultationBookingPageContent() {
       setSelectedSlot(null)
     }
   }, [selectedDate])
+
+  useEffect(() => {
+      const appointmentId = searchParams.get('appointmentId');
+    
+      const fetchAppointmentOrConsultant = async () => {
+        try {
+          if (appointmentId) {
+            const apptRes = await fetchData(`/appointments/${appointmentId}`, token);
+            if (apptRes) {
+              setConsultant(apptRes.consultant); // use consultant from the fetched appointment
+            }
+          } else {
+            // No appointmentId → fallback to fetching default consultant
+            const res = await fetchData("users/get-all/no-pagination?role=specialist", token);
+            const targetEmail = "olagokemubarakishola@gmail.com"; // The name you want to select
+
+            const match = res.find(s => s.email === targetEmail);
+
+            // console.log(match)
+
+            if (match) {
+              setConsultant(match);
+            } else {
+              console.warn(`Specialist "${targetEmail}" not found`);
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching consultant/appointment:', err);
+        }
+      };
+    
+      if (token) {
+        fetchAppointmentOrConsultant();
+      }
+    }, [token, searchParams]);
+  
+  function convertTo24Hour(timeStr) {
+    const [time, modifier] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':');
+  
+    if (modifier === 'PM' && hours !== '12') {
+      hours = parseInt(hours, 10) + 12;
+    }
+    if (modifier === 'AM' && hours === '12') {
+      hours = '00';
+    }
+  
+    return `${hours}:${minutes}`; 
+  }
+
+  const handleConfirm = async () => {
+    event.preventDefault()
+    if (!token || !session?.user?.id) return;
+  
+    setSubmitting(true);
+    try {
+      const appointmentData = {
+        ...formData,
+        date: selectedDate,
+        timeSlot: selectedSlot.timeSlot,
+        cost: calculatedCost,
+        consultMode: consultMode,
+        type: "general"
+      }
+      
+      const time24 = convertTo24Hour(appointmentData.timeSlot); // "11:00 AM" → "11:00"
+      const dateTimeISO = new Date(`${appointmentData.date}`);
+  
+      if (isNaN(dateTimeISO.getTime())) {
+        throw new Error('Invalid date format');
+      }
+  
+      const payload = {
+        patient: session.user.id,
+        consultant: consultant._id,
+        date: dateTimeISO,
+        duration: appointmentData.duration,
+        type: appointmentData.type || 'medicalTourism',
+        paymentStatus: 'pending',
+        consultMode: appointmentData.consultMode,
+      };
+
+      
+  
+      // Save appointment details to sessionStorage for later use
+      sessionStorage.setItem('orderData', JSON.stringify(payload));
+
+      // Initiate payment request to the backend
+      const paymentPayload = {
+        amount: calculatedCost, // Ensure the cost is in the correct unit (e.g., dollars)
+        email: session.user.email,
+        productName: `Consultation with ${consultant.firstName}`,
+      };
+
+      // console.log(paymentPayload)
+      // return
+
+      const paymentRes = await postData('/payments/initiate', paymentPayload, token);
+
+      if (paymentRes?.url) {
+        // Redirect to Stripe payment page
+        window.location.href = paymentRes.url;
+      } else {
+        alertError('Failed to initiate payment');
+      }
+    } catch (err) {
+      console.error(err);
+      alertError('Something went wrong while booking');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
 
   async function getSlotMaxDuration(selectedSlot, consultMode) {
@@ -198,11 +321,16 @@ export default function ConsultationBookingPageContent() {
     })()
   : [];
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target
+  //   console.log(value)
+  //   setFormData({ ...formData, [name]: name === 'duration' ? parseInt(value) : value })
+  // }
+
   const handleChange = (e) => {
-    const { name, value } = e.target
-    console.log(value)
-    setFormData({ ...formData, [name]: name === 'duration' ? parseInt(value) : value })
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -336,77 +464,66 @@ export default function ConsultationBookingPageContent() {
               </a>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-xl shadow">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Full Name
-                </label>
-                <input
-                  required
-                  type="text"
-                  name="name"
-                  id="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="mt-1 block p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-      
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email Address
-                </label>
-                <input
-                  required
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="mt-1 block p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-      
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                  Phone Number
-                </label>
-                <input
-                  required
-                  type="tel"
-                  name="phone"
-                  id="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="mt-1 block p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-      
-              <div>
-                <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-                  Duration (minutes)
-                </label>
-                <select
-                  required
-                  name="duration"
-                  id="duration"
-                  value={formData.duration}
-                  onChange={handleChange}
-                  disabled={consultMode === 'appointment' && !selectedSlot}
-                  className="mt-1 block p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  {durationOptions.length === 0 ? (
-                    <option value="">Select a slot first</option>
-                  ) : (
-                    durationOptions.map((min) => (
-                      <option key={min} value={min}>
-                        {min} minutes
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-      
+            <form className="space-y-6 bg-white p-6 rounded-xl shadow">
+              {consultMode === "now" ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-4">
+                  {[15, 30, 40, 60].map((min) => {
+                    const isActive = formData.duration === min.toString();
+                    const price = min * 2; // Customize pricing logic
+                    return (
+                      <div
+                        key={min}
+                        onClick={() => handleChange({ target: { name: "duration", value: min.toString() } })}
+                        className={`cursor-pointer rounded-2xl p-5 border transition-all duration-300 ${
+                          isActive
+                            ? "bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400"
+                            : "bg-white text-gray-900 border-gray-200 hover:shadow-md hover:border-indigo-300"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-lg font-bold">{min} Minutes</h4>
+                          {isActive && <CheckCircleIcon className="w-5 h-5 text-white" />}
+                        </div>
+                
+                        <div className="mt-4 flex items-center gap-2 text-sm">
+                          <ClockIcon className="w-4 h-4" />
+                          <span>{min} mins session</span>
+                        </div>
+                
+                        <div className="mt-2 flex items-center gap-2 text-sm">
+                          <DollarSignIcon className="w-4 h-4" />
+                          <span>${price.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div>
+                  <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+                    Duration (minutes)
+                  </label>
+                  <select
+                    required
+                    name="duration"
+                    id="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    disabled={consultMode === "appointment" && !selectedSlot}
+                    className="mt-1 block p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    {durationOptions.length === 0 ? (
+                      <option value="">Select a slot first</option>
+                    ) : (
+                      durationOptions.map((min) => (
+                        <option key={min} value={min}>
+                          {min} minutes
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+              )}
               <div className="text-sm text-gray-700">
                 Estimated Cost:{' '}
                 <span className="font-semibold text-gray-900">${calculatedCost}</span>
@@ -417,8 +534,9 @@ export default function ConsultationBookingPageContent() {
                   type="submit"
                   disabled={submitting || (consultMode === 'appointment' && !selectedSlot)}
                   className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
+                  onClick={() => handleConfirm()}
                 >
-                  {submitting ? 'Submitting...' : 'Review'}
+                  {submitting ? 'Submitting...' : 'Pay Now'}
                 </button>
               </div>
             </form>

@@ -13,8 +13,16 @@ import { useToast } from "@/context/ToastContext";
 import { RotateCcw } from "lucide-react";
 import Link from "next/link";
 
+import dynamic from 'next/dynamic';
+
+const AgoraVideoChat = dynamic(() => import('@/components/AgoraVideoChat'), { 
+  ssr: false 
+});
+
 
 const SessionPage = () => {
+  const agoraAppId = process.env.NEXT_PUBLIC_VITE_AGORA_API_ID;
+
   const { id } = useParams();
   const router = useRouter();
   const videoUrl = `https://videowidget.sozodigicare.com/?room=${id}`;
@@ -48,6 +56,9 @@ const SessionPage = () => {
 
   const [prescriptions, setPrescriptions] = useState([]);
   const [savingPrescription, setsavingPrescription] = useState(false);
+
+  const [specialistToken, setSpecialistToken] = useState(null);
+  const [patientToken, setPatientToken] = useState(null);
 
   const [newPrescription, setNewPrescription] = useState({
     medication: '',
@@ -96,10 +107,21 @@ const SessionPage = () => {
     }
   };
 
-  useEffect( () => {
-    const activeVideoSession = localStorage.getItem('activeVideoSession');
-    if(activeVideoSession) setActiveVideoSession(activeVideoSession)
-  } )
+  useEffect(() => {
+    const storedSession = localStorage.getItem('activeVideoSession');
+    if (storedSession) {
+      const sessionData = JSON.parse(storedSession); // Parse the stored session JSON string
+
+      // console.log("@@@@@@@@@@@@@@@@@@@@@@",sessionData?.session?.patientToken || sessionData?.patientToken)
+
+      // Set the session and tokens in the state
+      setActiveVideoSession(sessionData.session);
+      setSpecialistToken(sessionData?.session?.specialistToken || sessionData?.specialistToken);
+      setPatientToken(sessionData?.session?.patientToken || sessionData?.patientToken);
+    }
+  }, []); // Empty dependency array to run this once when the component mounts
+
+
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -479,7 +501,7 @@ const SessionPage = () => {
     if (appointment.session.appointment.status === "pending" && !sessionEnded) {
       return (
         <div className="relative w-full h-[80vh] rounded-xl overflow-hidden shadow-lg border border-gray-300">
-          <iframe
+          {/* <iframe
             ref={iframeRef}
             src={videoUrl}
             title="Consultation Video Chat"
@@ -488,7 +510,8 @@ const SessionPage = () => {
             onLoad={() => {
               sendCommandToIframe("START_CALL");
             }}
-          />
+          /> */}
+          <AgoraVideoChat agoraAppId={agoraAppId} agoraToken={userRole === "specialist"? specialistToken : patientToken} agoraChannelName={id} />
         </div>
       );
     }

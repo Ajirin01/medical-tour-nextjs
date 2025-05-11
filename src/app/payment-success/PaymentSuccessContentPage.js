@@ -64,7 +64,7 @@ const PaymentSuccessContentPage = () => {
         addToast('Appointment already exists. Redirecting...', 'info');
   
         if (orderData?.type === "general") {
-          router.push(`/admin/available-specialists?appointmentId=${orderData._id}`);
+          window.location.href = `/admin/available-specialists/${orderData.consultant}?appointmentId=${orderData._id}`
         } else {
           router.push(`/admin/appointments`);
         }
@@ -88,13 +88,13 @@ const PaymentSuccessContentPage = () => {
       if (res.appointment) {
         const appointmentId = res.appointment._id;
   
-        setPaymentStatus('Appointment booked successfully!');
-        addToast('Appointment booked successfully!', 'success');
+        setPaymentStatus('Payment successfully!');
+        addToast('Payment successfully!', 'success');
   
         if (orderData?.type === "general") {
-          router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
+          window.location.href = `/admin/available-specialists/${orderData.consultant}?appointmentId=${appointmentId}`;
         } else {
-          router.push(`/admin/appointments`);
+          window.location.href = `/admin/appointments`;
         }
       } else {
         throw new Error('Failed to book the appointment');
@@ -107,24 +107,22 @@ const PaymentSuccessContentPage = () => {
     }
   };
 
-  // if (error) {
-  //   return <div className="text-center text-red-600 font-semibold p-4 bg-red-100 border border-red-600 rounded-md">{error}</div>;
-  // }
-
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100 p-4">
-      <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-lg transform transition-all hover:scale-105">
-        <h1 className="text-3xl font-bold text-green-500 text-center mb-4">{paymentStatus}</h1>
-        {paymentStatus === 'Payment successful!' && !submitting && (
-          <p className="text-lg text-gray-700 text-center mt-2">Your order has been confirmed. Thank you for your payment!</p>
-        )}
-        {paymentStatus === 'Payment successful!' && submitting && (
-          <p className="text-lg text-gray-700 text-center mt-2">Booking your appointment...</p>
-        )}
-        {paymentStatus === 'Payment failed or not completed' && (
-          <p className="text-lg text-gray-700 text-center mt-2">Please try again later or contact support.</p>
-        )}
-      </div>
+    <div className='h-screen bg-gray-100 p-4'>
+      { paymentStatus && <div className="flex justify-center items-center h-screen bg-gray-100 p-4">
+        <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-lg transform transition-all hover:scale-105">
+          <h1 className="text-3xl font-bold text-green-500 text-center mb-4">{paymentStatus}</h1>
+          {/* {paymentStatus === 'Payment successful!' && !submitting && (
+            <p className="text-lg text-gray-700 text-center mt-2">Your order has been confirmed. Thank you for your payment!</p>
+          )} */}
+          {paymentStatus === 'Payment successful!' && submitting && (
+            <p className="text-lg text-gray-700 text-center mt-2">Booking your appointment...</p>
+          )}
+          {paymentStatus === 'Payment failed or not completed' && (
+            <p className="text-lg text-gray-700 text-center mt-2">Please try again later or contact support.</p>
+          )}
+        </div>
+      </div>}
     </div>
   );
 };

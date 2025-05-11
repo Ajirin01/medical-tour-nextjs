@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import Swiper from 'swiper';
 import { fetchData } from '@/utils/api';
 import Link from 'next/link';
-import Footer from '@/components/Footer';
 import FaqSection from '@/components/FAQs';
 
 function classNames(...classes) {

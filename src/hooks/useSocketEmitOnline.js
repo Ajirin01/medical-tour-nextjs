@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useUser } from "@/context/UserContext";
 import { getSocket } from "@/lib/socket";
-import { postData, fetchData } from "@/utils/api";
+import { postData, fetchData, updateData } from "@/utils/api";
 
 export default function useSocketEmitOnline() {
   const { data: session } = useSession();
@@ -94,27 +94,37 @@ export default function useSocketEmitOnline() {
             specialistId: user._id,
             appointmentId,
           });
-
+        
           const payload = {
             appointment: appointmentId,
             specialist: user._id,
             user: appointment.patient, // You should receive this with the incoming call payload
-          }
+          };
         
           // Create the session via HTTP and handle the result locally
-          const token = session?.user?.jwt
+          const token = session?.user?.jwt;
           postData("video-sessions", payload, token).then((res) => {
             if (res.success) {
               const session = res.session;
+              const specialistToken = res.session.specialistToken;  // Assuming the server sends back this token
+              const patientToken = res.session.patientToken;  // Assuming the server sends back this token
         
-              // Store the session locally for the specialist
-              localStorage.setItem("activeVideoSession", JSON.stringify(session));
+              // Store the session and tokens locally for the specialist
+              localStorage.setItem("activeVideoSession", JSON.stringify({ session, specialistToken, patientToken }));
         
-              // Emit session-created to the patient only
-              socketRef.current.emit("session-created", {
-                appointmentId, // Backend uses this to map socket
-                session,
-              });
+              // Emit session-created to the patient with tokens
+              // console.log("🔑 Tokens before emit:", specialistToken, patientToken); // Should show actual values
+
+              if (specialistToken && patientToken) {
+                socketRef.current.emit("session-created", {
+                  appointmentId,
+                  session,
+                  specialistToken,
+                  patientToken,
+                });
+              } else {
+                console.warn("⚠️ Tokens not available yet!");
+              }
         
               // Navigate to the specialist's session page
               window.location.href = `/admin/appointments/session/${session._id}`;
@@ -124,7 +134,7 @@ export default function useSocketEmitOnline() {
           }).catch((err) => {
             console.error("💥 Error creating session:", err);
           });
-        } else {
+        }else {
           socketRef.current.emit("reject-call", {
             specialistId: user._id,
             appointmentId,

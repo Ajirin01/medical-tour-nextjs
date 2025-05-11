@@ -297,55 +297,56 @@ const AppSidebar = () => {
         path: "/admin/appointments",
         roles: ["admin", "specialist", "user"]
       },
+      // Tourism appointment
       {
         icon: <CalenderIcon />,
         name: "Tourism Appointments",
         path: "/admin/medical-tourism/consultations/appointments",
         roles: ["admin"]
       },
-
+      // Consult Specialist
       {
         icon: <CalenderIcon />,
-        name: "Consult a Doctor",
-        path: "/consultation/book",
+        name: "Consult Specialist",
+        path: "/admin/available-specialists",
         roles: ["user"]
       },
-
+      // Doctor's prescription
       {
         icon: <PillIcon />,
         name: "Doctor Prescriptions",
         path: "/admin/doctor-prescriptions",
         roles: ["user", "specialist", "admin"]
       },
-
+      // Call sessions
       {
         icon: <CallSessionIcon />,
         name: "Call Sessions",
         path: "/admin/call-sessions",
         roles: ["user", "specialist", "admin"]
       },
-
+      // Feedbacks
       {
         icon: <FeedbackIcon />,
         name: "Feedbacks",
         path: "/admin/feedbacks",
         roles: ["admin"]
       },
-
+      // Galleries
       {
         icon: <GalleryIcon />,
         name: "Galleries",
         path: "/admin/galleries",
         roles: ["admin"]
       },
-
+      // Hospitals
       {
         icon: <HospitalIcon />,
         name: "Hospitals",
         path: "/admin/hospitals",
         roles: ["admin"]
       },
-
+      // Blogs
       {
         icon: <BlogIcon />,
         name: "Blogs",

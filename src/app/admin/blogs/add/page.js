@@ -100,7 +100,7 @@ const AddBlog = () => {
         />
         <label className="block mb-1">Content</label>
         <Editor
-          apiKey="oz66yasd6jxupf3del6yws3y817g1ru6gl75ma7xzx3b3u27"
+          apiKey={process.env.NEXT_PUBLIC_VITE_TINYMCE_API_KEY}
           value={formData.content}
           init={{
             height: 300,

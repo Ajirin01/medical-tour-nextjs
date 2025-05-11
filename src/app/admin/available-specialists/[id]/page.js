@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { fetchData } from "@/utils/api";
+import { fetchData, postData } from "@/utils/api";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { MapPin, GraduationCap } from "lucide-react";
 import io from "socket.io-client";
+import ConsultationRequestForm from "@/components/ConsultationRequestForm";
+import { useUser } from "@/context/UserContext";
+import { useSession } from "next-auth/react";
+
+import dynamic from 'next/dynamic';
+
+const LottieRinger = dynamic(() => import('@/components/LottieRinger'), {
+  ssr: false,
+});
 
 export default function StartConsultationPage() {
   const [specialist, setSpecialist] = useState(null);
@@ -15,6 +24,10 @@ export default function StartConsultationPage() {
 
   const [appointment, setAppointment] = useState(null)
 
+  const [busyMessage, setBusyMessage] = useState("");
+
+  const { user } = useUser()
+
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -23,6 +36,37 @@ export default function StartConsultationPage() {
 
   const { id: specialistId } = params;
   const appointmentId = searchParams.get("appointmentId");
+
+  const { data: session } = useSession()
+  const token = session?.user?.jwt
+
+  // console.log("Appointment ID:", !JSON.parse(appointmentId))
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    preferredDate: "",
+    duration: 0,  // Default duration
+  });
+
+  const COST_PER_MINUTE = 2
+
+  useEffect(() => {
+    setCalculatedCost(formData.duration * COST_PER_MINUTE)
+  }, [formData.duration])
+
+  useEffect( () => {
+    if(user) setFormData({
+                ...formData,
+                name: user.firstName+" "+user.lastName,
+                email: user.email,
+                phone: user.phone,
+              })
+  }, [user])
+  
+  const [submitting, setSubmitting] = useState(false);
+  const [calculatedCost, setCalculatedCost] = useState(30); // Base cost for 15 minutes
 
   useEffect(() => {
     socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
@@ -68,18 +112,22 @@ export default function StartConsultationPage() {
     const handleSpecialistJoined = (data) => {
       if (data.appointmentId === appointmentId) {
         setSessionStarted(true);
+    
+        socketRef.current.on("session-created", ({ appointmentId, session, specialistToken, patientToken }) => {
+          console.log("session-created");
+    
+          // Store the session and tokens in localStorage for future use
+          const sessionData = { ...session, specialistToken, patientToken };
+          localStorage.setItem("activeVideoSession", JSON.stringify(sessionData));
 
-        socketRef.current.on("session-created", ({appointmentId,  session}) =>{
-          console.log("session-created")
-          // Store the session locally for the specialist
-          localStorage.setItem("activeVideoSession", JSON.stringify(session));
-          window.location.href = `/admin/appointments/session/${session._id}`
+          console.log(appointmentId, session, specialistToken, patientToken)
+    
+          // Redirect to the session page after storing session and tokens
+          window.location.href = `/admin/appointments/session/${session._id}`;
         });
-
-        // window.location.href = `/admin/appointments/session/${appointmentId}`
-        // router.push(`/admin/appointments/session/${appointmentId}`);
       }
     };
+    
   
     socket.on("call-accepted", handleSpecialistJoined);
   
@@ -104,6 +152,35 @@ export default function StartConsultationPage() {
       socket.off("call-timeout");
     };
   }, [appointmentId, router]);
+
+
+  useEffect(() => {
+    if (!socketRef.current || !appointmentId || !specialistId) return;
+    setIsInviting(true);
+  
+    const socket = socketRef.current;
+  
+    // Listen for specialist busy
+    socket.on("specialist-busy", ({ appointmentId: busyAppointmentId }) => {
+      if (busyAppointmentId === appointmentId) {
+        setIsInviting(false);
+        setSessionStarted(false);
+        setInvitationRejected(false);
+        setBusyMessage("Specialist is currently on another call. Please wait a moment...");
+      }
+    });
+  
+    // Auto-trigger invite if not busy
+    socket.emit("invite-specialist-to-call", {
+      specialistId,
+      appointmentId,
+    });
+  
+    return () => {
+      socket.off("specialist-busy");
+    };
+  }, [appointmentId, specialistId]);
+  
   
 
   const handleStartCall = () => {
@@ -121,8 +198,121 @@ export default function StartConsultationPage() {
     });
   };
 
+  function convertTo24Hour(timeStr) {
+    const [time, modifier] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':');
+  
+    if (modifier === 'PM' && hours !== '12') {
+      hours = parseInt(hours, 10) + 12;
+    }
+    if (modifier === 'AM' && hours === '12') {
+      hours = '00';
+    }
+  
+    return `${hours}:${minutes}`; 
+  }
+
+  function convertMillisecondsTo24HourFormat(milliseconds) {
+    const date = new Date(milliseconds);  // Create a Date object using the milliseconds
+    
+    // Extract hours and minutes
+    const hours = date.getHours().toString().padStart(2, '0'); // Ensure two digits
+    const minutes = date.getMinutes().toString().padStart(2, '0'); // Ensure two digits
+  
+    // Return in 24-hour format (HH:mm)
+    return `${hours}:${minutes}`;
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    console.log(formData)
+  };
+
+  const handleConfirm = async () => {
+    // Get the current date
+    const selectedDate = new Date();
+
+    // Get the current time (in milliseconds since epoch)
+    const selectedTime = selectedDate.getTime();
+
+    // Add 5 minutes to the current time (5 * 60 * 1000 milliseconds)
+    const adjustedTime = selectedTime + 5 * 60 * 1000;
+
+    event.preventDefault()
+    if (!token || !session?.user?.id) return;
+  
+    setSubmitting(true);
+    try {
+      const appointmentData = {
+        ...formData,
+        date: selectedDate,
+        timeSlot: convertMillisecondsTo24HourFormat(adjustedTime),
+        cost: calculatedCost,
+        consultMode: "now",
+        type: "general"
+      }
+      
+      const time24 = convertTo24Hour(appointmentData.timeSlot); // "11:00 AM" → "11:00"
+      const dateTimeISO = new Date(`${appointmentData.date}`);
+  
+      if (isNaN(dateTimeISO.getTime())) {
+        throw new Error('Invalid date format');
+      }
+  
+      const payload = {
+        patient: session.user.id,
+        consultant: specialist._id,
+        date: dateTimeISO,
+        duration: appointmentData.duration,
+        type: appointmentData.type || 'medicalTourism',
+        paymentStatus: 'pending',
+        consultMode: appointmentData.consultMode,
+      };
+
+      
+  
+      // Save appointment details to sessionStorage for later use
+      sessionStorage.setItem('orderData', JSON.stringify(payload));
+
+      // Initiate payment request to the backend
+      const paymentPayload = {
+        amount: calculatedCost, // Ensure the cost is in the correct unit (e.g., dollars)
+        email: session.user.email,
+        productName: `Consultation with ${specialist.firstName}`,
+      };
+
+      // console.log(paymentPayload)
+      // return
+
+      const paymentRes = await postData('/payments/initiate', paymentPayload, token);
+
+      if (paymentRes?.url) {
+        // Redirect to Stripe payment page
+        window.location.href = paymentRes.url;
+      } else {
+        alertError('Failed to initiate payment');
+      }
+    } catch (err) {
+      console.error(err);
+      alertError('Something went wrong while booking');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (!specialist) return <div>Specialist not found</div>;
+  if(!appointmentId) return (<div>
+    <ConsultationRequestForm
+      handleSubmit={handleConfirm}
+      handleChange={handleChange}
+      formData={formData}
+      submitting={submitting}
+      calculatedCost={calculatedCost}
+    />
+  </div>);
 
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -176,11 +366,12 @@ export default function StartConsultationPage() {
         </div>
 
         {(appointment && appointment.status !== "completed") &&
-          <button
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-indigo-300 bg-white px-4 py-3 text-sm font-medium text-indigo-700 shadow-theme-xs hover:bg-indigo-50 hover:text-indigo-800 dark:border-indigo-700 dark:bg-indigo-800 dark:text-white dark:hover:bg-white/[0.03] dark:hover:text-white-200 lg:inline-flex lg:w-auto"
-            onClick={handleStartCall}
-          >
-            <svg
+          (invitationRejected || busyMessage) && (
+            <button
+              onClick={handleStartCall}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-indigo-300 bg-white px-4 py-3 text-sm font-medium text-indigo-700 shadow-theme-xs hover:bg-indigo-50 hover:text-indigo-800 dark:border-indigo-700 dark:bg-indigo-800 dark:text-white dark:hover:bg-white/[0.03] dark:hover:text-white-200 lg:inline-flex lg:w-auto"
+            >
+              <svg
               className="fill-current"
               width="18"
               height="18"
@@ -195,13 +386,16 @@ export default function StartConsultationPage() {
                 fill="currentColor"
               />
             </svg>
-            Call
-          </button>
-        }
+              Invite Specialist to session
+            </button>
+        )}
 
-        {isInviting && !invitationRejected && (
-          <div className="mt-5 text-center text-lg text-gray-500">
-            Inviting the specialist to join the call... Please wait.
+        {isInviting && !invitationRejected && !busyMessage && <LottieRinger />}
+
+
+        {busyMessage && (
+          <div className="mt-5 text-center text-lg text-orange-500">
+            {busyMessage}
           </div>
         )}
 
