@@ -12,18 +12,18 @@ import React, {
   const AgoraVideoChat = forwardRef(
     ({ agoraAppId, agoraToken, agoraChannelName }, ref) => {
       const [localVideoTrack, setLocalVideoTrack] = useState(null);
-      const [users, setUsers] = useState([]);
-      const [mainUser, setMainUser] = useState(null);
+      const [users, setUsers] = useState([]);  // Track remote users
+      const [mainUser, setMainUser] = useState(null); // Track the selected remote user
       const [isCameraOn, setIsCameraOn] = useState(true);
       const [isMicOn, setIsMicOn] = useState(true);
   
       const clientRef = useRef(null);
-      const localVideoRef = useRef(null);
+      const localVideoRef = useRef(null);  // Local video reference
       const audioTrackRef = useRef(null);
       const cleanupRef = useRef(false);
-      const mainVideoRef = useRef(null); // For the main video display
+      const mainVideoRef = useRef(null);  // Main video (remote user) reference
   
-      // ✅ Ensure this is always called
+      // Ensure this is always called
       useImperativeHandle(ref, () => ({
         endCall: async () => {
           cleanupRef.current = true;
@@ -110,7 +110,7 @@ import React, {
         if (mainUser && mainUser.videoTrack && mainVideoRef.current) {
           mainUser.videoTrack.play(mainVideoRef.current);
         } else if (localVideoTrack && mainVideoRef.current) {
-          localVideoTrack.play(mainVideoRef.current);
+          localVideoTrack.play(mainVideoRef.current);  // Show local video if no main user
         }
       }, [mainUser, localVideoTrack]);
   
@@ -151,7 +151,16 @@ import React, {
             <div
               ref={localVideoRef}
               className="w-full h-full cursor-pointer"
-              onClick={() => setMainUser(null)} // toggle view
+              onClick={() => {
+                // Toggle between local and remote video
+                if (!mainUser) {
+                  // Set main user to the first remote user (for now)
+                  setMainUser(users[0] || null);
+                } else {
+                  // Reset to showing local video
+                  setMainUser(null);
+                }
+              }}
             />
           </Rnd>
   
