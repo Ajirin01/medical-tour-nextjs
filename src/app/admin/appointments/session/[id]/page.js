@@ -109,6 +109,31 @@ const SessionPage = () => {
   };
 
   useEffect(() => {
+    const loadAppointment = async () => {
+      try {
+        const res = await fetchData(`video-sessions/${id}`, token);
+        console.log("SESSION", res);
+  
+        // Check if the appointment status is 'pending' before updating
+        if (res.success && res.session && res.session.appointment.status === "pending") {
+          await updateData(`video-sessions/${id}`, { startTime: new Date().toISOString() }, token);
+        }
+  
+        // Set the appointment data in state
+        setAppointment(res);
+      } catch (err) {
+        console.error("Failed to fetch appointment", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    if (id && token) {
+      loadAppointment();
+    }
+  }, [id, token]);
+
+  useEffect(() => {
     const storedSession = localStorage.getItem('activeVideoSession');
     if (storedSession) {
       const sessionData = JSON.parse(storedSession); // Parse the stored session JSON string
@@ -173,31 +198,6 @@ const SessionPage = () => {
   }, []);
 
   useEffect(() => {
-    const loadAppointment = async () => {
-      try {
-        const res = await fetchData(`video-sessions/${id}`, token);
-        console.log(res);
-  
-        // Check if the appointment status is 'pending' before updating
-        if (res && res.session && res.session.appointment.status === "pending") {
-          await updateData(`video-sessions/${id}`, { startTime: new Date().toISOString() }, token);
-        }
-  
-        // Set the appointment data in state
-        setAppointment(res);
-      } catch (err) {
-        console.error("Failed to fetch appointment", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    if (id && token) {
-      loadAppointment();
-    }
-  }, [id, token]);
-
-  useEffect(() => {
     // const specialistId = appointment.session.appointment.consultant
     socketRef.current.on("call-rejected", ({ appointmentId, specialistId }) => {
       console.log("call-rejected event received", appointmentId, specialistId);
@@ -230,8 +230,9 @@ const SessionPage = () => {
     if(appointmentRef.current?.session && appointmentRef.current?.session?.appointment?.status === "completed" && !appointmentRef.current?.session?.feedback){
       setShowRatingField(true)
     }
-  }, [])
+  }, [appointmentRef.current])
 
+  // handle session ended
   useEffect(() => {
     const socket = socketRef.current;
   
@@ -242,6 +243,7 @@ const SessionPage = () => {
         setIsTimerRunning(false);
         setShowRatingField(true)
         handleEndSession();
+        handleEndCall()
         addToast("Specialist ended the session", "info", 5000)
       }
     };
@@ -345,6 +347,7 @@ const SessionPage = () => {
         setSessionEnded(true);
         clearInterval(timerId);
         handleEndSession();
+        handleEndCall()
       }
     };
   

@@ -49,7 +49,7 @@ export default function useSocketEmitOnline() {
     }
 
     const emitSpecialistOnline = () => {
-      if (socketRef.current?.connected) {
+      if (socketRef.current?.connected && user.role === "specialist") {
         socketRef.current.emit("specialist-online", user);
       }
     };
