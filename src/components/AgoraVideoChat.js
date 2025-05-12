@@ -10,8 +10,8 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
 
-  const mainVideoRef = useRef(null); 
-  const thumbnailVideoRef = useRef(null);
+  const mainVideoRef = useRef(null); // new
+  const thumbnailVideoRef = useRef(null); // new
 
   const clientRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -37,8 +37,6 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
       }
       setUsers([]);
       setMainUser(null);
-    //   console.log(ref)
-
     },
   }));
 
@@ -109,22 +107,9 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
   }, [agoraAppId, agoraToken, agoraChannelName]);
 
   useEffect(() => {
-    if (mainUser) {
-      const container = mainVideoRef.current;
-      if (mainUser.videoTrack && container) {
-        mainUser.videoTrack.play(container);
-      }
-    } else {
-      localVideoTrack?.play(mainVideoRef.current);
-    }
-  }, [mainUser, localVideoTrack]);
-
-  useEffect(() => {
     users.forEach((user) => {
       const container = document.getElementById(`remote-video-${user.uid}`);
-      if (user.videoTrack && container) {
-        user.videoTrack.play(container);
-      }
+      if (user.videoTrack && container) user.videoTrack.play(container);
     });
   }, [users]);
 
@@ -144,31 +129,15 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
 
   return (
     <div className="relative w-full h-[80vh] bg-black rounded-xl overflow-hidden border shadow-lg">
-      {/* Main Video */}
-      <div ref={mainVideoRef} className="absolute top-0 left-0 w-full h-full z-0" />
+      <div className="absolute top-0 left-0 w-full h-full">
+        {mainUser ? (
+          <div id={`remote-video-${mainUser.uid}`} className="w-full h-full" />
+        ) : (
+          <div ref={localVideoRef} className="w-full h-full" />
+        )}
+      </div>
 
-      {/* Resizable/Draggable Thumbnail */}
-      <Rnd
-        default={{
-          x: window.innerWidth - 180,
-          y: window.innerHeight - 260,
-          width: 160,
-          height: 120,
-        }}
-        bounds="parent"
-        minWidth={120}
-        minHeight={90}
-        className="z-10 border-2 border-white rounded-md overflow-hidden bg-black"
-      >
-        <div
-          ref={thumbnailVideoRef}
-          className="w-full h-full cursor-pointer"
-          onClick={() => setMainUser(mainUser ? null : users[0])} // toggle view
-        />
-      </Rnd>
-
-      {/* Controls */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-gray-900/60 px-4 py-2 rounded-full z-20">
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-gray-900/60 px-4 py-2 rounded-full">
         <button onClick={handleToggleMic} className="text-white hover:text-red-500">
           {isMicOn ? <Mic size={24} /> : <MicOff size={24} />}
         </button>
@@ -178,6 +147,24 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
         <button onClick={() => ref?.current?.endCall()} className="text-white hover:text-red-500">
           <PhoneOff size={24} />
         </button>
+      </div>
+
+      <div className="absolute bottom-4 right-4 flex gap-2">
+        <div
+          onClick={() => setMainUser(null)}
+          className="w-32 h-24 bg-gray-700 border-2 border-white rounded-md cursor-pointer overflow-hidden"
+        >
+          <div ref={localVideoRef} className="w-full h-full" />
+        </div>
+        {users.map((user) => (
+          <div
+            key={user.uid}
+            onClick={() => setMainUser(user)}
+            className="w-32 h-24 bg-gray-700 border-2 border-white rounded-md cursor-pointer overflow-hidden"
+          >
+            <div id={`remote-video-${user.uid}`} className="w-full h-full" />
+          </div>
+        ))}
       </div>
     </div>
   );
