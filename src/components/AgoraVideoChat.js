@@ -18,11 +18,6 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
   const audioTrackRef = useRef(null);
   const cleanupRef = useRef(false);
 
-  const containerRef = useRef(null);
-  const [containerSize, setContainerSize] = useState(null);
-
-  
-
   useImperativeHandle(ref, () => ({
     endCall: async () => {
       cleanupRef.current = true;
@@ -46,15 +41,6 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
 
     },
   }));
-
-  useEffect(() => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setContainerSize({ width: rect.width, height: rect.height });
-    }
-  }, []);
-
-  
 
   const initializeAgoraCall = async () => {
     if (!agoraAppId || !agoraToken || !agoraChannelName) return;
@@ -156,17 +142,6 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
     }
   };
 
-  if (!containerSize) {
-    return <div ref={containerRef} className="absolute inset-0" />; // wait for size
-  }
-
-  const defaultPosition = {
-    x: containerSize.width - 180,
-    y: containerSize.height - 140,
-    width: 160,
-    height: 120,
-  };
-
   return (
     <div className="relative w-full h-[80vh] bg-black rounded-xl overflow-hidden border shadow-lg">
       {/* Main Video */}
@@ -174,18 +149,23 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
 
       {/* Resizable/Draggable Thumbnail */}
       <Rnd
-        default={defaultPosition}
+        default={{
+          x: window.innerWidth - 180,
+          y: window.innerHeight - 260,
+          width: 160,
+          height: 120,
+        }}
         bounds="parent"
         minWidth={120}
         minHeight={90}
         className="z-10 border-2 border-white rounded-md overflow-hidden bg-black"
-        >
+      >
         <div
-            ref={videoRef}
-            className="w-full h-full cursor-pointer"
-            onClick={() => setMainUser(isMainView ? users[0] : null)}
+          ref={thumbnailVideoRef}
+          className="w-full h-full cursor-pointer"
+          onClick={() => setMainUser(mainUser ? null : users[0])} // toggle view
         />
-        </Rnd>
+      </Rnd>
 
       {/* Controls */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-gray-900/60 px-4 py-2 rounded-full z-20">
