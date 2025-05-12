@@ -129,31 +129,37 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
 
   return (
     <div className="relative w-full h-[80vh] bg-black rounded-xl overflow-hidden border shadow-lg">
-      {/* Main video container with resizable feature */}
       <div className="absolute top-0 left-0 w-full h-full">
         {mainUser ? (
-          <div
-            id={`remote-video-${mainUser.uid}`}
-            className="resizable border-green-500"
-            style={{ width: '100%', height: '100%' }}
-          >
-            <video
-              className="video-element"
-              ref={mainVideoRef}
-              autoPlay
-              playsInline
-              muted
-            />
-            <div className="resize-handle" />
-          </div>
+          <div id={`remote-video-${mainUser.uid}`} className="w-full h-full" />
         ) : (
-          <div ref={localVideoRef} className="w-full h-full bg-gray-800 rounded-md">
-            <video className="video-element" autoPlay playsInline muted />
-          </div>
+          <div ref={localVideoRef} className="w-full h-full" />
         )}
       </div>
 
-      {/* Controls */}
+      
+
+      <div className="w-full max-w-4xl flex flex-col md:flex-row gap-4 items-center justify-center mt-20">
+        <div
+          onClick={() => setMainUser(null)}
+          id="remoteVideoContainer" className="resizable border-green-500"
+        >
+          <div ref={localVideoRef} className="w-full h-full" />
+          <div className="resize-handle"></div>
+        </div>
+        {users.map((user) => (
+          <div
+            key={user.uid}
+            onClick={() => setMainUser(user)}
+            className="resizable border-blue-500"
+            id="localVideoContainer"
+          >
+            <div id={`remote-video-${user.uid}`} className="w-full h-full" />
+            <div className="resize-handle"></div>
+          </div>
+        ))}
+      </div>
+
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-gray-900/60 px-4 py-2 rounded-full">
         <button onClick={handleToggleMic} className="text-white hover:text-red-500">
           {isMicOn ? <Mic size={24} /> : <MicOff size={24} />}
@@ -164,44 +170,6 @@ const AgoraVideoChat = forwardRef(({ agoraAppId, agoraToken, agoraChannelName },
         <button onClick={() => ref?.current?.endCall()} className="text-white hover:text-red-500">
           <PhoneOff size={24} />
         </button>
-      </div>
-
-      {/* Thumbnails of remote users */}
-      <div className="absolute bottom-4 right-4 flex gap-2">
-        <div
-          onClick={() => setMainUser(null)}
-          className="resizable border-blue-500"
-          style={{ width: '300px', height: '200px' }}
-        >
-          <video
-            ref={localVideoRef}
-            className="video-element"
-            autoPlay
-            playsInline
-            muted
-          />
-          <div className="resize-handle" />
-        </div>
-        {users.map((user) => (
-          <div
-            key={user.uid}
-            onClick={() => setMainUser(user)}
-            className="resizable border-green-500"
-            style={{ width: '300px', height: '200px' }}
-          >
-            <div
-              id={`remote-video-${user.uid}`}
-              className="video-element"
-            >
-              <video
-                id={`remote-video-${user.uid}`}
-                autoPlay
-                playsInline
-              />
-            </div>
-            <div className="resize-handle" />
-          </div>
-        ))}
       </div>
     </div>
   );
