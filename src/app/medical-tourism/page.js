@@ -23,6 +23,7 @@ const MedicalTourism = () => {
   useEffect(() => {
     setHasWindow(typeof window !== 'undefined');
   }, []);
+  
 
   useEffect(() => {
     if (!hasWindow) return;
