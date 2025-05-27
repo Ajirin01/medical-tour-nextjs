@@ -18,6 +18,19 @@ const MedicalTourism = () => {
   const [expandedSpecialty, setExpandedSpecialty] = useState(null);
   const [selectedDestination, setSelectedDestination] = useState(null);
 
+  const [hasWindow, setHasWindow] = useState(false);
+
+  useEffect(() => {
+    setHasWindow(typeof window !== 'undefined');
+  }, []);
+
+  useEffect(() => {
+    if (!hasWindow) return;
+
+    // Safe to use window now
+    console.log('Window width is:', window.innerWidth);
+  }, [hasWindow]);
+
   const handleContactClick = () => {
     navigate(PATH.general.contact);
   };
