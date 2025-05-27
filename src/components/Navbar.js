@@ -1,231 +1,461 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useState } from "react";
-import Link from "next/link";
-import { Dialog, DialogPanel, PopoverGroup } from "@headlessui/react";
-import { 
-  Bars3Icon, 
-  XMarkIcon,
-  SquaresPlusIcon,
-  PlayCircleIcon,
-  PhoneIcon,
-  InformationCircleIcon,
-  QuestionMarkCircleIcon,
-  CameraIcon
- } from "@heroicons/react/24/outline";
-import { Hospital, UserCheck, Stethoscope } from 'lucide-react';
-import { useSession, signOut } from "next-auth/react"; // Authentication
-import SubNav from "@/components/SubNav";
-import DropdownPopover from '@/components/DropdownPopover'
-import AuthDropdown from "./AuthDropdownMenu";
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import {
+  Home,
+  Info,
+  User,
+  Gauge,
+  Bell,
+  ChevronDown,
+  Menu,
+  LogOut 
+} from 'lucide-react';
 
-const solutions = [
-  {
-    name: 'Packages',
-    description: 'Explore curated medical tourism packages with full service details',
-    href: '/medical-tourism',
-    icon: SquaresPlusIcon, // Represents bundled services
-  },
-  {
-    name: 'Hospitals',
-    description: 'Discover accredited hospitals offering top-tier medical care',
-    href: '/#hospitals',
-    icon: Hospital, // Could signify stats or insights about hospitals
-  },
-  {
-    name: 'Doctors',
-    description: 'Browse specialists and top-rated doctors for your treatment',
-    href: '/#doctors',
-    icon: UserCheck, // Could imply personal care or credentials
-  },
-  {
-    name: 'Treatments',
-    description: 'Learn about procedures and treatment options we offer',
-    href: '/#treatments',
-    icon: Stethoscope, // Represents transformation or recovery
+import {
+  FaChevronDown,
+  FaChevronUp,FaSignOutAlt,FaCubes,
+  FaTimes, FaUserPlus, FaSignInAlt,
+  FaUserMd,
+  FaStethoscope,
+  FaVials,
+  FaPills,
+  FaPlaneDeparture
+} from 'react-icons/fa';
+
+import Button from "@/components/gabriel/Button";
+import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
+import { useUser } from '@/context/UserContext';
+import LogoutModal from "@/components/gabriel/LogoutModal";
+
+
+export default function TopNav({}) {
+  const [servicesOpen, setServicesOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+
+  const router = useRouter();
+
+
+  const { user } = useUser() || {}
+  const isAuthenticated = !!user;
+
+  const apiUrl = process.env.NEXT_PUBLIC_NODE_BASE_URL;
+
+
+  const navigate = (location) => {
+    router.push(location);
   }
-]
 
-const aboutUs = [
-  {
-    name: 'Overview',
-    description: 'Learn about our medical tourism services and top healthcare providers.',
-    href: '/#about',
-    icon: InformationCircleIcon, // Clear, general info symbol
-  },
-  {
-    name: 'Gallery',
-    description: 'View photos of our healthcare destinations and patient experiences.',
-    href: '/#gallery',
-    icon: CameraIcon, // Icon representing photo collection
-  },
-  {
-    name: 'Frequently asked questions',
-    description: 'Find answers to common questions about our services and medical tourism.',
-    href: '/#faq',
-    icon: QuestionMarkCircleIcon, // Appropriate for FAQ
-  }
-];
+  const handleLogoutDecision = (choice) => {
+    if (choice === "logout") {
+      signOut({ callbackUrl: '/login' }); 
+    }
+  };
 
+  const links = [
+    {
+      href: "/services/ai",
+      label: "Quick Health Checker",
+      icon: <FaUserMd size={16} className="text-blue-500" />, // Doctor icon for AI health check
+    },
+    {
+      href: "/services/consult",
+      label: "Real-time Medical Consultation",
+      icon: <FaStethoscope size={16} className="text-blue-500" />, // Stethoscope for consultation
+    },
+    {
+      href: "/laboratory",
+      label: "Laboratory Referral Services",
+      icon: <FaVials size={16} className="text-blue-500" />, // Vials for lab services
+    },
+    {
+      href: "/pharmacy",
+      label: "Online Pharmacy",
+      icon: <FaPills size={16} className="text-blue-500" />, // Pills for pharmacy
+    },
+    {
+      href: "/medical-tourism",
+      label: "Medical Tourism",
+      icon: <FaPlaneDeparture size={16} className="text-blue-500" />, // Plane for tourism
+    },
+  ];
 
-const actions = [
-  { name: 'Watch demo', href: '#', icon: PlayCircleIcon },
-  { name: 'Contact sales', href: '/#contact', icon: PhoneIcon },
-]
-
-const navigation = [
-  { name: "Medical Tourism", comp: DropdownPopover},
-  { name: "About Us", comp: DropdownPopover },
-  { name: "Blog", href: "/blog" },
-  // { name: "Laboratory", href: "/laboratory" },
-  // { name: "Pharmacy", href: "/pharmacy" }
-];
-
-export default function Navbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: session } = useSession(); // Get user session
 
   return (
-    <header className="bg-blue-600 text-white">
-      {/* Announcement Bar */}
-      <div className="bg-indigo-600 text-white text-center py-2 text-sm">
-        {/* Get free delivery on orders over $100 */}
-        <Link
-          className="cta-btn text-white font-semibold transition-all duration-300 animate-pulse"
-          href="/auth/sign-up?role=specialist"
-        >
-          Join Our Medical Experts today
-        </Link>
-      </div>
-      
-      <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
-        <div className="flex lg:flex-1">
-          <Link href="/" className="text-xl font-bold">
-          <Image
-              src="/images/logo/logo-dark.png" // update with your actual logo path
-              alt="Medical Tourism Logo"
-              width={100} // adjust size as needed
-              height={70}
-              className="object-contain"
-            />
+    <header className="bg-white relative top-0 z-50 mb-5">
+      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+        {/* Left: Logo */}
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center space-x-2">
+            <Image src="/images/logo/logo.png" alt="Logo" width={100} height={70} />
           </Link>
         </div>
-        
-        <div className="flex lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-white"
-          >
-            <span className="sr-only">Open main menu</span>
-            <Bars3Icon className="size-6" aria-hidden="true" />
+
+        {/* Right: Desktop nav, notification, user */}
+        <div className="flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-6 text-sm">
+            <NavLink href="/" icon={<Home size={18} />} label="Home" active />
+            <NavLink href="/about" icon={<Info size={18} />} label="About" />
+            <NavLink href="/doctors" icon={<User size={18} />} label="Doctors" />
+
+            {/* Services dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setServicesOpen(!servicesOpen)}
+                className={`flex items-center ${
+                  servicesOpen ? 'text-blue-700 font-semibold' : 'text-gray-800'
+                } hover:text-blue-700`}
+              >
+                <FaCubes size={18} className="mr-1" />
+                Services <ChevronDown size={16} className="ml-1" />
+              </button>
+
+              {servicesOpen && (
+                <DropdownMenu
+                  links={links}
+                />
+              )}
+
+            </div>
+
+            {/* Dashboard dropdown */}
+            { isAuthenticated && 
+              <div className="relative">
+                <button
+                  onClick={() => setDashboardOpen(!dashboardOpen)}
+                  className={`flex items-center ${
+                    dashboardOpen ? 'text-blue-700 font-semibold' : 'text-gray-800'
+                  } hover:text-blue-700`}
+                >
+                  <Gauge size={18} className="mr-1" />
+                  Dashboard <ChevronDown size={16} className="ml-1" />
+                </button>
+
+                {dashboardOpen && (
+                  <DropdownMenu
+                    links={[
+                      {
+                        href: '/admin',
+                        label: 'Dashboard',
+                        icon: <Gauge size={16} className="text-blue-500" />
+                      },
+                      {
+                        href: '/dashboard/admin',
+                        label: 'Admin Panel',
+                        icon: <Gauge size={16} className="text-blue-500" />
+                      }
+                    ]}
+                  />
+                )}
+
+              </div>
+            }
+          </nav>
+
+          <Bell size={20} className="text-gray-700 hidden md:inline" />
+          <div className="hidden md:flex items-center ml-6 space-x-3">
+                {isAuthenticated ? (
+                  <div className="flex items-center space-x-3">
+                    {/* <Notification /> */}
+                    
+                    <div className="flex items-center space-x-3 bg-gray-50 rounded-full px-3 py-1.5 border border-gray-100">
+                      <div className="relative">
+                        <img
+                          className="h-8 w-8 rounded-full object-cover border-2 border-white shadow-sm"
+                          src={user.profileImage ? `${apiUrl}${user.profileImage}` : defaultUser}
+                          alt={user.firstName}
+                          crossOrigin="anonymous"
+                        />
+                        <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-white"></div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-gray-700 font-medium text-sm leading-tight">
+                          {user.firstName}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setShowLogout(true)}
+                        className="text-gray-500 hover:text-primary-6 transition-colors duration-200 text-sm font-medium ml-2"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <Button
+                      background="bg-white"
+                      textColor="text-[var(--color-primary-6)]"
+                      borderRadius="rounded-full"
+                      border="border-2 border-primary-6"
+                      hoverEffect="hover:bg-[var(--color-primary-6)] hover:text-white transition-colors duration-200"
+                      className="text-sm font-medium py-2 px-4"
+                      onClick={() => navigate("/login")}
+                    >
+                      Log In
+                    </Button>
+                    <Button
+                      background="bg-[var(--color-primary-6)]"
+                      textColor="text-white"
+                      borderRadius="rounded-full"
+                      hoverEffect="hover:bg-[var(--color-primary-7)] transition-colors duration-200"
+                      className="text-sm font-medium py-2 px-4"
+                      onClick={() => navigate("/auth/sign-up")}
+                    >
+                      Sign Up
+                    </Button>
+                  </>
+                )}
+              </div>
+
+
+          {/* Mobile menu button */}
+          <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+            <Menu size={24} />
           </button>
         </div>
-        
-        <PopoverGroup className="hidden lg:flex lg:gap-x-12">
-          {navigation.map((item) =>
-            item.comp ? (
-              <item.comp
-                key={item.name}
-                title={item.name}
-                items={item.name === "About Us" ? aboutUs : solutions}
-                callsToAction={actions}
-                buttonStyle="inline-flex items-center gap-x-1 text-sm font-semibold hover:cursor-pointer !text-white"
-              />
-            ) : (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-sm font-semibold hover:underline"
-              >
-                {item.name}
-              </Link>
-            )
-          )}
-        </PopoverGroup>
+      </div>
 
+      {/* Mobile Menu Backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
-        {/* Authentication Links */}
-
-        <AuthDropdown />
-      </nav>
-      
-      {/* Mobile Menu */}
-      <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="lg:hidden">
-        <DialogPanel className="fixed inset-0 z-10 bg-blue-600 p-6 sm:max-w-sm">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold text-white">
-              <Image
-                src="/images/logo/logo-dark.png" // update with your actual logo path
-                alt="Medical Tourism Logo"
-                width={70} // adjust size as needed
-                height={40}
-                className="object-contain"
-              />
+      {/* Mobile Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-full w-[85%] max-w-sm bg-white z-50 transform transition-transform duration-500 ease-in-out ${
+          mobileOpen ? 'translate-x-0' : 'translate-x-full'
+        } shadow-2xl rounded-l-3xl flex flex-col overflow-hidden`}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b">
+          <div className="flex items-center">
+            <Link href="/" className="flex items-center space-x-2">
+              <Image src="/images/logo/logo.png" alt="Logo" width={90} height={50} />
             </Link>
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(false)}
-              className="-m-2.5 rounded-md p-2.5 text-white"
-            >
-              <span className="sr-only">Close menu</span>
-              <XMarkIcon className="size-6" aria-hidden="true" />
-            </button>
           </div>
-          
-          <div className="mt-6">
-            {navigation.map((item) =>
-              item.comp ? (
-                <item.comp
-                  key={item.name}
-                  title={item.name}
-                  items={item.name === "About Us" ? aboutUs : solutions}
-                  callsToAction={actions}
-                  buttonStyle="inline-flex items-center gap-x-1 text-sm font-semibold ml-3 hover:cursor-pointer !text-white"
-                />
-              ) : (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block py-2 text-base font-semibold text-white hover:bg-blue-700 rounded-lg px-3"
-                >
-                  {item.name}
-                </Link>
-              )
-            )}
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="w-10 h-10 rounded-full bg-gray-100 shadow-md flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-500 transition"
+          >
+            <FaTimes className="h-5 w-5" />
+          </button>
+        </div>
 
-            {session ? (
-              <>
-                <a
-                  href="/admin"
-                  className="block w-full px-4 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-500 mb-2 text-center"
-                >
-                  Dashboard
-                </a>
-                <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                  className="block w-full px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 text-center"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="block w-full px-4 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-500 text-center"
-              >
-                Login
-              </Link>
-            )}
-            
-            
-          </div>
-        </DialogPanel>
-      </Dialog>
+        {/* User Info with Logout on right */}
+        <div className="p-6 border-b border-gray-100">
+                {isAuthenticated ? (
+                  <div className={`
+                    flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from[var(--color-primary-6)]/10 to[var(--color-primary-1)]/10
+                  `}>
+                    <img
+                      className="h-14 w-14 rounded-full object-cover border-2 border-white shadow-md"
+                      src={user.profileImage ? `${apiUrl}${user.profileImage}` : defaultUser}
+                      alt={user.firstName}
+                      crossOrigin="anonymous"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold text-lg text-gray-800">
+                        {user.firstName} {user.lastName}
+                      </div>
+                      <div className="text-gray-500 text-sm flex items-center">
+                        <div className="h-2 w-2 rounded-full bg-green-400 mr-2"></div>
+                        Online
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowLogout(true)}
+                      className="p-3 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200"
+                    >
+                      <FaSignOutAlt />
+                    </button>
+                  </div>
+                ) : (
+                  <div className={`
+                    flex gap-3
+                  `}>
+                    <Button
+                      background="bg-white"
+                      textColor="text-[var(--color-primary-6)]"
+                      borderRadius="rounded-xl"
+                      border="border-2 border-[var(--color-primary-6)]"
+                      hoverEffect="hover:bg-[var(--color-primary-6)] hover:text-white transition-colors duration-200"
+                      className="flex-1 text-base py-3 flex items-center justify-center gap-2"
+                      onClick={() => {
+                        navigate("/login");
+                        setMobileOpen(false);
+                      }}
+                    >
+                      <FaSignInAlt /> Log In
+                    </Button>
+                    <Button
+                      background="bg-[var(--color-primary-6)]"
+                      textColor="text-white"
+                      borderRadius="rounded-xl"
+                      hoverEffect="hover:bg-[var(--color-primary-7)] transition-colors duration-200"
+                      className="flex-1 text-base py-3 flex items-center justify-center gap-2"
+                      onClick={() => {
+                        navigate("/auth/sign-up");
+                        setMobileOpen(false);
+                      }}
+                    >
+                      <FaUserPlus /> Sign Up
+                    </Button>
+                  </div>
+                )}
+              </div>
 
-      {/* SubNav with MiniCart */}
-      {/* <SubNav /> */}
+
+
+        {/* Mobile Links */}
+        <div className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
+          <MobileNavLink icon={<Home size={18} />} href="/" label="Home" />
+          <MobileNavLink icon={<Info size={18} />} href="/about" label="About" />
+          <MobileNavLink icon={<User size={18} />} href="/doctors" label="Our Doctors" />
+          <MobileDropdown
+            icon={<FaCubes size={18} />}
+            label="Services"
+            links={links}
+          />
+
+          { isAuthenticated && 
+            <MobileDropdown
+              icon={<Gauge size={18} />}
+              label="Dashboard"
+              links={[
+                {
+                  href: '/dashboard/user',
+                  label: 'User Dashboard',
+                  icon: <Gauge size={16} className="text-blue-500" />
+                },
+                {
+                  href: '/dashboard/admin',
+                  label: 'Admin Panel',
+                  icon: <Gauge size={16} className="text-blue-500" />
+                }
+              ]}
+            />
+          }
+
+        </div>
+
+        {/* Footer */}
+        <div className="px-4 py-5 text-center text-xs text-gray-400 border-t">
+          © 2025 SozoDigiCare
+        </div>
+
+        <LogoutModal
+          show={showLogout}
+          setShow={setShowLogout}
+          onDecision={handleLogoutDecision}
+        />
+      </div>
     </header>
   );
 }
+
+// Subcomponents
+function NavLink({ href, icon, label, active }) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center space-x-1 ${
+        active ? 'text-blue-700 border-b-2 border-blue-700 pb-1' : 'text-gray-800 hover:text-blue-700'
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+function DropdownMenu({ links }) {
+  return (
+    <div className="absolute top-8 left-0 bg-white shadow-md rounded-md py-2 w-48 z-10">
+      {links.map(link => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          {link.icon}
+          <span>{link.label}</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+
+function MobileNavLink({ href, label, icon }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-4 text-gray-800 font-medium px-3 py-3 rounded-lg hover:bg-gray-100 transition"
+    >
+      <div className="bg-gray-100 text-blue-600 p-2 rounded-lg">
+        {icon}
+      </div>
+      <span className="text-sm">{label}</span>
+    </Link>
+  );
+}
+
+
+function MobileDropdown({ label, icon, links }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="w-full">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center justify-between w-full text-gray-800 font-medium px-3 py-3 rounded-lg ${
+          open ? 'bg-slate-200' : 'hover:bg-slate-100'
+        } transition-colors duration-300`}
+      >
+        <div className="flex items-center gap-4">
+          <div className="bg-gray-100 text-blue-600 p-2 rounded-lg">
+            {icon}
+          </div>
+          <span className="text-sm">{label}</span>
+        </div>
+        {open ? (
+          <FaChevronUp className="h-3 w-3 text-gray-500" />
+        ) : (
+          <FaChevronDown className="h-3 w-3 text-gray-500" />
+        )}
+      </button>
+
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          open ? 'max-h-40 bg-blue-50' : 'max-h-0'
+        }`}
+      >
+        <div className="pl-16 py-2 space-y-1">
+          {links.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 text-sm py-1"
+            >
+              <span className="text-blue-500">{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      
+    </div>
+  );
+}
+
+

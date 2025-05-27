@@ -371,7 +371,7 @@ const AppSidebar = () => {
             {item.subItems ? (
               <button
                 onClick={() => toggleSubmenu(itemKey)}
-                className={`menu-item group flex items-center w-full ${isOpen ? "menu-item-active" : "menu-item-inactive"}`}
+                className={`menu-item group font-bold flex items-center w-full ${isOpen ? "menu-item-active" : "menu-item-inactive"}`}
               >
                 <span className="menu-item-icon">{item.icon}</span>
                 {(isExpanded || isHovered || isMobileOpen) && (
@@ -396,7 +396,7 @@ const AppSidebar = () => {
             ) : (
               <Link
                 href={item.path}
-                className={`menu-item group flex items-center ${isActive(item.path) ? "menu-item-active" : "menu-item-inactive"} transition-all duration-300`}
+                className={`menu-item group flex font-bold items-center ${isActive(item.path) ? "menu-item-active" : "menu-item-inactive"} transition-all duration-300`}
                 onClick={handleClick}
               >
                 <span className="menu-item-icon">{item.icon}</span>
@@ -404,7 +404,7 @@ const AppSidebar = () => {
                   <span className="menu-item-text flex items-center gap-2">
                     {item.name}
                     {item.badge > 0 && (
-                      <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                      <span className="bg-amber-500 text-white text-md font-bold px-1.5 py-0.5 rounded-full">
                         {item.badge}
                       </span>
                     )}
@@ -429,7 +429,6 @@ const AppSidebar = () => {
       })}
     </ul>
   );
-  
   
 
   return (
@@ -465,7 +464,7 @@ const AppSidebar = () => {
       </div>
       <div className="flex flex-col overflow-y-auto no-scrollbar">
         <nav className="mb-6">
-          <h2 className={`mb-4 text-xs uppercase flex text-gray-400 ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
+          <h2 className={`mb-4 text-md uppercase font-bold flex text-gray-500 ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
             {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots />}
           </h2>
           {renderMenuItems(getNavItems())}

@@ -44,8 +44,8 @@ export default function StatisticsChart() {
   };
 
   useEffect(() => {
-    fetchSessionData();
-  }, []);
+    if(token) fetchSessionData();
+  }, [token]);
 
   const options = {
     legend: {

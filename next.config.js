@@ -15,7 +15,7 @@ const nextConfig = withPWA({
     return config;
   },
   images: {
-    domains: ["*"],
+    domains: ["*", "127.0.0.1"],
   },
 });
 

@@ -1,12 +1,18 @@
 'use client'
 
-import '/aos.css'; // Import AOS styles
-import AOS from 'aos';
 import { useEffect, useState } from 'react';
 import Swiper from 'swiper';
 import { fetchData } from '@/utils/api';
 import Link from 'next/link';
-import FaqSection from '@/components/FAQs';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaPlane, FaStethoscope, FaAmbulance, FaArrowRight, FaRobot, FaUserMd, FaVideo, FaPills, FaClipboardList, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { consult, doctorIcon, medicMask, pngwing1, roboDoc, userIcon } from '@/assets';
+import SimpleCarousel from '@/components/gabriel/SimpleCarousel';
+import { cards } from '@/data/cards';
+import { blogs } from '@/data/blogs';
+import { faqItems } from '@/data/faqData';
+import { useMediaQuery } from 'react-responsive'; 
+
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -14,7 +20,6 @@ function classNames(...classes) {
 
 export default function HomePage() {
   const [isClient, setIsClient] = useState(false);
-  const [activeTab, setActiveTab] = useState(1);
   const [packages, setPackages] = useState([]);
   const [galleries, setGalleries] = useState([]);
   const [hospitals, setHospitals] = useState([]);
@@ -22,35 +27,35 @@ export default function HomePage() {
   const [activeIndex, setActiveIndex] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    setActiveTab(1);
-    setIsClient(true);
-    AOS.init();
-  }, []);
+  const [selectedService, setSelectedService] = useState(null);
+  const iconlist = ['Medical Tourism Solutions', 'Medical Equipment', 'Air Ambulance Services'];
+  const services = [
+    {
+      icon: <FaPlane className="text-5xl text-primary-6" />,
+      title: "Medical Tourism Solutions",
+      description: "Tailored healthcare travel packages for international patients",
+      animation: "M10 10 L50 50 L90 10",
+    },
+    {
+      icon: <FaStethoscope className="text-5xl text-primary-6" />,
+      title: "Medical Devices and Equipment",
+      description: "State-of-the-art medical devices and supplies for healthcare facilities",
+      animation: "M10 50 Q50 10 90 50 Q50 90 10 50",
+    },
+    {
+      icon: <FaClipboardList className="text-5xl text-primary-6" />,
+      title: "Laboratory Referral Services",
+      description: "Streamlined access to advanced diagnostic testing",
+      animation: "M10 30 Q50 60 90 30 Q50 0 10 30",
+    },
+  ];
+
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    const swiper = new Swiper('.init-swiper', {
-      loop: true,
-      speed: 600,
-      autoplay: {
-        delay: 5000,
-      },
-      slidesPerView: 'auto',
-      centeredSlides: true,
-      pagination: {
-        el: '.swiper-pagination',
-        type: 'bullets',
-        clickable: true,
-      },
-      breakpoints: {
-        320: { slidesPerView: 1, spaceBetween: 0 },
-        768: { slidesPerView: 3, spaceBetween: 20 },
-        1200: { slidesPerView: 5, spaceBetween: 20 },
-      },
-    });
-
-    return () => swiper.destroy();
+    setHasMounted(true);
   }, []);
+
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -106,597 +111,345 @@ export default function HomePage() {
     fetchPackages();
   }, []);
 
-  if (!isClient) return <div>Loading...</div>;
+  const ServiceCard = ({ icon, title, description, index }) => (
+    <motion.div
+      className="bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.2 }}
+    >
+      <div className="flex justify-center mb-4">
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold text-primary-10 text-center mb-2">{title}</h3>
+      <p className="text-gray-600 text-center mb-4">{description}</p>
+      <div className="flex justify-center space-x-4">
+        <button
+          className="text-sm"
+          onClick={() => console.log(`Consult Doctor for ${title}`)}
+        >
+          Consult Doctor
+        </button>
+        <button
+          className="text-sm"
+          onClick={() => console.log(`Use AI for ${title}`)}
+        >
+          Use AI
+        </button>
+      </div>
+    </motion.div>
+  );
+  
+  const OptionCard = ({ icon, title, description, buttonText, onClick, color }) => (
+    <motion.div
+      className={`bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden ${color} text-white`}
+      whileHover={{ scale: 1.05 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      <div className="flex justify-center mb-4 text-6xl">
+        {icon}
+      </div>
+      <h3 className="text-2xl font-semibold text-center mb-4">{title}</h3>
+      <p className="text-center mb-6">{description}</p>
+      <div className="flex justify-center">
+        <button
+          className="text-lg font-semibold"
+          onClick={onClick}
+        >
+          {buttonText} <FaArrowRight className="ml-2 inline" />
+        </button>
+      </div>
+    </motion.div>
+  );
+  
+  const InteractiveChoice = () => {
+    // const navigate = useNavigate();
+    const [hoveredOption, setHoveredOption] = useState(null);
+    const isMobile = useMediaQuery({ maxWidth: 768 });
+    // const dispatch = useDispatch();
+  
+    const handleChat = () => {
+      // dispatch(triggerChatbotAttention());
+      // dispatch(openChatBot(true));
+    };
+  
+    const options = [
+      {
+        name: 'AI',
+        image: roboDoc,
+        title: 'AI Health Assistant',
+        description: 'Get instant health insights powered by advanced AI',
+        action: () => handleChat(),
+        color: 'bg-cyan-500',
+        icon: <FaRobot className="text-4xl" />,
+      },
+      {
+        name: 'Consultant',
+        image: consult,
+        title: 'Consultant',
+        description: 'Connect with experienced healthcare professionals',
+        action: () => navigate(PATH.dashboard.consultant),
+        color: 'bg-pink-500',
+        icon: <FaUserMd className="text-4xl" />,
+      },
+    ];
 
-  return (
-    <>
-      {/* Now paste the homepage HTML structure here */}
-      <main className="main">
-
-        {/* <!-- Hero Section  */}
-        <section id="hero" className="hero section">
-
-        <div id="hero-carousel" className="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-
-          <div className="carousel-item active">
-            <img src="assets/img/hero-carousel/hero-carousel-1.jpg" alt="Healthcare Consultation" />
-            <div className="container">
-              <h2>Welcome to SozoDigiCare</h2>
-              <p>Breaking barriers in healthcare access worldwide, SozoDigiCare connects individuals with the urgent medical care they need, promoting global health equity and better outcomes for all.</p>
-              <a href="#about" className="btn-get-started">Learn More</a>
-            </div>
-          </div>{/* <!-- End Carousel Item  */}
-
-          <div className="carousel-item">
-            <img src="assets/img/hero-carousel/hero-carousel-2.jpg" alt="Medical Tourism" />
-            <div className="container">
-              <h2>Global Healthcare Access</h2>
-              <p>We bridge geographical, bureaucratic, and financial barriers, offering timely medical consultations and expert care, regardless of where you are in the world.</p>
-              <a href="#about" className="btn-get-started">Learn More</a>
-            </div>
-          </div>{/* <!-- End Carousel Item  */}
-
-          <div className="carousel-item">
-            <img src="assets/img/hero-carousel/hero-carousel-3.jpg" alt="Expert Medical Care" />
-            <div className="container">
-              <h2>Your Health, Our Priority</h2>
-              <p>Our diverse team of medical experts and support professionals ensures that you receive immediate attention, no matter your location or financial situation.</p>
-              <a href="#about" className="btn-get-started">Learn More</a>
-            </div>
-          </div>{/* <!-- End Carousel Item  */}
-
-          <a className="carousel-control-prev" href="#hero-carousel" role="button" data-bs-slide="prev">
-            <span className="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
-          </a>
-
-          <a className="carousel-control-next" href="#hero-carousel" role="button" data-bs-slide="next">
-            <span className="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
-          </a>
-
-          <ol className="carousel-indicators"></ol>
-
-        </div>
-
-        </section>{/* <!-- /Hero Section  */}
-
-
-        {/* <!-- Featured Services Section  */}
-        <section id="featured-services" className="featured-services section">
-
-        <div className="container">
-
-          <div className="row gy-4">
-
-            <div className="col-xl-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="100">
-              <div className="service-item position-relative">
-                <div className="icon"><i className="fas fa-user-md icon"></i></div>
-                <h4><a href="" className="stretched-link">Expert Medical Consultations</a></h4>
-                <p>Access top-tier medical professionals from various specialties for consultations, diagnosis, and advice, no matter where you are.</p>
-              </div>
-            </div>{/* <!-- End Service Item  */}
-
-            <div className="col-xl-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="200">
-              <div className="service-item position-relative">
-                <div className="icon"><i className="fas fa-hospital-alt icon"></i></div>
-                <h4><a href="" className="stretched-link">Medical Tourism</a></h4>
-                <p>Plan and coordinate your medical tourism journey with the help of our comprehensive services, including travel and accommodations.</p>
-              </div>
-            </div>{/* <!-- End Service Item  */}
-
-            <div className="col-xl-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="300">
-              <div className="service-item position-relative">
-                <div className="icon"><i className="fas fa-stethoscope icon"></i></div>
-                <h4><a href="" className="stretched-link">Remote Health Monitoring</a></h4>
-                <p>Stay on top of your health with our remote monitoring services, offering ongoing care and health tracking through digital tools.</p>
-              </div>
-            </div>{/* <!-- End Service Item  */}
-
-          </div>
-
-        </div>
-
-        </section>{/* <!-- /Featured Services Section  */}
-
-        {/* <!-- Call To Action Section  */}
-        <section id="call-to-action" className="call-to-action section accent-background">
-
-        <div className="container">
-          <div className="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
-            <div className="col-xl-10">
-              <div className="text-center">
-                <h3>Need Immediate Medical Attention?</h3>
-                <p>If you're facing a medical emergency or need urgent care, don't wait. SozoDigiCare connects you with the right medical experts immediately to ensure you get the care you deserve, wherever you are.</p>
-                <Link className="cta-btn" href="/consultation/book">Connect with a Doctor Now</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        </section>{/* <!-- /Call To Action Section  */}
-
-
-        {/* <!-- About Section  */}
-        <section id="about" className="about section">
-
-        {/* <!-- Section Title  */}
-        <div className="container section-title" data-aos="fade-up">
-          <h2>About SozoDigiCare<br/></h2>
-          <p>Bridging the healthcare gap for a healthier, more equitable world.</p>
-        </div>{/* <!-- End Section Title  */}
-
-        <div className="container">
-
-          <div className="row gy-4">
-            <div className="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="100">
-              <img src="assets/img/about.jpg" className="img-fluid" alt="" />
-              {/* Optionally, add a video link if needed */}
-              <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" className="glightbox pulsating-play-btn"></a>
-            </div>
-            <div className="col-lg-6 content" data-aos="fade-up" data-aos-delay="200">
-              <h3>Empowering Global Health Equity</h3>
-              <p className="fst-italic">
-                SozoDigiCare aims to overcome geographic, bureaucratic, and financial barriers to healthcare, ensuring immediate access to world-class medical expertise for individuals in need.
-              </p>
-              <ul>
-                <li><i className="bi bi-check2-all"></i> <span>Breaking down barriers to timely healthcare access.</span></li>
-                <li><i className="bi bi-check2-all"></i> <span>Connecting patients to a network of global medical professionals.</span></li>
-                <li><i className="bi bi-check2-all"></i> <span>Ensuring care delivery in emergency and routine medical situations.</span></li>
-              </ul>
-              <p>
-                At SozoDigiCare, we believe in a future where healthcare is accessible to all, regardless of their circumstances. Our mission is to provide essential healthcare services through a seamless and immediate connection to medical professionals, ensuring better health outcomes for marginalized communities worldwide.
-              </p>
-
-              <div className="flex justify-center mt-8">
-                <Link
-                  className="cta-btn px-6 py-3 rounded-full text-white font-semibold bg-cyan-600 hover:bg-cyan-700 shadow-lg border-2 border-cyan-400 hover:shadow-cyan-500/50 transition-all duration-300 animate-pulse"
-                  href="/auth/sign-up?role=specialist"
-                >
-                  Join Our Medical Experts today
-                </Link>
-              </div>
-
-
-            </div>
-          </div>
-
-        </div>
-
-        </section>{/* <!-- /About Section  */}
-
-
-        {/* <!-- Services Section  */}
-        <section id="services" className="services section">
-
-        {/* <!-- Section Title  */}
-        <div className="container section-title" data-aos="fade-up">
-          <h2>Our Services</h2>
-          <p>Bringing you world-class healthcare services with a focus on immediate access and comprehensive care.</p>
-        </div>{/* <!-- End Section Title  */}
-
-        <div className="container">
-
-          <div className="row gy-4">
-
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-              <div className="service-item position-relative">
-                <div className="icon">
-                  <i className="fas fa-heartbeat"></i>
-                </div>
-                <a href="#" className="stretched-link">
-                  <h3>Immediate Medical Support</h3>
-                </a>
-                <p>Get emergency medical assistance with just a click, ensuring you never wait for urgent care.</p>
-              </div>
-            </div>
-
-            {/* <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-              <div className="service-item position-relative">
-                <div className="icon">
-                  <i className="fas fa-pills"></i>
-                </div>
-                <a href="/pharmacy" className="stretched-link">
-                  <h3>Online Drug Store</h3>
-                </a>
-                <p>Access prescription medications and over-the-counter drugs with the convenience of online ordering.</p>
-              </div>
-            </div> */}
-
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-              <div className="service-item position-relative">
-                <div className="icon">
-                  <i className="fas fa-hospital-user"></i>
-                </div>
-                <a href="#" className="stretched-link">
-                  <h3>Expert Medical Consultation</h3>
-                </a>
-                <p>Consult with experienced medical professionals from around the world, regardless of your location.</p>
-              </div>
-            </div>
-
-            {/* <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-              <div className="service-item position-relative">
-                <div className="icon">
-                  <i className="fas fa-dna"></i>
-                </div>
-                <a href="/laboratory" className="stretched-link">
-                  <h3>Lab Services</h3>
-                </a>
-                <p>Access diagnostic tests and lab services with prompt results to support your medical needs.</p>
-              </div>
-            </div> */}
-
-            {/* <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-              <div className="service-item position-relative">
-                <div className="icon">
-                  <i className="fas fa-wheelchair"></i>
-                </div>
-                <a href="#" className="stretched-link">
-                  <h3>Healthcare for Mobility</h3>
-                </a>
-                <p>Specialized services for patients requiring mobility support, including equipment and care assistance.</p>
-              </div>
-            </div> */}
-
-            <div className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
-              <div className="service-item position-relative">
-                <div className="icon">
-                  <i className="fas fa-notes-medical"></i>
-                </div>
-                <a href="#" className="stretched-link">
-                  <h3>Medical Documentation</h3>
-                </a>
-                <p>Efficient medical record management, ensuring you always have access to your health history when you need it.</p>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-        </section>{/* <!-- /Services Section  */}
-       
-
-        {/* <!-- Tabs Section  */}
-        <section id="treatments" className="tabs section">
-          <div className="container" data-aos="fade-up" data-aos-delay="100">
-            <div className="row">
-              <div className="col-lg-3">
-                <ul className="nav nav-tabs flex-column" role="tablist">
-                  {["Cardiology", "Neurology", "Hepatology", "Pediatrics", "Ophthalmologists"].map((department, index) => (
-                    <li key={index} className="nav-item" role="presentation">
-                      <a
-                        className={`nav-link ${activeTab === index + 1 ? 'active show' : ''}`}
-                        data-bs-toggle="tab"
-                        href={`#tabs-tab-${index + 1}`}
-                        aria-selected={activeTab === index + 1 ? 'true' : 'false'}
-                        role="tab"
-                        onClick={() => setActiveTab(index + 1)}
-                      >
-                        {department}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="col-lg-9 mt-4 mt-lg-0">
-                <div className="tab-content">
-                  {["Cardiology", "Neurology", "Hepatology", "Pediatrics", "Ophthalmologists"].map((department, index) => (
-                    <div
-                      key={index}
-                      className={`tab-pane ${activeTab === index + 1 ? 'active show' : ''}`}
-                      id={`tabs-tab-${index + 1}`}
-                    >
-                      <div className="row">
-                        <div className="col-lg-8 details order-2 order-lg-1">
-                          <h3>{department}</h3>
-                          <p className="fst-italic">
-                            {department === "Cardiology" && "Cardiology focuses on diagnosing and treating heart conditions..."}
-                            {department === "Neurology" && "Neurology deals with the diagnosis and treatment of disorders..."}
-                            {department === "Hepatology" && "Hepatology specializes in the care of patients with liver diseases..."}
-                            {department === "Pediatrics" && "Pediatrics provides care for children, from infancy to adolescence..."}
-                            {department === "Ophthalmologists" && "Ophthalmology is focused on diagnosing and treating eye conditions..."}
-                          </p>
-                        </div>
-                        <div className="col-lg-4 text-center order-1 order-lg-2">
-                          <img
-                            src={`assets/img/departments-${index + 1}.jpg`}
-                            alt={department}
-                            className="img-fluid"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>{/* <!-- /Tabs Section */}
-
-
-        {/* <!-- Testimonials Section  */}
-        <section id="testimonials" className="testimonials section">
-          {/* Section Title */}
-          <div className="container section-title" data-aos="fade-up">
-            <h2>Testimonials</h2>
-            <p>What our clients say about us</p>
-          </div>
-
-          <div className="container" data-aos="fade-up" data-aos-delay="100">
-            <div className="swiper testimonials-swiper">
-              <div className="swiper-wrapper">
-                {/* Testimonial Item 1 */}
-                <div className="swiper-slide">
-                  <div className="testimonial-item">
-                    <p>
-                      <i className="bi bi-quote quote-icon-left"></i>
-                      <span>
-                        "The service provided by SozoDigiCare was exceptional. The booking process was smooth, and the consultation was thorough and highly professional. I feel well cared for and informed about my health options." - Michael Thompson
-                      </span>
-                      <i className="bi bi-quote quote-icon-right"></i>
-                    </p>
-                    <img src="assets/img/testimonials/testimonials-1.jpg" className="testimonial-img" alt="Michael Thompson" />
-                    <h3>Michael Thompson</h3>
-                    <h4>Business Executive</h4>
-                  </div>
-                </div>
-                {/* Testimonial Item 2 */}
-                <div className="swiper-slide">
-                  <div className="testimonial-item">
-                    <p>
-                      <i className="bi bi-quote quote-icon-left"></i>
-                      <span>
-                        "I had the most comfortable experience with SozoDigiCare. Their team was very understanding and professional. They provided me with the best options, and I’m now well on my way to recovery." - Linda Roberts
-                      </span>
-                      <i className="bi bi-quote quote-icon-right"></i>
-                    </p>
-                    <img src="assets/img/testimonials/testimonials-2.jpg" className="testimonial-img" alt="Linda Roberts" />
-                    <h3>Linda Roberts</h3>
-                    <h4>Teacher</h4>
-                  </div>
-                </div>
-                {/* Testimonial Item 3 */}
-                <div className="swiper-slide">
-                  <div className="testimonial-item">
-                    <p>
-                      <i className="bi bi-quote quote-icon-left"></i>
-                      <span>
-                        "The medical staff at SozoDigiCare were incredibly supportive. They helped me through every step of my treatment, and their telemedicine services made it easy for me to access care, even from home." - David Green
-                      </span>
-                      <i className="bi bi-quote quote-icon-right"></i>
-                    </p>
-                    <img src="assets/img/testimonials/testimonials-3.jpg" className="testimonial-img" alt="David Green" />
-                    <h3>David Green</h3>
-                    <h4>Software Engineer</h4>
-                  </div>
-                </div>
-                {/* Testimonial Item 4 */}
-                <div className="swiper-slide">
-                  <div className="testimonial-item">
-                    <p>
-                      <i className="bi bi-quote quote-icon-left"></i>
-                      <span>
-                        "SozoDigiCare’s team was very caring and attentive. I felt like I was in good hands throughout my entire consultation. I highly recommend them for anyone in need of quality healthcare." - Emily Davis
-                      </span>
-                      <i className="bi bi-quote quote-icon-right"></i>
-                    </p>
-                    <img src="assets/img/testimonials/testimonials-4.jpg" className="testimonial-img" alt="Emily Davis" />
-                    <h3>Emily Davis</h3>
-                    <h4>Freelancer</h4>
-                  </div>
-                </div>
-                {/* Testimonial Item 5 */}
-                <div className="swiper-slide">
-                  <div className="testimonial-item">
-                    <p>
-                      <i className="bi bi-quote quote-icon-left"></i>
-                      <span>
-                        "My experience with SozoDigiCare has been wonderful. They have a user-friendly platform, and the medical professionals are top-notch. The whole process was seamless, and I felt well-supported." - John Wilson
-                      </span>
-                      <i className="bi bi-quote quote-icon-right"></i>
-                    </p>
-                    <img src="assets/img/testimonials/testimonials-5.jpg" className="testimonial-img" alt="John Wilson" />
-                    <h3>John Wilson</h3>
-                    <h4>Entrepreneur</h4>
-                  </div>
-                </div>
-              </div>
-              <div className="swiper-pagination"></div>
-            </div>
-          </div>
-        </section>
-        {/* <!-- /Testimonials Section */}
-
-
-        {/* <!-- Doctors Section  */}
-        <section id="doctors" className="doctors section light-background">
-
-        {/* <!-- Section Title  */}
-        <div className="container section-title" data-aos="fade-up">
-          <h2>Meet Our Doctors</h2>
-          <p>Our team of dedicated healthcare professionals are here to support your journey to better health.</p>
-        </div>{/* <!-- End Section Title  */}
-
-        <div className="container">
-          <div className="row gy-4">
-            {specialists.map((spec, idx) => (
-              <div
-                className="col-lg-3 col-md-6 d-flex align-items-stretch"
-                data-aos="fade-up"
-                data-aos-delay={100 * (idx + 1)}
-                key={spec._id}
+    if (!hasMounted) return null;
+  
+    return (
+      <section className="relative bg-gradient-to-br from-[var(--color-primary-8)] mt-8 py-32 px-6 sm:px-8 overflow-hidden flex items-center rounded-3xl mx-4">
+        <div className="max-w-5xl mx-auto relative">
+          <div className={`flex ${isMobile ? 'flex-col' : 'justify-between'} items-center gap-8`}>
+            {options.map((option) => (
+              <motion.div
+                key={option.name}
+                className={`relative ${isMobile ? 'w-64 h-64' : 'w-72 h-72'} rounded-full overflow-hidden cursor-pointer border-4 border-white shadow-lg`}
+                whileHover={{ scale: 1.05 }}
+                onClick={option.action}
               >
-                <div className="team-member">
-                  <div className="member-img">
-                    <img
-                      src={
-                        spec.profileImage
-                          ? `${process.env.NEXT_PUBLIC_NODE_BASE_URL}${spec.profileImage}`
-                          : spec.gender === "female"
-                            ? "/images/placeholder-female.jpg"
-                            : "/images/placeholder-male.jpg"
-                      }
-                      className="img-fluid"
-                      alt={`${spec.firstName} ${spec.lastName}`}
-                      onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop
-                        e.target.src = spec.gender === "female"
-                          ? "/images/placeholder-female.jpg"
-                          : "/images/placeholder-male.jpg";
-                      }}
-                    />
+                <motion.img
+                  src={option.image.src}
+                  alt={option.name}
+                  className="w-full h-full object-cover"
+                  initial={{ scale: 1 }}
+                  animate={{ scale: hoveredOption === option.name ? 1.1 : 1 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <motion.div
+                  className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white p-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  onHoverStart={() => setHoveredOption(option.name)}
+                  onHoverEnd={() => setHoveredOption(null)}
+                >
+                  <div className={`${option.color} rounded-full p-4 mb-2`}>
+                    {option.icon}
                   </div>
-                  <div className="member-info">
-                    <h4>{`Dr. ${spec.firstName} ${spec.lastName}`}</h4>
-                    <span>{spec.specialty || "Medical Specialist"}</span>
-                  </div>
-                </div>
+                  <h3 className="text-xl font-bold mb-2 text-center">{option.title}</h3>
+                  <p className="text-sm text-center mb-3">{option.description}</p>
+                  <button
+                    className="text-sm font-semibold"
+                    onClick={option.action}
+                  >
+                    Choose {option.name}
+                  </button>
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        {!isMobile && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            animate={{
+              background: hoveredOption === 'AI'
+                ? 'radial-gradient(circle at 25% 50%, rgba(0,255,255,0.2) 0%, rgba(0,0,0,0) 50%)'
+                : hoveredOption === 'Consultant'
+                  ? 'radial-gradient(circle at 75% 50%, rgba(255,105,180,0.2) 0%, rgba(0,0,0,0) 50%)'
+                  : 'none'
+            }}
+            transition={{ duration: 0.5 }}
+          />
+        )}
+      </section>
+    );
+  };
+  
+  const FAQ = () => {
+    const [activeIndex, setActiveIndex] = useState(null);
+  
+    const faqs = faqItems
+  
+    const toggleAccordion = (index) => {
+      setActiveIndex(activeIndex === index ? null : index);
+    };
+  
+    return (
+      <section className="faq-section py-20 bg-white rounded-3xl mx-4 mt-8 mb-8">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-primary-10">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div 
+                key={index} 
+                className="bg-gray-50 rounded-2xl overflow-hidden shadow-md"
+              >
+                <button
+                  className="w-full p-6 flex justify-between items-center text-left focus:outline-none"
+                  onClick={() => toggleAccordion(index)}
+                >
+                  <h3 className="text-lg font-semibold text-primary-9">{faq.question}</h3>
+                  {activeIndex === index ? 
+                    <FaChevronUp className="text-secondary-6" /> : 
+                    <FaChevronDown className="text-secondary-6" />
+                  }
+                </button>
+                <AnimatePresence>
+                  {activeIndex === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="px-6 pb-6 text-gray-600">
+                        {faq.answer}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>
         </div>
+      </section>
+    );
+  };
 
-        </section>{/* <!-- /Doctors Section */}
-
-
-        {/* <!-- Gallery Section  */}
-        <section id="gallery" className="gallery section">
-          {/* <!-- Section Title  */}
-          <div className="container section-title" data-aos="fade-up">
-            <h2>Gallery</h2>
-            <p>Experience our healthcare facilities and services through these images</p>
-          </div>
-
-          <div className="container" data-aos="fade-up" data-aos-delay="100">
-            <div className="swiper init-swiper">
-              <div className="swiper-wrapper align-items-center">
-                {galleries.map((item, index) => (
-                  <div className="swiper-slide" key={index}>
-                    <a
-                      className="glightbox"
-                      data-gallery="images-gallery"
-                      href={`${process.env.NEXT_PUBLIC_NODE_BASE_URL}/${item.photo}`}
-                      title={item.title}
-                    >
-                      <img src={`${process.env.NEXT_PUBLIC_NODE_BASE_URL}/${item.photo}`} className="img-fluid" alt={item.title || ''} />
-                    </a>
-                  </div>
-                ))}
-              </div>
-              <div className="swiper-pagination"></div>
-            </div>
-          </div>
-
-        </section>
-        {/* <!-- /Gallery Section */}
-
-        {/* <!-- Faq Section  --> */}
-        <section className="faq section light-background">
-
-          {/* <!-- Section Title  --> */}
-          <div id="faq" className="container section-title" data-aos="fade-up">
-            <h2>Frequently Asked Questions</h2>
-            <p>Find answers to some of the most common questions regarding SozoDigicare services.</p>
-          </div>{/* <!-- End Section Title  */}
-
-          <FaqSection />
-
-        </section> {/* <!-- End Faq Section --> */}
-
-
-        {/* <!-- Contact Section  --> */}
-        <section id="contact" className="contact section">
-
-        {/* <!-- Section Title  --> */}
-        <div className="container section-title" data-aos="fade-up">
-          <h2>Contact</h2>
-          <p>Feel free to reach out to us for any inquiries or support. We are here to assist you!</p>
-        </div>{/* <!-- End Section Title  */}
-
-        <div className="mb-5" data-aos="fade-up" data-aos-delay="200">
-          <iframe style={{border:"0", width: "100%", height: '370px'}} src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d48389.78314118045!2d-74.006138!3d40.710059!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a22a3bda30d%3A0xb89d1fe6bc499443!2sDowntown%20Conference%20Center!5e0!3m2!1sen!2sus!4v1676961268712!5m2!1sen!2sus" frameBorder="0" allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
-        </div>{/* <!-- End Google Maps  */}
-
-        <div className="container" data-aos="fade-up" data-aos-delay="100">
-
-          <div className="row gy-4">
-            <div className="col-lg-6">
-              <div className="row gy-4">
-
-                <div className="col-lg-12">
-                  <div className="info-item d-flex flex-column justify-content-center align-items-center" data-aos="fade-up" data-aos-delay="200">
-                    <i className="bi bi-geo-alt"></i>
-                    <h3>Address</h3>
-                    <p>A108 Adam Street, New York, NY 535022</p>
-                  </div>
-                </div>{/* <!-- End Info Item  */}
-
-                <div className="col-md-6">
-                  <div className="info-item d-flex flex-column justify-content-center align-items-center" data-aos="fade-up" data-aos-delay="300">
-                    <i className="bi bi-telephone"></i>
-                    <h3>Call Us</h3>
-                    <p>+1 5589 55488 55</p>
-                  </div>
-                </div>{/* <!-- End Info Item  */}
-
-                <div className="col-md-6">
-                  <div className="info-item d-flex flex-column justify-content-center align-items-center" data-aos="fade-up" data-aos-delay="400">
-                    <i className="bi bi-envelope"></i>
-                    <h3>Email Us</h3>
-                    <p>info@sozodigicare.com</p>
-                  </div>
-                </div>{/* <!-- End Info Item  */}
-
-              </div>
-            </div>
-
-            <div className="col-lg-6">
-              <form action="forms/contact.php" method="post" className="php-email-form" data-aos="fade-up" data-aos-delay="500">
-                <div className="row gy-4">
-
-                  <div className="col-md-6">
-                    <input type="text" name="name" className="form-control" placeholder="Your Name" required="" />
-                  </div>
-
-                  <div className="col-md-6 ">
-                    <input type="email" className="form-control" name="email" placeholder="Your Email" required="" />
-                  </div>
-
-                  <div className="col-md-12">
-                    <input type="text" className="form-control" name="subject" placeholder="Subject" required="" />
-                  </div>
-
-                  <div className="col-md-12">
-                    <textarea className="form-control" name="message" rows="4" placeholder="Message" required="" ></textarea>
-                  </div>
-
-                  <div className="col-md-12 text-center">
-                    <div className="loading">Loading</div>
-                    <div className="error-message"></div>
-                    <div className="sent-message">Your message has been sent. Thank you!</div>
-
-                    <button type="submit">Send Message</button>
-                  </div>
-
-                </div>
-              </form>
-            </div>{/* <!-- End Contact Form  */}
-
-          </div>
-
+  const renderServiceCard = (card) => (
+    <div key={card.id} className="bg-white rounded-2xl shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
+      <div className="relative h-48">
+        <img src={card.image.src} alt={card.content} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+          <h3 className="text-white font-bold text-xl p-4">{card.content}</h3>
         </div>
+      </div>
+    </div>
+  );
 
-        </section>{/* <!-- /Contact Section  */}
-      </main>
+  const renderBlogPost = (blog) => (
+    <div key={blog.id} className="w-full">
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden h-[320px] flex flex-col">
+        <img src={blog.image} alt={blog.title} className="w-full h-40 object-cover" />
+        <div className="p-4 flex flex-col flex-grow">
+          <h3 className="font-bold text-lg mb-2 text-primary-10 line-clamp-2">{blog.title}</h3>
+          <p className="text-gray-600 text-sm mb-2 flex-grow overflow-hidden line-clamp-2">{blog.content}</p>
+          <Link href={ `${blog.link}` } className="text-secondary-6 font-semibold hover:underline inline-flex items-center mt-auto">
+            Read More <FaArrowRight className="ml-2" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 
-      {/* <!-- Scroll Top  */}
-      <a href="#" id="scroll-top" className="scroll-top d-flex text-white align-items-center justify-content-center"><i className="bi bi-arrow-up-short"></i></a>
+  const serviceTitles = ['Free AI Diagnosis', ...services.map(service => service.title)];
 
-      {/* <!-- Preloader  */}
-      {/* <div id="preloader"></div> */}
+  const handleServiceClick = (service) => {
+    setSelectedService(service);
+    // You can add more logic here, like opening a modal or navigating to a service page
+    console.log(`Selected service: ${service}`);
+  };
 
-      
-    </>
-  )
+  return (
+    <div className='bg-red'>
+      {/* <ChatBot /> */}
+      <section className="Hero relative min-h-screen bg-gradient-to-br from-[var(--color-primary-6)] to-white transition-colors overflow-hidden flex items-center rounded-3xl">
+        <div className="intro-text p-6 sm:p-10 md:pl-20 flex flex-col justify-center items-start text-left w-full max-w-3xl z-10">
+          <h1 className="font-extrabold text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
+            <span className="bg-gradient-to-r from-white to-[var(--color-secondary-1)] text-transparent bg-clip-text">Step into the next generation</span>
+            <span className="text-white block mt-2">Healthcare Services</span>
+            <span className="text-[var(--color-secondary-1)] block mt-2">with our</span>
+          </h1>
+          <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8">
+            {/* <TypewriterEffect words={serviceTitles} typingSpeed={100} erasingSpeed={50} delayBetweenWords={2000} /> */}
+          </div>
+          {/* <button
+            className="transition-all py-8 px-8 duration-300 hover:scale-105 hover:shadow-xl mt-4 text-lg sm:text-xl font-bold relative overflow-hidden group flex items-center justify-center"
+            borderRadius='rounded-small'
+            border="border-2 border-white rounded-lg"
+            background='bg-gradient-to-r from-primary-6 to-primary-8'
+            textColor='text-white'
+            onClick={() => navigate(PATH.general.signUp)}
+          >
+            <span className="relative z-10">Sign Up for Free</span>
+          </button> */}
+        </div>
+        <img src={roboDoc.src} alt="robo doctor" className="absolute right-0 bottom-0 w-xs max-w-lg opacity-30 md:opacity-100" />
+      </section>
+
+      <section className="services-section py-8 bg-white rounded-3xl mx-4 mt-8">
+        <div className="container mx-auto mt-16 px-4">
+          <SimpleCarousel items={cards.map(renderServiceCard)} autoplay={true} autoplayInterval={2000} />
+          <div className="text-center mt-12">
+            <button
+              className="py-6 px-8 text-lg mx-auto hover:shadow-lg transition-all duration-300"
+              onClick={() => navigate(PATH.general.signUp)}
+            >
+              Our Consultants
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Our Comprehensive Services</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service, index) => (
+              <motion.div
+                key={index}
+                className="bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div className="flex justify-center mb-4">
+                  {service.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-primary-10 text-center mb-2">{service.title}</h3>
+                <p className="text-gray-600 text-center">{service.description}</p>
+                <motion.svg
+                  className="absolute bottom-0 left-0 w-full h-12 text-primary-1 opacity-10"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  <motion.path
+                    d={service.animation}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                  />
+                </motion.svg>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <InteractiveChoice />
+
+      <section className='py-20 bg-gray-50 rounded-3xl mx-4 mt-8'>
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-primary-10">Latest Blog Posts</h2>
+          <SimpleCarousel items={blogs.map(renderBlogPost)} autoplay={true} autoplayInterval={7000} />
+          <div className="text-center mt-12">
+            <Link
+              href="/blog"
+              className="inline-flex items-center text-secondary-6 font-semibold text-lg hover:underline"
+            >
+              View All Posts <FaArrowRight className="ml-2" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <FAQ />
+
+      <section className="become-specialist py-20 bg-[var(--color-primary-9)] text-white rounded-3xl mx-4 mt-8 mb-8">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Become One of Our Specialists</h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto">Join our team of expert specialists and help us deliver cutting-edge healthcare services.</p>
+          <button
+            className="py-3 px-8 text-lg hover:shadow-lg mx-auto transition-all duration-300"
+            onClick={() => navigate(PATH.general.doctorSignUp)}
+          >
+            Apply Now
+          </button>
+        </div>
+      </section>
+    </div>
+  );
 }

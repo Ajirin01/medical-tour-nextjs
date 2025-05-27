@@ -4,6 +4,46 @@ layer(base);
 @import 'tailwindcss';
 
 
+:root {
+  /* Primary Colors */
+  --color-primary-1: #d2dff2;
+  --color-primary-2: #b4c9e9;
+  --color-primary-3: #8faede;
+  --color-primary-4: #6993d2;
+  --color-primary-5: #4478c7;
+  --color-primary-6: #1e5dbc;
+  --color-primary-7: #194e9d;
+  --color-primary-8: #143e7d;
+  --color-primary-9: #0f2f5e;
+  --color-primary-10: #0a1f3f;
+  --color-primary-11: #061326;
+
+  /* Secondary Colors */
+  --color-secondary-1: #d9f4f0;
+  --color-secondary-2: #bfede7;
+  --color-secondary-3: #a0e4db;
+  --color-secondary-4: #80dbce;
+  --color-secondary-5: #60d2c2;
+  --color-secondary-6: #40c9b6;
+  --color-secondary-7: #35a898;
+  --color-secondary-8: #2b8679;
+  --color-secondary-9: #20655b;
+  --color-secondary-10: #15433d;
+  --color-secondary-11: #0d2824;
+
+  /* Gray Colors */
+  --color-gray-1: #d0d0d0;
+  --color-gray-2: #b1b1b1;
+  --color-gray-3: #8a8a8b;
+  --color-gray-4: #636364;
+  --color-gray-5: #3c3c3d;
+  --color-gray-6: #151516;
+  --color-gray-7: #121212;
+  --color-gray-8: #0e0e0f;
+  --color-gray-9: #0b0b0b;
+  --color-gray-10: #070707;
+  --color-gray-11: #040404;
+}
 
 
 @custom-variant dark (&:is(.dark *));

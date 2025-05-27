@@ -8,8 +8,9 @@ import io from "socket.io-client";
 import ConsultationRequestForm from "@/components/ConsultationRequestForm";
 import { useUser } from "@/context/UserContext";
 import { useSession } from "next-auth/react";
-
+import { FaCalendarAlt, FaStar, FaExclamationTriangle, FaPhoneAlt } from 'react-icons/fa';
 import dynamic from 'next/dynamic';
+import { convertTo24Hour,  convertMillisecondsTo24HourFormat} from "@/utils/helperFunctions";
 
 const LottieRinger = dynamic(() => import('@/components/LottieRinger'), {
   ssr: false,
@@ -155,8 +156,10 @@ export default function StartConsultationPage() {
 
 
   useEffect(() => {
-    if (!socketRef.current || !appointmentId || !specialistId) return;
+    if (!socketRef.current || !appointmentId || !specialistId || !appointment) return;
     setIsInviting(true);
+
+    // console.log(appointment.status)
   
     const socket = socketRef.current;
   
@@ -171,57 +174,36 @@ export default function StartConsultationPage() {
     });
   
     // Auto-trigger invite if not busy
-    socket.emit("invite-specialist-to-call", {
-      specialistId,
-      appointmentId,
-    });
+    if(appointment.status === "pending"){
+      socket.emit("invite-specialist-to-call", {
+        specialistId,
+        appointmentId,
+      });
+    }
   
     return () => {
       socket.off("specialist-busy");
     };
-  }, [appointmentId, specialistId]);
+  }, [appointmentId, specialistId, specialist, appointment]);
   
   
 
   const handleStartCall = () => {
     if (!appointmentId || !specialist?._id) return alert("Missing info");
 
-    // Set the invitation state to true to show a waiting message
-    setIsInviting(true);
-    setInvitationRejected(false);  // Reset rejection status when retrying
+    if(appointment.status === "pending"){
+      // Set the invitation state to true to show a waiting message
+      setIsInviting(true);
+      setInvitationRejected(false);  // Reset rejection status when retrying
 
-    const socket = socketRef.current;
+      const socket = socketRef.current;
 
-    socket.emit("invite-specialist-to-call", {
-      specialistId: specialist._id,
-      appointmentId,
-    });
+      socket.emit("invite-specialist-to-call", {
+        specialistId: specialist._id,
+        appointmentId,
+      });
+    }
   };
-
-  function convertTo24Hour(timeStr) {
-    const [time, modifier] = timeStr.split(' ');
-    let [hours, minutes] = time.split(':');
-  
-    if (modifier === 'PM' && hours !== '12') {
-      hours = parseInt(hours, 10) + 12;
-    }
-    if (modifier === 'AM' && hours === '12') {
-      hours = '00';
-    }
-  
-    return `${hours}:${minutes}`; 
-  }
-
-  function convertMillisecondsTo24HourFormat(milliseconds) {
-    const date = new Date(milliseconds);  // Create a Date object using the milliseconds
-    
-    // Extract hours and minutes
-    const hours = date.getHours().toString().padStart(2, '0'); // Ensure two digits
-    const minutes = date.getMinutes().toString().padStart(2, '0'); // Ensure two digits
-  
-    // Return in 24-hour format (HH:mm)
-    return `${hours}:${minutes}`;
-  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -315,96 +297,82 @@ export default function StartConsultationPage() {
   </div>);
 
   return (
-    <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-white">
-            {specialist.profileImage ? (
-              <img
-                src={`${process.env.NEXT_PUBLIC_NODE_BASE_URL}${specialist.profileImage}`}
-                alt={`${specialist.firstName}`}
-                className="w-full h-full object-cover rounded-full"
-                width={80}
-                height={80}
-              />
-            ) : (
-              `${specialist.firstName[0]}${specialist.lastName[0]}`
-            )}
-          </div>
+    <div className="p-6 border border-gray-200 rounded-3xl dark:border-gray-800 bg-white dark:bg-gray-900 max-w-4xl mx-auto">
+      <div className="flex flex-col md:flex-row rounded-3xl overflow-hidden">
+        {/* Left: Specialist Info */}
+        <div className="md:w-1/3 bg-gradient-to-br from-[var(--color-primary-7)] to-[var(--color-primary-5)] p-6 text-white">
+          <div className="flex flex-col items-center">
+            <img
+              src={specialist.profileImage 
+                ? `${process.env.NEXT_PUBLIC_NODE_BASE_URL}${specialist.profileImage}` 
+                : defaultUser?.src}
+              alt={`Dr. ${specialist.firstName} ${specialist.lastName}`}
+              className="w-28 h-28 md:w-36 md:h-36 rounded-full object-cover border-4 border-white shadow-lg mb-4"
+            />
+            <h2 className="text-xl font-bold text-center">
+              Dr. {specialist.firstName} {specialist.lastName}
+            </h2>
+            <p className="text-[var(--color-primary-1)] font-medium mb-2">{specialist.specialty}</p>
 
-          <div className="order-3 xl:order-2">
-            <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
-              {specialist.firstName + " " + specialist.lastName}
-            </h4>
-            <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
-              <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <GraduationCap className="w-3 h-3 mr-1" /> {specialist.specialty}
-              </p>
-              <div className="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
-              {/* <p className="text-sm text-gray-500 dark:text-gray-400">
-                {specialist.address.city}, {specialist.address.state}, {specialist.address.country}
-              </p> */}
-              <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                <MapPin className="w-3 h-3 mr-1" /> {specialist.address.country}
-              </p>
+            <div className="flex items-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <FaStar 
+                  key={i}
+                  className={`h-5 w-5 ${i < (specialist.rating || 0) 
+                    ? 'text-yellow-400' 
+                    : 'text-white text-opacity-30'}`} 
+                />
+              ))}
+              <span className="ml-2 font-medium">{specialist.rating || 0}</span>
             </div>
-          </div>
 
-          {/* Rating Stars */}
-          <div className="flex items-center order-2 gap-1 grow xl:order-3 xl:justify-end">
-            {[...Array(5)].map((_, i) => (
-              <svg
-                key={i}
-                className="w-5 h-5 text-yellow-400"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.049 2.927a.998.998 0 011.902 0l1.144 3.523a1 1 0 00.95.69h3.688c.969 0 1.371 1.24.588 1.81l-2.986 2.17a1 1 0 00-.364 1.118l1.144 3.523c.3.924-.755 1.688-1.538 1.118l-2.986-2.17a1 1 0 00-1.176 0l-2.986 2.17c-.783.57-1.838-.194-1.538-1.118l1.144-3.523a1 1 0 00-.364-1.118l-2.986-2.17c-.783-.57-.38-1.81.588-1.81h3.688a1 1 000.95-.69l1.144-3.523z" />
-              </svg>
-            ))}
+            <div className="mt-4 space-y-1 text-sm">
+              <p><strong>Experience:</strong> {specialist.experience || "N/A"} years</p>
+              <p><strong>Location:</strong> {specialist.address?.country || "Available Online"}</p>
+            </div>
           </div>
         </div>
 
-        {(appointment && appointment.status !== "completed") &&
-          (invitationRejected || busyMessage) && (
+        {/* Right: Action Area */}
+        <div className="md:w-2/3 p-6 space-y-5 flex flex-col justify-between">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">About</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              {specialist.bio ||
+                `Dr. ${specialist.firstName} ${specialist.lastName} is a dedicated specialist in ${specialist.specialty}. Known for their compassionate care and depth of knowledge, they help patients through personalized treatment and follow-up care.`}
+            </p>
+          </div>
+
+          {(appointment && appointment.status !== "completed") && (invitationRejected || busyMessage) && (
             <button
               onClick={handleStartCall}
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-indigo-300 bg-white px-4 py-3 text-sm font-medium text-indigo-700 shadow-theme-xs hover:bg-indigo-50 hover:text-indigo-800 dark:border-indigo-700 dark:bg-indigo-800 dark:text-white dark:hover:bg-white/[0.03] dark:hover:text-white-200 lg:inline-flex lg:w-auto"
+              className="w-full py-3 bg-[var(--color-primary-6)] hover:bg-[var(--color-primary-7)] text-white rounded-lg font-medium transition-colors flex items-center justify-center"
             >
-              <svg
-              className="fill-current"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1v3.5a1 1 0 01-1 1C11.61 21 3 12.39 3 2.5a1 1 0 011-1H7.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.24 1.01l-2.2 2.2z"
-                fill="currentColor"
-              />
-            </svg>
+              <FaPhoneAlt  className="mr-2" />
               Invite Specialist to session
             </button>
-        )}
+          )}
 
-        {isInviting && !invitationRejected && !busyMessage && <LottieRinger />}
+          {isInviting && !invitationRejected && !busyMessage && appointment?.status === "pending" && <LottieRinger />}
 
+          {busyMessage && (
+            <div className="text-center text-lg text-orange-500">
+              {busyMessage}
+            </div>
+          )}
 
-        {busyMessage && (
-          <div className="mt-5 text-center text-lg text-orange-500">
-            {busyMessage}
-          </div>
-        )}
+          {invitationRejected && (
+            <div className="flex items-center justify-center gap-3 mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+              <FaExclamationTriangle className="w-5 h-5 shrink-0" />
+              <p className="text-sm font-medium">
+                The specialist has <span className="font-semibold">rejected</span> the call. Please try again later.
+              </p>
+            </div>
+          )}
 
-        {invitationRejected && (
-          <div className="mt-5 text-center text-lg text-red-500">
-            The specialist has rejected the call. Please try again later.
-          </div>
-        )}
+        </div>
       </div>
     </div>
+
   );
 }

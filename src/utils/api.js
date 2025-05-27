@@ -1,41 +1,62 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_NODE_API_BASE_URL || "http://localhost:5000";
 
-// Helper to add timeout
-async function fetchWithTimeout(resource, options = {}, timeout = 10000) { // default 10s
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
+// Timeout Fetch
+// Timeout Fetch with Retry
+export async function fetchWithTimeout(resource, options = {}, timeout = 10000, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
 
-  try {
-    const res = await fetch(resource, {
-      ...options,
-      signal: controller.signal,
-    });
-    return res;
-  } finally {
-    clearTimeout(id);
+    try {
+      const res = await fetch(resource, {
+        ...options,
+        signal: controller.signal,
+      });
+
+      clearTimeout(id);
+
+      return res; // Success
+    } catch (err) {
+      clearTimeout(id);
+
+      if (err.name === "AbortError") {
+        console.warn(`Request aborted due to timeout (Attempt ${attempt})`);
+      } else {
+        console.warn(`Fetch error: ${err.message} (Attempt ${attempt})`);
+      }
+
+      if (attempt === retries) {
+        if (err.name === "AbortError") {
+          return { aborted: true };
+        }
+        throw err;
+      }
+
+      // Optional: wait before retrying (simple backoff)
+      await new Promise((res) => setTimeout(res, 500 * attempt));
+    }
   }
 }
 
-// Fetch Data (GET)
+
+// GET
 export async function fetchData(endpoint, token = null) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, { headers });
 
-  try {
-    const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, { headers });
-
-    if (!res.ok) {
-      const errorResponse = await res.json();
-      throw new Error(errorResponse.message || `Error: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("API Fetch Error:", error);
-    throw error;
+  if (res?.aborted) {
+    return { aborted: true };
   }
+
+  if (!res.ok) {
+    const errorResponse = await res.json().catch(() => ({}));
+    throw new Error(errorResponse.message || `Error: ${res.statusText}`);
+  }
+
+  return await res.json();
 }
 
-// Post Data (POST)
+// POST
 export async function postData(endpoint, data, token = null, isFormData = false) {
   const headers = token
     ? {
@@ -44,27 +65,26 @@ export async function postData(endpoint, data, token = null, isFormData = false)
       }
     : { "Content-Type": "application/json" };
 
-  try {
-    const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
-      method: "POST",
-      headers,
-      body: isFormData ? data : JSON.stringify(data),
-    });
+  const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
+    method: "POST",
+    headers,
+    body: isFormData ? data : JSON.stringify(data),
+  });
 
-    if (!res.ok) {
-      const errorResponse = await res.json();
-      throw new Error(errorResponse.message || `Error: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("API Post Error:", error);
-    throw error;
+  if (res?.aborted) {
+    return { aborted: true };
   }
+
+  if (!res.ok) {
+    const errorResponse = await res.json().catch(() => ({}));
+    throw new Error(errorResponse.message || `Error: ${res.statusText}`);
+  }
+
+  return await res.json();
 }
 
-// Update Data (PUT or PATCH)
-export async function updateData(endpoint, data, token, isFormData = false) {
+// PUT
+export async function updateData(endpoint, data, token = null, isFormData = false) {
   const headers = token
     ? {
         Authorization: `Bearer ${token}`,
@@ -72,43 +92,40 @@ export async function updateData(endpoint, data, token, isFormData = false) {
       }
     : {};
 
-  try {
-    const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
-      method: "PUT",
-      headers,
-      body: isFormData ? data : JSON.stringify(data),
-    });
+  const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
+    method: "PUT",
+    headers,
+    body: isFormData ? data : JSON.stringify(data),
+  });
 
-    if (!res.ok) {
-      const errorResponse = await res.json();
-      throw new Error(errorResponse.message || `Error: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("API Update Error:", error);
-    throw error;
+  if (res?.aborted) {
+    return { aborted: true };
   }
+
+  if (!res.ok) {
+    const errorResponse = await res.json().catch(() => ({}));
+    throw new Error(errorResponse.message || `Error: ${res.statusText}`);
+  }
+
+  return await res.json();
 }
 
-// Delete Data (DELETE)
-export async function deleteData(endpoint, token) {
+// DELETE
+export async function deleteData(endpoint, token = null) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
+    method: "DELETE",
+    headers,
+  });
 
-  try {
-    const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
-      method: "DELETE",
-      headers,
-    });
-
-    if (!res.ok) {
-      const errorResponse = await res.json();
-      throw new Error(errorResponse.message || `Error: ${res.statusText}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("API Delete Error:", error);
-    throw error;
+  if (res?.aborted) {
+    return { aborted: true };
   }
+
+  if (!res.ok) {
+    const errorResponse = await res.json().catch(() => ({}));
+    throw new Error(errorResponse.message || `Error: ${res.statusText}`);
+  }
+
+  return await res.json();
 }
