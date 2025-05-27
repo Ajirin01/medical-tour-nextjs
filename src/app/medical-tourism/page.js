@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import { PATH } from '@/routes/path';
+import dynamic from 'next/dynamic';
+
 import { medicalTourismHero } from '@/assets';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -10,6 +10,8 @@ import 'leaflet/dist/leaflet.css';
 import '@/mapIcons'; // Import the mapIcons file we just created
 import { FaPlane, FaHospital, FaUserMd, FaGlobe, FaMoneyBillWave, FaCalendarAlt, FaHandHoldingMedical, FaPassport, FaCut, FaBone, FaHeartbeat, FaBaby, FaTooth, FaStethoscope, FaWeight, FaYinYang } from 'react-icons/fa';
 import { services, specialties, destinations } from "./data"
+
+const MapClientOnly = dynamic(() => import('@/components/MapClientOnly'), { ssr: false });
 
 const MedicalTourism = () => {
   // const navigate = useNavigate();
@@ -207,20 +209,10 @@ const MedicalTourism = () => {
         <section className="mb-20">
           <h2 className="text-4xl font-bold mb-12 text-center">Our Global Health Havens</h2>
           <div className="relative w-full h-[500px] border border-gray-300 rounded-lg overflow-hidden">
-            <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }}>
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              {destinations.map((destination, index) => (
-                <Marker key={index} position={destination.coordinates}>
-                  <Popup>
-                    <h3 className="font-bold">{destination.name}</h3>
-                    <p>Specialties: {destination.specialties.join(', ')}</p>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+          <section className="mb-20">
+            <h2 className="text-4xl font-bold mb-12 text-center">Our Global Health Havens</h2>
+            <MapClientOnly />
+          </section>
           </div>
         </section>
 
