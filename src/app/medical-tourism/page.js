@@ -22,17 +22,17 @@ const MedicalTourism = () => {
 
   const [hasWindow, setHasWindow] = useState(false);
 
-  useEffect(() => {
-    setHasWindow(typeof window !== 'undefined');
-  }, []);
+  // useEffect(() => {
+  //   setHasWindow(typeof window !== 'undefined');
+  // }, []);
   
 
-  useEffect(() => {
-    if (!hasWindow) return;
+  // useEffect(() => {
+  //   if (!hasWindow) return;
 
-    // Safe to use window now
-    console.log('Window width is:', window.innerWidth);
-  }, [hasWindow]);
+  //   // Safe to use window now
+  //   console.log('Window width is:', window.innerWidth);
+  // }, [hasWindow]);
 
   const handleContactClick = () => {
     navigate(PATH.general.contact);
@@ -51,13 +51,7 @@ const MedicalTourism = () => {
     <div className="medical-tourism">
       {/* Hero Section */}
       <div className="relative h-[80vh] flex items-center justify-center overflow-hidden">
-      <Image 
-          src={medicalTourismHero} 
-          alt="Medical Tourism Hero" 
-          layout="fill" 
-          objectFit="cover" 
-          priority 
-        />
+        <img src={medicalTourismHero.src} alt="Medical Tourism Hero" className='absolute h-full w-full object-cover' />
         <div className="absolute inset-0 bg-black/50 z-10"></div>
         <div className="relative z-10 text-center text-white">
           <h1 className="text-6xl font-bold mb-4">Welcome to SozoDigiCare</h1>
@@ -217,7 +211,7 @@ const MedicalTourism = () => {
           <div className="relative w-full h-[500px] border border-gray-300 rounded-lg overflow-hidden">
           <section className="mb-20">
             <h2 className="text-4xl font-bold mb-12 text-center">Our Global Health Havens</h2>
-            <MapClientOnly />
+            {/* <MapClientOnly /> */}
           </section>
           </div>
         </section>
