@@ -5,13 +5,13 @@ import dynamic from 'next/dynamic';
 
 import { medicalTourismHero } from '@/assets';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import '@/mapIcons'; // Import the mapIcons file we just created
+// import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+// import 'leaflet/dist/leaflet.css';
+// import '@/mapIcons'; // Import the mapIcons file we just created
 import { FaPlane, FaHospital, FaUserMd, FaGlobe, FaMoneyBillWave, FaCalendarAlt, FaHandHoldingMedical, FaPassport, FaCut, FaBone, FaHeartbeat, FaBaby, FaTooth, FaStethoscope, FaWeight, FaYinYang } from 'react-icons/fa';
 import { services, specialties, destinations } from "./data"
 
-const MapClientOnly = dynamic(() => import('@/components/MapClientOnly'), { ssr: false });
+// const MapClientOnly = dynamic(() => import('@/components/MapClientOnly'), { ssr: false });
 
 const MedicalTourism = () => {
   // const navigate = useNavigate();
