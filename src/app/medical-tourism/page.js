@@ -51,7 +51,13 @@ const MedicalTourism = () => {
     <div className="medical-tourism">
       {/* Hero Section */}
       <div className="relative h-[80vh] flex items-center justify-center overflow-hidden">
-        <img src={medicalTourismHero.src} alt="Medical Tourism Hero" className='absolute h-full w-full object-cover' />
+      <Image 
+          src={medicalTourismHero} 
+          alt="Medical Tourism Hero" 
+          layout="fill" 
+          objectFit="cover" 
+          priority 
+        />
         <div className="absolute inset-0 bg-black/50 z-10"></div>
         <div className="relative z-10 text-center text-white">
           <h1 className="text-6xl font-bold mb-4">Welcome to SozoDigiCare</h1>
