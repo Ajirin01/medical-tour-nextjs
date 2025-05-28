@@ -10,6 +10,7 @@ export async function fetchWithTimeout(resource, options = {}, timeout = 10000, 
     try {
       const res = await fetch(resource, {
         ...options,
+        credentials: "include",
         signal: controller.signal,
       });
 
