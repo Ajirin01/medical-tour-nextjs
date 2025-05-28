@@ -27,7 +27,7 @@ export function ToastProvider({ children }) {
       {children}
 
       {/* Toast Container */}
-      <div className="fixed bottom-6 right-6 z-50 space-y-2 flex flex-col items-end">
+      <div className="fixed bottom-6 right-6 z-9999999999999 space-y-2 flex flex-col items-end">
         {toasts.map((toast, index) => (
           <div
             key={index}

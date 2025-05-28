@@ -1,4 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 const SessionTimer = ({
   appointment,
@@ -9,6 +11,9 @@ const SessionTimer = ({
   handleEndCall,
   addToast
 }) => {
+  const [localRemainingTime, setLocalRemainingTime] = useState(0);
+  const [totalDurationSeconds, setTotalDurationSeconds] = useState(1); // Prevent divide-by-zero
+
   useEffect(() => {
     if (!appointment || !appointment.session.appointment.duration) return;
 
@@ -31,12 +36,9 @@ const SessionTimer = ({
     const sessionDurationMs = (appointment.session.appointment.duration * 60 * 1000) / 60;
     const sessionEndTime = sessionStartTime + sessionDurationMs;
 
-    let notified = {
-      70: false,
-      80: false,
-      90: false,
-      95: false,
-    };
+    setTotalDurationSeconds(Math.ceil(sessionDurationMs / 1000));
+
+    let notified = { 70: false, 80: false, 90: false, 95: false };
 
     const updateTimer = () => {
       const now = Date.now();
@@ -45,7 +47,9 @@ const SessionTimer = ({
 
       const remainingTimeMs = Math.max(0, sessionEndTime - now);
       const remainingSeconds = Math.ceil(remainingTimeMs / 1000);
+
       setRemainingTime(remainingSeconds);
+      setLocalRemainingTime(remainingSeconds);
 
       const remainingMinutes = Math.ceil(remainingSeconds / 60);
 
@@ -79,7 +83,27 @@ const SessionTimer = ({
     return () => clearInterval(timerId);
   }, [appointment]);
 
-  return null;
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const percentage = ((totalDurationSeconds - localRemainingTime) / totalDurationSeconds) * 100;
+
+  return (
+    <div style={{ width: 70, height: 70 }}>
+      <CircularProgressbar
+        value={percentage}
+        text={formatTime(localRemainingTime)}
+        styles={buildStyles({
+          textColor: "#ff4d4f",
+          pathColor: "#ff4d4f",
+          trailColor: "#eee",
+        })}
+      />
+    </div>
+  );
 };
 
 export default SessionTimer;

@@ -39,7 +39,7 @@ const VideoSection = ({
     //     />
     //   </div>
 
-    <div className="relative w-full h-[80vh] rounded-xl overflow-hidden shadow-lg border border-gray-300">
+    <div className="relative z-99999 w-full h-[100vh] rounded-xl overflow-hidden shadow-lg">
         <iframe
           ref={iframeRef}
           src={iframeUrl}

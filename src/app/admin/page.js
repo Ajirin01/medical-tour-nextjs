@@ -8,6 +8,8 @@ import {
   FaBell, FaClipboardList, FaEllipsisH, FaPills, FaChevronRight
 } from 'react-icons/fa';
 
+import { useRouter } from "next/navigation";
+
 import { DTable } from "@/components/gabriel";
 
 import MonthlyTarget from "@/components/admin/ecommerce/MonthlyTarget";
@@ -23,6 +25,8 @@ export default function Ecommerce() {
   const { data: session } = useSession();
   const userRole = session?.user?.role ?? "user";
   const token = session?.user?.jwt
+
+  const router = useRouter()
 
   const { user } = useUser()
 
@@ -107,7 +111,9 @@ export default function Ecommerce() {
   };
 
   const handleChat = () => {};
-  const handleConsult = () => {};
+  const handleConsult = () => {
+    router.push("admin/available-specialists")
+  };
   const handleMedicalRecords = () => {};
   const handleAppointments = () => {};
   const handleHistory = () => {};

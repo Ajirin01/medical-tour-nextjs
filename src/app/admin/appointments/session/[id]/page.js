@@ -20,10 +20,15 @@ import useAppointment from "@/hooks/useAppointment";
 import useSessionSocket from "@/hooks/useSessionSocket";
 
 import { postData, fetchData, updateData } from "@/utils/api";
+import { useSidebar } from "@/context/admin/SidebarContext";
+
 
 const SessionPage = () => {
   const { id } = useParams();
   const router = useRouter();
+
+  const { isExpanded, isMobileOpen, toggleMobileSidebar } = useSidebar();
+  
 
   const videoUrl = `https://videowidget.sozodigicare.com/?room=${id}`
 
@@ -39,6 +44,9 @@ const SessionPage = () => {
 
   const [remainingTime, setRemainingTime] = useState(null);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+
+  const [isFullScreen, setIsFullScreen] = useState(true);
+  const [showOptions, setShowOptions] = useState(false);
 
   const [sessionEnded, setSessionEnded] = useState(false);
   const [endingSession, setEndingSession] = useState(false);
@@ -83,6 +91,17 @@ const SessionPage = () => {
   useEffect(()=> {
     if(appointmentRef.current?.session && appointmentRef.current?.session?.appointment?.status === "completed" && !appointmentRef.current?.session?.feedback){
       setShowRatingField(true)
+    }
+  }, [appointmentRef.current])
+
+  useEffect(()=> {
+      toggleMobileSidebar()
+  }, [])
+
+  useEffect(()=> {
+    if(appointmentRef.current?.session && appointmentRef.current?.session?.appointment?.status === "pending"){
+      setIsTimerRunning(true)
+      toggleMobileSidebar()
     }
   }, [appointmentRef.current])
 
@@ -305,115 +324,124 @@ const SessionPage = () => {
   const specialist = appointment.session.specialist;
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
-      <h1 className="text-2xl font-semibold text-center text-gray-800 dark:text-gray-300 mb-2">Consultation Video Session</h1>
-      <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">
-        {userRole === 'specialist' || userRole === 'consultant'
-          ? `Patient: ${patient?.firstName} ${patient?.lastName} | Date: ${new Date(appointment.session.appointment.date).toLocaleString()}`
-          : `Consultant: ${specialist?.firstName} ${specialist?.lastName} | Date: ${new Date(appointment.session.appointment.date).toLocaleString()}`}
-      </p>
-
-
-      <SessionTimer
-        appointment={appointment}
-        setRemainingTime={setRemainingTime}
-        setIsTimerRunning={setIsTimerRunning}
-        setSessionEnded={setSessionEnded}
-        handleEndSession={handleEndSession}
-        handleEndCall={handleEndCall}
-        addToast={addToast}
-      />
-
-      <VideoSection
-        appointment={appointment}
-        session={session}
-        sessionEnded={sessionEnded}
-        specialistToken={specialistToken}
-        patientToken={patientToken}
-        userRole={userRole}
-        iframeRef={iframeRef}
-        iframeUrl={videoUrl}
-        id={id}
-        videoRef={videoRef}
-        showRatingField={showRatingField}
-        showRatingForm={showRatingForm}
-        setShowRatingForm={setShowRatingForm}
-        rating={rating}
-        setRating={setRating}
-        comment={comment}
-        setComment={setComment}
-        handleRateSession={handleRateSession}
-        isSubmitting={isSubmitting}
-
-      /> 
-
-      {((userRole === "specialist" || userRole === "consultant") && appointment.session.appointment.status === "pending") && !sessionEnded && (
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={handleEndSession}
-            className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700"
-            disabled={endingSession}
+    <div className={`relative ${isTimerRunning ? "bottom-25 bg-black" : "bottom-0 bg-white"} transition-all duration-300`}>
+      <div className={`min-h-screen ${isTimerRunning ? "bg-black" : "bg-white"}`}>
+        <div className="absolute top-4 right-4 flex gap-2 z-9999999">
+          {/* <button
+            onClick={() => setIsFullScreen(!isFullScreen)}
+            className="bg-white dark:bg-gray-800 px-3 py-1 rounded text-sm shadow hover:bg-gray-200 dark:hover:bg-gray-700"
           >
-            {endingSession ? "Ending..." : "End Session"}
-          </button>
+            {isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          </button> */}
+          { isTimerRunning && userRole === "specialist" &&<button
+            onClick={() => setShowOptions(!showOptions)}
+            className="bg-white dark:bg-gray-800 border px-3 py-1 rounded-full text-xl font-bold shadow hover:bg-gray-200 dark:hover:bg-gray-700"
+            title="Options"
+          >
+            ⋮
+          </button>}
         </div>
-      )}
-  
-      {/* Other buttons for specialists/consultants */}
-      { (((userRole === "specialist" || userRole === "consultant") && appointment.session.appointment.status === "pending") && !sessionEnded) && 
-        <div className="flex justify-center gap-4 mt-6">
-          <button
-            onClick={handleOpenQuestions}
-            className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ${userRole !== 'specialist' && userRole !== 'consultant' ? 'hidden' : ''}`}
-            disabled={userRole !== 'specialist' && userRole !== 'consultant'}
-          >
-            Patient Questions
-          </button>
-          <button
-            onClick={() => setShowDocs(true)}
-            className={`bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 ${userRole !== 'specialist' && userRole !== 'consultant' ? 'hidden' : ''}`}
-            disabled={userRole !== 'specialist' && userRole !== 'consultant'}
-          >
-            Documentation
-          </button>
-          <button
-            onClick={() => setShowPrescriptions(true)}
-            className={`bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 ${userRole !== 'specialist' && userRole !== 'consultant' ? 'hidden' : ''}`}
-            disabled={userRole !== 'specialist' && userRole !== 'consultant'}
-          >
-            Prescriptions
-          </button>
+        
+        {/* Timer */}
+        { isTimerRunning && <div className="absolute top-10 left-1/2 transform -translate-x-1/2 mb-6 z-999999">
+          <SessionTimer
+            appointment={appointment}
+            setRemainingTime={setRemainingTime}
+            setIsTimerRunning={setIsTimerRunning}
+            setSessionEnded={setSessionEnded}
+            handleEndSession={handleEndSession}
+            handleEndCall={handleEndCall}
+            addToast={addToast}
+          />
+        </div>}
+
+        {/* Video Area */}
+        <div className="mb-6">
+          <VideoSection
+            appointment={appointment}
+            session={session}
+            sessionEnded={sessionEnded}
+            specialistToken={specialistToken}
+            patientToken={patientToken}
+            userRole={userRole}
+            iframeRef={iframeRef}
+            iframeUrl={videoUrl}
+            id={id}
+            videoRef={videoRef}
+            showRatingField={showRatingField}
+            showRatingForm={showRatingForm}
+            setShowRatingForm={setShowRatingForm}
+            rating={rating}
+            setRating={setRating}
+            comment={comment}
+            setComment={setComment}
+            handleRateSession={handleRateSession}
+            isSubmitting={isSubmitting}
+          />
         </div>
-      }
-  
 
-      <NotesDialog
-        showDocs={showDocs}
-        setShowDocs={setShowDocs}
-        sessionNotes={sessionNotes}
-        setSessionNotes={setSessionNotes}
-        handleSaveNotes={handleSaveNotes}
-        savingNotes={savingNotes}
-      />
+        {showOptions && (userRole === "specialist" || userRole === "consultant") &&
+          appointment.session.appointment.status === "pending" &&
+          !sessionEnded && (
+            <div className="absolute top-16 right-4 bg-gray-800 rounded-xl shadow-xl p-4 w-60 z-[99999] space-y-3 animate-fade-in border dark:border-gray-700">
+              <button
+                onClick={handleEndSession}
+                className="flex items-center gap-2 w-full border border-white text-white dark:text-white px-4 py-2 rounded-lg transition hover:text-gray-200"
+                disabled={endingSession}
+              >
+                <span>🔚</span>
+                {endingSession ? "Ending..." : "End Session"}
+              </button>
 
-      <PrescriptionDialog
-        showPrescriptions={showPrescriptions}
-        setShowPrescriptions={setShowPrescriptions}
-        prescriptions={prescriptions}
-        handleDeletePrescription={handleDeletePrescription}
-        newPrescription={newPrescription}
-        setNewPrescription={setNewPrescription}
-        handleAddPrescription={handleAddPrescription}
-        savingPrescription={savingPrescription}
-      />
+              <button
+                onClick={() => setShowDocs(true)}
+                className="flex items-center gap-2 w-full border border-white text-white dark:text-white px-4 py-2 rounded-lg transition hover:text-gray-200"
+              >
+                <span>📄</span>
+                Documentation
+              </button>
 
-      <QuestionsDialog
-        showQuestions={showQuestions}
-        setShowQuestions={setShowQuestions}
-        healthQuestions={healthQuestions}
-        loadingQuestions={loadingQuestions}
-      />
+              <button
+                onClick={() => setShowPrescriptions(true)}
+                className="flex items-center gap-2 w-full border border-white text-white dark:text-white px-4 py-2 rounded-lg transition hover:text-gray-200"
+              >
+                <span>💊</span>
+                Prescriptions
+              </button>
+            </div>
+
+        )}
+
+        {/* Dialogs */}
+        <NotesDialog
+          showDocs={showDocs}
+          setShowDocs={setShowDocs}
+          sessionNotes={sessionNotes}
+          setSessionNotes={setSessionNotes}
+          handleSaveNotes={handleSaveNotes}
+          savingNotes={savingNotes}
+        />
+
+        <PrescriptionDialog
+          showPrescriptions={showPrescriptions}
+          setShowPrescriptions={setShowPrescriptions}
+          prescriptions={prescriptions}
+          handleDeletePrescription={handleDeletePrescription}
+          newPrescription={newPrescription}
+          setNewPrescription={setNewPrescription}
+          handleAddPrescription={handleAddPrescription}
+          savingPrescription={savingPrescription}
+        />
+
+        {/* <QuestionsDialog
+          showQuestions={showQuestions}
+          setShowQuestions={setShowQuestions}
+          healthQuestions={healthQuestions}
+          loadingQuestions={loadingQuestions}
+        /> */}
+      </div>
     </div>
+
   );
 };
 

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { defaultUser } from '@/assets';
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -33,6 +34,8 @@ const AppSidebar = () => {
   const pathname = usePathname();
   const [openSubmenus, setOpenSubmenus] = useState({});
   const subMenuRefs = useRef({});
+
+  const apiUrl = process.env.NEXT_PUBLIC_NODE_BASE_URL
 
   const [unverifiedLabCount, setUnverifiedLabCount] = useState(0);
   const [unverifiedPharmCount, setUnverifiedPharmCount] = useState(0);
@@ -446,22 +449,36 @@ const AppSidebar = () => {
         }`}
       >
         <a href="/">
-            <img
-              width={154}
-              height={32}
-              className="dark:hidden"
-              src="/images/logo/logo.png"
-              alt="Logo"
-            />
-            <img
-              width={154}
-              height={32}
-              className="hidden dark:block"
-              src="/images/logo/logo-dark.png"
-              alt="Logo"
-            />
-          </a>
+          <img
+            width={100}
+            height={32}
+            className="dark:hidden"
+            src="/images/logo/logo.png"
+            alt="Logo"
+          />
+          <img
+            width={154}
+            height={32}
+            className="hidden dark:block"
+            src="/images/logo/logo-dark.png"
+            alt="Logo"
+          />
+        </a>
+
+        
       </div>
+
+      <div className="flex flex-col items-center p-4 border-b border-gray-200">
+        <img
+          src={user?.profileImage ? `${apiUrl}${user?.profileImage}` : defaultUser.src}
+          crossOrigin="anonymous"
+          alt="User" 
+          className="w-20 h-20 rounded-full mb-2 object-cover"
+        />
+        <h2 className="text-xl font-semibold text-gray-800">{user?.firstName}</h2>
+        <p className="text-sm text-gray-600">{user?.role}</p>
+      </div>
+
       <div className="flex flex-col overflow-y-auto no-scrollbar">
         <nav className="mb-6">
           <h2 className={`mb-4 text-md uppercase font-bold flex text-gray-500 ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
