@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
+import { getSocket } from "@/lib/socket";
 
 const useSessionSocket = ({
   session,
@@ -16,10 +16,8 @@ const useSessionSocket = ({
   const socketRef = useRef();
 
   useEffect(() => {
-    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
-      transports: ['websocket']
-    });
-    return () => socketRef.current.disconnect();
+    socketRef.current = getSocket();
+    // return () => socketRef.current.disconnect();
   }, []);
 
   useEffect(() => {
@@ -38,15 +36,15 @@ const useSessionSocket = ({
   useEffect(() => {
     const socket = socketRef.current;
 
-    socket.on('call-rejected', ({ appointmentId }) => {
-      alert('The specialist rejected your consultation. Please choose another available specialist.');
-      router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
-    });
+    // socket.on('call-rejected', ({ appointmentId }) => {
+    //   alert('The specialist rejected your consultation. Please choose another available specialist.');
+    //   router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
+    // });
 
-    socket.on('call-timeout', ({ appointmentId }) => {
-      alert('Call timed out. The specialist did not respond.');
-      router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
-    });
+    // socket.on('call-timeout', ({ appointmentId }) => {
+    //   alert('Call timed out. The specialist did not respond.');
+    //   router.push(`/admin/available-specialists?appointmentId=${appointmentId}`);
+    // });
 
     socket.on('specialist-disconnected', ({ appointmentId }) => {
       alert('The specialist disconnected unexpectedly. Please try another.');
@@ -69,8 +67,8 @@ const useSessionSocket = ({
     });
 
     return () => {
-      socket.off('call-rejected');
-      socket.off('call-timeout');
+      // socket.off('call-rejected');
+      // socket.off('call-timeout');
       socket.off('specialist-disconnected');
       socket.off('session-ended');
     };

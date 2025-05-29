@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useCallback } from "react";
 
 import { useToast } from "@/context/ToastContext";
 import { useUser } from "@/context/UserContext";
@@ -21,6 +22,8 @@ import useSessionSocket from "@/hooks/useSessionSocket";
 
 import { postData, fetchData, updateData } from "@/utils/api";
 import { useSidebar } from "@/context/admin/SidebarContext";
+import { getSocket } from "@/lib/socket";
+
 
 
 const SessionPage = () => {
@@ -77,6 +80,11 @@ const SessionPage = () => {
 
   const videoRef = useRef();
   const appointmentRef = useRef(appointment);
+  const socketRef = useRef();
+  
+  useEffect(() => {
+    socketRef.current = getSocket();
+  }, []);
 
   useEffect(() => {
     appointmentRef.current = appointment;
@@ -89,10 +97,10 @@ const SessionPage = () => {
   };
 
   useEffect(()=> {
-    if(appointmentRef.current?.session && appointmentRef.current?.session?.appointment?.status === "completed" && !appointmentRef.current?.session?.feedback){
+    if(appointmentRef.current?.session?.appointment?.status === "completed" && !appointmentRef.current?.session?.feedback){
       setShowRatingField(true)
     }
-  }, [appointmentRef.current])
+  }, [appointment])
 
   useEffect(()=> {
       toggleMobileSidebar()
@@ -107,7 +115,7 @@ const SessionPage = () => {
 
   const handleEndSession = async () => {
     const currentAppointment = appointmentRef.current;
-    if (!currentAppointment?.session._id || !token) return;
+    if (!currentAppointment?.session._id || !token || currentAppointment.status === "completed") return;
     try {
       setEndingSession(true);
       socketRef.current.emit("session-ended", {
@@ -127,6 +135,7 @@ const SessionPage = () => {
       handleEndCall();
       setIsTimerRunning(false);
       setEndingSession(false);
+      toggleMobileSidebar()
     }
   };
 
@@ -182,18 +191,6 @@ const SessionPage = () => {
       fetchPrescriptions();
     }
   }, [showPrescriptions]);
-
-  const socketRef = useSessionSocket({
-    session,
-    appointmentRef,
-    setSessionEnded,
-    setIsTimerRunning,
-    setShowRatingField,
-    handleEndSession,
-    handleEndCall,
-    addToast,
-    router
-  });
 
   useEffect(() => {
     const storedSession = localStorage.getItem('activeVideoSession');
@@ -304,6 +301,38 @@ const SessionPage = () => {
     }
   };
 
+  const patient = appointment?.session?.user;
+  const specialist = appointment?.session?.specialist;
+
+  const handleSessionEnded = useCallback(({ specialist, appointmentId }) => {
+    try {
+      console.log("🔔 session-ended event received:", { specialist, appointmentId });
+  
+      const currentAppointment = appointmentRef.current;
+      console.log("📋 Current appointment:", currentAppointment);
+  
+      const sessionIdMatch = currentAppointment?.session?.appointment?._id === appointmentId;
+      const userIdMatch = currentAppointment?.session?.user?._id === session?.user?.id;
+  
+      console.log("✅ sessionIdMatch:", sessionIdMatch);
+      console.log("✅ userIdMatch:", userIdMatch);
+  
+      if (sessionIdMatch && userIdMatch) {
+        setSessionEnded(true);
+        setIsTimerRunning(false);
+        setShowRatingField(true);
+        handleEndCall();
+        toggleMobileSidebar()
+        addToast("Specialist ended the session", "info", 5000);
+      } else {
+        console.warn("⚠️ session-ended received but session or user ID did not match");
+      }
+    } catch (error) {
+      console.error("❌ Error in handleSessionEnded:", error);
+    }
+  }, [appointmentRef, session?.user?.id, handleEndSession, handleEndCall]); // Add only necessary dependencies
+  
+
   const handleOpenQuestions = async () => {
     // console.log("Question clicked", appointment.session)
     if (appointment.session.appointment.patient) {
@@ -320,8 +349,7 @@ const SessionPage = () => {
     return <div className="text-center mt-10 text-red-500">Appointment not found</div>;
   }
 
-  const patient = appointment.session.user;
-  const specialist = appointment.session.specialist;
+  
 
   return (
     <div className={`relative ${isTimerRunning ? "bottom-25 bg-black" : "bottom-0 bg-white"} transition-all duration-300`}>
@@ -377,6 +405,7 @@ const SessionPage = () => {
             setComment={setComment}
             handleRateSession={handleRateSession}
             isSubmitting={isSubmitting}
+            handleSessionEnded={handleSessionEnded}
           />
         </div>
 
