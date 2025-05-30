@@ -115,7 +115,12 @@ export default function Ecommerce() {
     router.push("admin/available-specialists")
   };
   const handleMedicalRecords = () => {};
-  const handleAppointments = () => {};
+  const handleAppointments = () => {
+    router.push("admin/appointments")
+  };
+  const handleCreateAppointments = () => {
+    router.push("admin/consultation/book")
+  };
   const handleHistory = () => {};
 
   const quickActions = [
@@ -399,7 +404,7 @@ export default function Ecommerce() {
                   
                   <div className="p-4 bg-gray-50">
                     <button 
-                      onClick={handleAppointments}
+                      onClick={handleCreateAppointments}
                       className="w-full py-2 bg-white border border-gray-300 rounded-lg text-[var(--color-primary67)] hover:bg-gray-50 text-sm font-medium transition-colors"
                     >
                       + New Appointment

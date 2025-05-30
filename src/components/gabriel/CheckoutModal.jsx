@@ -15,11 +15,14 @@ const CheckoutModal = ({
   amount,
   currency = "USD",
   duration,
-  initiateCallAPI,
+  initiateCallAPI
 }) => {
   const specialist = useSelector((state) =>  state.specialist.specialist);
   const appointmentDate = useSelector((state) => state.specialist.appointmentDate);
   const consultMode = useSelector((state) => state.specialist.consultMode);
+  const slot = useSelector((state) => state.specialist.slot);
+
+  // console.log(specialist, appointmentDate, consultMode, slot)
 
 
   const { user } = useUser();
@@ -91,10 +94,11 @@ const CheckoutModal = ({
       // return
 
       if (orderData.appointmentId) {
-        if (orderData?.type === "general") {
+        if (orderData?.type === "general" && consultMode === "now") {
 
           window.location.href = `/admin/available-specialists/${orderData.consultant}?appointmentId=${orderData._id}`;
         } else {
+          setCallStatus("booking")
           router.push(`/admin/appointments`);
         }
         return;
@@ -104,6 +108,9 @@ const CheckoutModal = ({
         patient: orderData.patient,
         consultant: orderData.consultant,
         date: orderData.date,
+        mode: orderData.mode,
+        startTime: orderData.startTime,
+        endTime: orderData.endTime,
         duration: orderData.duration,
         type: orderData.type,
         paymentStatus: "paid",
@@ -119,9 +126,10 @@ const CheckoutModal = ({
 
       if (res.appointment) {
         const appointmentId = res.appointment._id;
-        if (orderData?.type === "general") {
+        if (orderData?.type === "general" && consultMode === "now") {
           window.location.href = `/admin/available-specialists/${orderData.consultant}?appointmentId=${appointmentId}`;
         } else {
+          setCallStatus("booking")
           window.location.href = `/admin/appointments`;
         }
       } else {
@@ -131,7 +139,11 @@ const CheckoutModal = ({
       setError("Failed to book the appointment");
       console.error(err);
     } finally {
-      setCallStatus("redirecting")
+      if(consultMode ===  "appointment"){
+        setCallStatus("booking")
+      }else{
+        setCallStatus("redirecting")
+      }
       setProcessing(false);
     }
   };
@@ -160,15 +172,22 @@ const CheckoutModal = ({
         amount: payload.paymentIntent.amount,
       };
 
-      const orderData = {
+      let orderData = {
         patient: session?.user?.id,
         consultant: specialist?._id,
         date: appointmentDate,
         duration: duration,
         type: "general",
+        mode: consultMode,
         paymentStatus: "paid",
         consultMode: consultMode,
       };
+      
+      // Add startTime and endTime only if consultMode is "appointment"
+      if (consultMode === "appointment") {
+        orderData = { ...orderData, startTime: slot.startTime, endTime: slot.endTime };
+      }
+      
 
       try {
         await createAppointment(paymentData, orderData);
@@ -188,7 +207,7 @@ const CheckoutModal = ({
   return (
     <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-        { callStatus !== "redirecting" ? (
+        { callStatus !== "redirecting" && callStatus !== "booking" ? (
           <form onSubmit={handleSubmit}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">Checkout</h2>
@@ -259,14 +278,24 @@ const CheckoutModal = ({
           </form>
          ) : (
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">
-              {callStatus === "initiating" ? "Initiating Call..." : "Waiting for Specialist..."}
-            </h2>
-            <p className="mb-4">
-              {callStatus === "initiating"
-                ? "We're setting up your call. This may take a moment."
-                : "We've notified the specialist. Please wait while they accept the call."}
-            </p>
+            { callStatus === "booking" ?
+            <>
+              <h2 className="text-2xl font-bold mb-4">
+                Payment successful! Booking your appointment...
+              </h2>
+            </>
+            : <>
+              <h2 className="text-2xl font-bold mb-4">
+                {callStatus === "initiating" ? "Initiating Call..." : "Waiting for Specialist..."}
+              </h2>
+              <p className="mb-4">
+                {callStatus === "initiating"
+                  ? "We're setting up your call. This may take a moment."
+                  : "We've notified the specialist. Please wait while they accept the call."}
+              </p>
+            </>
+            }
+            
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900 mx-auto"></div>
           </div>
         )} 

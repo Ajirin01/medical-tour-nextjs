@@ -1,497 +1,340 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import 'react-calendar/dist/Calendar.css'
+import React, { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { fetchData, postData } from '@/utils/api'
 import { useUser } from '@/context/UserContext'
-import { useSession } from "next-auth/react";
-import FullCalendar from '@fullcalendar/react'
-import interactionPlugin from '@fullcalendar/interaction' // optional but useful
-import dayGridPlugin from '@fullcalendar/daygrid'
+import { useSession } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 import { useToast } from '@/context/ToastContext'
-import { ClockIcon, DollarSignIcon, CheckCircleIcon } from "lucide-react";
-// import Link from "next/link";
+
+import { useSelector, useDispatch } from "react-redux";
+import ModalContainer from "@/components/gabriel/ModalContainer";
+
+import { DayPicker } from 'react-day-picker'
+import 'react-day-picker/dist/style.css'
+import BookingInstructions from '@/components/BookingInstructions'
+import getMinutesDifference from '@/utils/getMinutesDifference'
+import { 
+  setPrice,
+  setSpecialist,
+  setDuration,
+  setConsultMode,
+  setSlot,
+  resetBooking, 
+  setAppointmentDate} from '@/store/specialistSlice'
+
+import {
+  PricingModal,
+  CheckoutModal,
+  FindSpecialistModal,
+} from "@/components/gabriel";
+
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 
-export default function ConsultationBookingPageContent() {
-  const router = useRouter()
-  const { user, loading } = useUser()
+const ConsultationBookingPageContent = () => {
+  const dispatch = useDispatch();
 
-  const [availableSlots, setAvailableSlots] = useState([])
-  const [selectedDate, setSelectedDate] = useState(null)
-  const [selectedSlot, setSelectedSlot] = useState(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [calculatedCost, setCalculatedCost] = useState(0)
+  const specialist = useSelector((state) => state.specialist.specialist);
+  const price = useSelector((state) => state.specialist.price);
+  const duration = useSelector((state) => state.specialist.duration);
 
-  const searchParams = useSearchParams()
+  const appointmentDate = useSelector(
+    (state) => state.specialist.appointmentDate
+  );
 
-  const consultationMode = searchParams.get('consultationMode')
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
 
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
 
-  const [ consultant, setConsultant] = useState()
+  const [mounted, setMounted] = useState(false)
+  const { user } = useUser()
   const { addToast } = useToast()
+  const { data: session } = useSession()
+  const searchParams = useSearchParams()
+  const token = session?.user?.jwt
 
-  const alertSuccess = (msg) => addToast(msg, 'success')
-  const alertError = (msg) => addToast(msg, 'error')
+  const [selectedDate, setSelectedDate] = useState(startOfToday)
+  const [availableSlots, setAvailableSlots] = useState([])
+  const [selectedSlot, setSelectedSlot] = useState(null)
+  const [reason, setReason] = useState('')
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [loadingBooking, setLoadingBooking] = useState(false)
+  const [loadingCategories, setLoadingCategories] = useState(true)
 
-  const [consultMode, setConsultMode] = useState(consultationMode); // 'appointment' | 'now'
-
-  const [maxDuration, setMaxDuration] = useState(60);
-  const [durationOptions, setDurationOptions] = useState([]);
-
-  const { data: session } = useSession();
-  const token = session?.user?.jwt;
+  const [categories, setCategories] = useState([])
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [specialistsByCategory, setSpecialistsByCategory] = useState([])
 
   const COST_PER_MINUTE = 2
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    preferredDate: '',
-    duration: 0,
-  })
-  
-
-  // Add this logic to auto-fill time if 'now' is selected
   useEffect(() => {
-    if (consultMode === 'now') {
-      const now = new Date();
-      const roundedNow = new Date(Math.ceil(now.getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000)); // Round to next 15min
-      setSelectedDate(roundedNow);
-      setSelectedSlot({ timeSlot: 'Immediate', datetime: roundedNow });
-      setFormData(prev => ({ ...prev, duration: '30' })); // Default duration
-      setDurationOptions([15, 30, 45, 60]);
-      setCalculatedCost(30 * 2); // e.g., $2/min
-    } else {
-      setSelectedDate(null);
-      setSelectedSlot(null);
-      setFormData(prev => ({ ...prev, duration: '' }));
-    }
-  }, [consultMode]);
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
-    const fetchAvailableSlots = async () => {
-      try {
-        const res = await fetchData(`availabilities/slots/by?userRole=specialist`, token)
-        console.log(res)
-        if (Array.isArray(res.data)) {
-          setAvailableSlots(res.data)
-        }
-      } catch (err) {
-        console.error('Failed to fetch slots by role:', err)
-      }
-    }
-
-    if (token) fetchAvailableSlots()
+    if (token) fetchSpecialistCategories()
   }, [token])
 
   useEffect(() => {
-    setCalculatedCost(formData.duration * COST_PER_MINUTE)
-  }, [formData.duration])
+    if (token && selectedDate && specialistsByCategory.length > 0) {
+      fetchAvailableSlots()
+    }
+  }, [selectedDate, specialistsByCategory, token])
 
-  useEffect(() => {
-    if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        name: `${user.firstName} ${user.lastName}` || '',
-        email: user.email || '',
-        phone: user.phone || '',
+  const fetchSpecialistCategories = async () => {
+    setLoadingCategories(true)
+    try {
+      const res = await fetchData('users/get-all/no-pagination?role=specialist', token)
+      const grouped = res.reduce((acc, specialist) => {
+        const category = specialist.category || 'Uncategorized'
+        if (!acc[category]) acc[category] = []
+        acc[category].push(specialist)
+        return acc
+      }, {})
+
+      const categoryList = Object.entries(grouped).map(([name, members]) => ({
+        name,
+        count: members.length,
+        members,
       }))
+
+      setCategories(categoryList)
+    } catch (err) {
+      console.error('Failed to load categories:', err)
+      addToast('Could not load specialist categories.', 'error')
+    } finally {
+      setLoadingCategories(false)
     }
-  }, [user])
-
-  useEffect(() => {
-    if (selectedDate && consultMode !== "now") {
-      console.log("selectedSlot", selectedSlot)
-    //   console.log(selectedDate)
-      const formattedDate = selectedDate.toISOString().split('T')[0]
-      setFormData((prev) => ({ ...prev, preferredDate: formattedDate }))
-      setFormData((prev) => ({ ...prev, id: selectedSlot?.id }))
-      setSelectedSlot(null)
-    }
-  }, [selectedDate])
-
-  useEffect(() => {
-      const appointmentId = searchParams.get('appointmentId');
-    
-      const fetchAppointmentOrConsultant = async () => {
-        try {
-          if (appointmentId) {
-            const apptRes = await fetchData(`/appointments/${appointmentId}`, token);
-            if (apptRes) {
-              setConsultant(apptRes.consultant); // use consultant from the fetched appointment
-            }
-          } else {
-            // No appointmentId → fallback to fetching default consultant
-            const res = await fetchData("users/get-all/no-pagination?role=specialist", token);
-            const targetEmail = "olagokemubarakishola@gmail.com"; // The name you want to select
-
-            const match = res.find(s => s.email === targetEmail);
-
-            // console.log(match)
-
-            if (match) {
-              setConsultant(match);
-            } else {
-              console.warn(`Specialist "${targetEmail}" not found`);
-            }
-          }
-        } catch (err) {
-          console.error('Error fetching consultant/appointment:', err);
-        }
-      };
-    
-      if (token) {
-        fetchAppointmentOrConsultant();
-      }
-    }, [token, searchParams]);
-  
-  function convertTo24Hour(timeStr) {
-    const [time, modifier] = timeStr.split(' ');
-    let [hours, minutes] = time.split(':');
-  
-    if (modifier === 'PM' && hours !== '12') {
-      hours = parseInt(hours, 10) + 12;
-    }
-    if (modifier === 'AM' && hours === '12') {
-      hours = '00';
-    }
-  
-    return `${hours}:${minutes}`; 
   }
 
-  const handleConfirm = async () => {
-    event.preventDefault()
-    if (!token || !session?.user?.id) return;
-  
-    setSubmitting(true);
+  const fetchAvailableSlots = async () => {
+    setLoadingSlots(true)
+    setAvailableSlots([])
+
     try {
-      const appointmentData = {
-        ...formData,
-        date: selectedDate,
-        timeSlot: selectedSlot.timeSlot,
-        cost: calculatedCost,
-        consultMode: consultMode,
-        type: "general"
+      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      const selectedDayName = weekdays[selectedDate.getDay()]
+      const selectedDateString = selectedDate.toISOString().split('T')[0]
+
+      const allSlots = []
+      for (const specialist of specialistsByCategory) {
+        const res = await fetchData(`availabilities/slots/by?userRole=specialist&consultantId=${specialist._id}`, token)
+
+        const filtered = res.data.filter((slot) => {
+          if (slot.type === 'recurring') {
+            return slot.dayOfWeek === selectedDayName
+          } else if (slot.type === 'one-time') {
+            return new Date(slot.date).toISOString().split('T')[0] === selectedDateString
+          }
+          return false
+        })
+
+        filtered.forEach((slot) => {
+          allSlots.push({ ...slot, consultant: specialist })
+        })
       }
-      
-      const time24 = convertTo24Hour(appointmentData.timeSlot); // "11:00 AM" → "11:00"
-      const dateTimeISO = new Date(`${appointmentData.date}`);
-  
-      if (isNaN(dateTimeISO.getTime())) {
-        throw new Error('Invalid date format');
-      }
-  
-      const payload = {
-        patient: session.user.id,
-        consultant: consultant._id,
-        date: dateTimeISO,
-        duration: appointmentData.duration,
-        type: appointmentData.type || 'medicalTourism',
-        paymentStatus: 'pending',
-        consultMode: appointmentData.consultMode,
-      };
-
-      
-  
-      // Save appointment details to sessionStorage for later use
-      sessionStorage.setItem('orderData', JSON.stringify(payload));
-
-      // Initiate payment request to the backend
-      const paymentPayload = {
-        amount: calculatedCost, // Ensure the cost is in the correct unit (e.g., dollars)
-        email: session.user.email,
-        productName: `Consultation with ${consultant.firstName}`,
-      };
-
-      // console.log(paymentPayload)
-      // return
-
-      const paymentRes = await postData('/payments/initiate', paymentPayload, token);
-
-      if (paymentRes?.url) {
-        // Redirect to Stripe payment page
-        window.location.href = paymentRes.url;
-      } else {
-        alertError('Failed to initiate payment');
-      }
+      setAvailableSlots(allSlots)
     } catch (err) {
-      console.error(err);
-      alertError('Something went wrong while booking');
+      console.error('Error fetching slots:', err)
+      addToast('Failed to load slots', 'error')
     } finally {
-      setSubmitting(false);
+      setLoadingSlots(false)
     }
+  }
+
+  if (!mounted) return null
+
+  const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  const selectedDayName = weekdays[selectedDate.getDay()]
+
+  const openCheckoutModal = (price, duration) => {
+    console.log(price)
+    dispatch(setPrice(price));
+    dispatch(setDuration(duration));
+    setModalContent("checkoutModal");
+    dispatch(setConsultMode("appointment"));
+    dispatch(setSpecialist(selectedSlot.consultant))
+    dispatch(setAppointmentDate(selectedSlot.date))
+    dispatch(setSlot(selectedSlot))
+    setShowModal(true);
   };
 
-
-  async function getSlotMaxDuration(selectedSlot, consultMode) {
-    // Handle "Consult Now" mode — fixed 60-minute max
-    if (consultMode === 'now') {
-      return 60;
-    }
-    if (!selectedSlot) return 0;
-  
-    // Fallback for normal appointment slot
-    if (!selectedSlot.id) return 0;
-  
-    try {
-      // Fetch availability details by ID
-      const slotData = await fetchData(`availabilities/${selectedSlot.id}`);
-  
-      if (!slotData || !slotData.startTime || !slotData.endTime) return 0;
-  
-      const [startH, startM] = slotData.startTime.split(':').map(Number);
-      const [endH, endM] = slotData.endTime.split(':').map(Number);
-  
-      const start = new Date();
-      start.setHours(startH, startM, 0, 0);
-      const end = new Date();
-      end.setHours(endH, endM, 0, 0);
-  
-      const diffMinutes = (end - start) / 60000;
-  
-      return diffMinutes;
-  
-    } catch (err) {
-      console.error("Failed to fetch slot availability:", err);
-      return 0;
-    }
-  }
-  
-  
-  useEffect(() => {
-    const fetchDuration = async () => {
-      if (!selectedSlot?.id && consultMode !=="now") {
-        setMaxDuration(0);
-        setDurationOptions([]);
-        return;
-      }
-  
-      const max = await getSlotMaxDuration(selectedSlot, consultMode);
-
-      setMaxDuration(max);
-  
-      const result = [];
-      for (let i = 10; i <= max; i += 5) {
-        result.push(i);
-      }
-      setDurationOptions(result);
-    };
-  
-    fetchDuration();
-  }, [selectedSlot, selectedDate]);
-  
-  
-  const slotsForDate = selectedDate && consultMode !== "now"
-  ? (() => {
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-      const localDate = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        selectedDate.getDate()
-      );
-
-      // Ensure that the correct day is being selected
-      const selectedDayIndex = localDate.getDay();
-      const selectedDayName = days[selectedDayIndex];
-
-      const daySlots = availableSlots.filter(slot => slot.dayOfWeek === selectedDayName);
-
-      console.log(daySlots)
-
-      const generatedSlots = [];
-      for (const slot of daySlots) {
-        const [startH, startM] = slot.startTime.split(':').map(Number);
-        const [endH, endM] = slot.endTime.split(':').map(Number);
-
-        let current = new Date(localDate);
-        current.setHours(startH, startM, 0, 0);
-
-        const endDate = new Date(localDate);
-        endDate.setHours(endH, endM, 0, 0);
-
-        while (current < endDate) {
-          generatedSlots.push({id:slot._id, timeSlot: current.toTimeString().slice(0, 5)});
-          current = new Date(current.getTime() + 30 * 60000);
-        }
-      }
-
-      return generatedSlots;
-    })()
-  : [];
-
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const closeModal = () => {
+    setShowModal(false);
+    setModalContent(null);
+    dispatch(resetBooking());
   };
 
   return (
-    <div className="flex justify-center px-4 py-8">
-      <div className="w-full max-w-3xl mb-8">
-        <div className="mb-8">
-      
-          {/* CALENDAR AND SLOT SELECTION (ONLY FOR APPOINTMENTS) */}
-          {consultMode === 'appointment' && (
-            <>
-              <p className="mt-4 text-lg text-gray-600">
-                Select a date and time for your consultation.
-              </p>
-              <FullCalendar
-                plugins={[dayGridPlugin, interactionPlugin]}
-                initialView="dayGridMonth"
-                headerToolbar={{
-                  left: 'prev,next today',
-                  center: 'title',
-                  right: 'dayGridMonth,dayGridWeek',
-                }}
-                height="auto"
-                selectable={true}
-                selectMirror={true}
-                dateClick={(info) => {
-                  const clickedDate = new Date(info.dateStr);
-                  setSelectedDate(clickedDate);
-                }}
-                validRange={{ start: new Date().toISOString().split('T')[0] }}
-              />
-      
-              {selectedDate && (
-                <div className="mt-6 p-4 bg-white rounded-md shadow">
-                  <h3 className="text-lg font-medium text-gray-800 mb-2">
-                    Available Time Slots for {selectedDate.toDateString()}:
-                  </h3>
-      
-                  {slotsForDate.length === 0 ? (
-                    <p className="text-sm text-gray-500">No slots available for this day.</p>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {slotsForDate.map((slot, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => {
-                            setSelectedSlot(slot);
-                          }}
-                          className={`px-4 py-2 rounded-md border ${
-                            selectedSlot === slot.timeSlot
-                              ? 'bg-indigo-600 text-white border-indigo-600'
-                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-                          }`}
-                        >
-                          {slot.timeSlot}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-      
-                  {selectedSlot && (
-                    <p className="mt-4 text-sm text-gray-700">
-                      Selected Time: <span className="font-medium">{selectedSlot.timeSlot}</span>
-                    </p>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-      
-          {/* FORM */}
-          {loading ? (
-            <div className="text-center text-gray-600">Checking login status...</div>
-          ) : !user ? (
-            <div className="bg-white p-6 rounded-xl shadow text-center">
-              <p className="text-lg text-gray-700 font-medium mb-4">
-                Please log in to book a consultation.
-              </p>
-              <a
-                href="/login"
-                className="inline-block bg-indigo-600 text-white px-5 py-3 rounded-md font-semibold hover:bg-indigo-700 transition"
-              >
-                Log In
-              </a>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-0">
+      <h2 className="text-2xl font-bold mb-2">Book an Appointment</h2>
+      <BookingInstructions />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className="max-h-[500px] overflow-y-auto space-y-2 pr-2">
+          {loadingCategories ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
-            <form className="space-y-6 bg-white p-6 rounded-xl shadow">
-              {consultMode === "now" ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-4">
-                  {[15, 30, 40, 60].map((min) => {
-                    const isActive = formData.duration === min.toString();
-                    const price = min * 2; // Customize pricing logic
-                    return (
-                      <div
-                        key={min}
-                        onClick={() => handleChange({ target: { name: "duration", value: min.toString() } })}
-                        className={`cursor-pointer rounded-2xl p-5 border transition-all duration-300 ${
-                          isActive
-                            ? "bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400"
-                            : "bg-white text-gray-900 border-gray-200 hover:shadow-md hover:border-indigo-300"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-lg font-bold">{min} Minutes</h4>
-                          {isActive && <CheckCircleIcon className="w-5 h-5 text-white" />}
-                        </div>
-                
-                        <div className="mt-4 flex items-center gap-2 text-sm">
-                          <ClockIcon className="w-4 h-4" />
-                          <span>{min} mins session</span>
-                        </div>
-                
-                        <div className="mt-2 flex items-center gap-2 text-sm">
-                          <DollarSignIcon className="w-4 h-4" />
-                          <span>${price.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div>
-                  <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-                    Duration (minutes)
-                  </label>
-                  <select
-                    required
-                    name="duration"
-                    id="duration"
-                    value={formData.duration}
-                    onChange={handleChange}
-                    disabled={consultMode === "appointment" && !selectedSlot}
-                    className="mt-1 block p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  >
-                    {durationOptions.length === 0 ? (
-                      <option value="">Select a slot first</option>
-                    ) : (
-                      durationOptions.map((min) => (
-                        <option key={min} value={min}>
-                          {min} minutes
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-              )}
-              <div className="text-sm text-gray-700">
-                Estimated Cost:{' '}
-                <span className="font-semibold text-gray-900">${calculatedCost}</span>
+            categories.map((cat) => (
+              <div
+                key={cat.name}
+                onClick={() => {
+                  setSelectedCategory(cat)
+                  setSpecialistsByCategory(cat.members)
+                  setAvailableSlots([])
+                  setSelectedSlot(null)
+                }}
+                className={`cursor-pointer p-3 rounded-md border transition-all duration-150 ${
+                  selectedCategory?.name === cat.name
+                    ? 'border-indigo-600 bg-indigo-50'
+                    : 'hover:border-indigo-400 hover:bg-gray-50'
+                }`}
+              >
+                <h4 className="text-base font-semibold">{cat.name}</h4>
+                <p className="text-xs text-gray-500">{cat.count} specialist{cat.count > 1 ? 's' : ''}</p>
               </div>
-      
-              <div>
-                <button
-                  type="submit"
-                  disabled={submitting || (consultMode === 'appointment' && !selectedSlot)}
-                  className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
-                  onClick={() => handleConfirm()}
-                >
-                  {submitting ? 'Submitting...' : 'Pay Now'}
-                </button>
-              </div>
-            </form>
+            ))
           )}
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Date {selectedCategory && `for ${selectedCategory.name}`}
+          </label>
+          <div className="mb-2 font-semibold text-lg text-gray-700">
+            {selectedDayName}, {selectedDate.toLocaleDateString()}
+          </div>
+          <DayPicker
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => {
+              if (date) setSelectedDate(date)
+            }}
+            disabled={{ before: startOfToday }}
+            weekStartsOn={1}
+            className="rounded-lg shadow-md bg-white p-2"
+            styles={{
+              caption: { textAlign: 'center' },
+              day_selected: { backgroundColor: '#4f46e5', color: 'white' },
+            }}
+          />
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          {loadingSlots ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : availableSlots.length > 0 ? (
+            <>
+              <h3 className="text-lg font-medium mb-4">
+                Available Time Slots for {selectedDayName}, {selectedDate.toLocaleDateString()}
+              </h3>
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                {availableSlots.map((slot) => (
+                  <div
+                    key={slot._id}
+                    onClick={() => setSelectedSlot(slot)}
+                    className={`p-4 border rounded-md cursor-pointer transition-colors ${
+                      selectedSlot?._id === slot._id ? 'border-indigo-600 bg-indigo-50' : 'hover:border-indigo-300'
+                    }`}
+                  >
+                    <div className="font-medium">
+                      {slot.startTime} - {slot.endTime}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Specialist: {slot.consultant.firstName} {slot.consultant.lastName}
+                    </div>
+                    <div className="text-sm text-indigo-700 font-semibold mt-1">
+                      Appointment Fee: ${ getMinutesDifference(slot.startTime, slot.endTime) * COST_PER_MINUTE}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+
+              {selectedSlot && (
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Reason</label>
+                  <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    rows={3}
+                    placeholder="Why are you booking this consultation?"
+                    className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2"
+                  />
+                </div>
+              )}
+
+              { selectedSlot && 
+                <button
+                  onClick={() => openCheckoutModal(
+                    getMinutesDifference(selectedSlot.startTime, selectedSlot.endTime) * COST_PER_MINUTE,
+                    getMinutesDifference(selectedSlot.startTime, selectedSlot.endTime)
+                  )}
+                  disabled={!selectedSlot || !reason || loadingBooking}
+                  className="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loadingBooking && (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  )}
+                  {loadingBooking ? 'Processing...' : 'Book Appointment'}
+                </button>
+              }
+
+              {/* <button
+                onClick={handleBookAppointment}
+                disabled={!selectedSlot || !reason || loadingBooking}
+                className="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loadingBooking && (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
+                {loadingBooking ? 'Processing...' : 'Book Appointment'}
+              </button> */}
+            </>
+          ) : (
+            <div className="text-center text-gray-500">
+              <p>No available slots for the selected date.</p>
+              <p className="mt-2">
+                Please contact us at{' '}
+                <a href="tel:+1234567890" className="text-indigo-600">
+                  +1 (234) 567-890
+                </a>{' '}
+                if you need help.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {showModal && modalContent === "checkoutModal" && selectedSlot.consultant && (
+          <ModalContainer
+            modal={
+              <Elements stripe={stripePromise}>
+                <CheckoutModal
+                  closeModal={closeModal}
+                  amount={price}
+                  currency="USD"
+                  duration={duration}
+                  date={new Date(selectedSlot.date)}
+                  consultMode="appointment"
+                />
+              </Elements>
+            }
+          />
+        )}
       </div>
     </div>
-  );
+  )
 }
+
+export default ConsultationBookingPageContent

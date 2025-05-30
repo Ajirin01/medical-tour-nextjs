@@ -29,6 +29,8 @@ const ConsultationAppointmentsPageContent  = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const userRole = session?.user?.role
+
   const page = parseInt(searchParams.get("page") || "1", 10);
 
   const loadAppointments = async () => {
@@ -87,12 +89,12 @@ const ConsultationAppointmentsPageContent  = () => {
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:text-gray-300 p-6">
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">Consultation Appointments</h1>
-        <Link
-          href="/admin/medical-tourism/consultations/appointments/create"
+        { userRole === "user" && <Link
+          href='/admin/consultation/book'
           className="bg-indigo-600 text-white px-4 py-2 rounded-full border border-indigo-400 shadow-lg shadow-indigo-500/50 ring-2 ring-indigo-300 hover:ring-4 transition-all duration-300"
         >
           + Book Appointment
-        </Link>
+        </Link>}
       </div>
 
       {/* Filters */}
