@@ -109,7 +109,7 @@ export default function TopNav({}) {
 
             {/* Dashboard dropdown */}
             { isAuthenticated && 
-              <NavLink href="/doctors" icon={<Gauge size={18} />} label="Doctors" />
+              <NavLink href="/admin" icon={<Gauge size={18} />} label="Dashboard" />
             }
           </nav>
 

@@ -308,7 +308,7 @@ export default function Ecommerce() {
                   <div className="border-b dark:border-gray-700 px-5 py-4 flex justify-between items-center">
                     <h2 className="font-semibold text-gray-800 dark:text-gray-100">Current Medications</h2>
                     <button
-                      onClick={() => navigate(PATH.dashboard.medications)}
+                      onClick={() => router.push('/admin/doctor-prescription')}
                       className="text-[var(--color-primary67)] hover:text-[var(--color-primary-7)] text-xs font-medium"
                     >
                       View All
@@ -320,7 +320,8 @@ export default function Ecommerce() {
                       <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-medium text-gray-800 dark:text-gray-100">{med.name}</h3>
+                            {/* {JSON.stringify(med)} */}
+                            <h3 className="font-medium text-gray-800 dark:text-gray-100">{med.medication}</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400">{med.dosage} - {med.schedule}</p>
                           </div>
                           <div className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -385,7 +386,7 @@ export default function Ecommerce() {
                         </div>
                         <div className="ml-4 flex-shrink-0">
                           <button 
-                            onClick={() => navigate(`${PATH.dashboard.appointments}/${appointment.id || appointment._id}`)}
+                            onClick={() => router.push(`${PATH.dashboard.appointments}/${appointment.id || appointment._id}`)}
                             className="px-3 py-1 bg-primary-50 text-[var(--color-primary67)] rounded-full text-xs font-medium hover:bg-primary-100 transition-colors"
                           >
                             Details
