@@ -206,7 +206,7 @@ export default function Ecommerce() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen border-gray-200 bg-white dark:bg-gray-900 dark:text-gray-300">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
         { userRole === "user" && 
@@ -263,187 +263,192 @@ export default function Ecommerce() {
 
         {/* Existing eCommerce Grid Layout */}
         <div className="grid grid-cols-12 gap-4 md:gap-6">
-          <div className="col-span-6 xl:col-span-5">
-            <MonthlyTarget />
-          </div>
+        {userRole === "admin" &&
+          <>
+              <div className="col-span-6 xl:col-span-5">
+                <MonthlyTarget />
+              </div>
 
-          {(userRole === "admin" || userRole === "user" || userRole === "specialist") && (
-            <div className="col-span-7">
-              <StatisticsChart />
-            </div>
-          )}
+              
+                <div className="col-span-7">
+                  <StatisticsChart />
+                </div>
+            </>
+          }
 
           { userRole === "user" && 
             <div className="col-span-12">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Quick Actions */}
-                <div className="lg:col-span-1">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
-                  <div className="grid grid-cols-1 gap-4">
-                    {quickActions.map((action, index) => (
-                      <div 
-                        key={index} 
-                        onClick={action.action}
-                        className={`${action.bgColor} border ${action.borderColor} rounded-xl p-4 cursor-pointer transition-all hover:shadow-md flex items-center justify-between`}
-                      >
-                        <div className="flex items-center">
-                          <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center shadow-sm mr-4">
-                            {action.icon}
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-gray-800">{action.title}</h3>
-                            <p className="text-xs text-gray-500">{action.description}</p>
-                          </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Quick Actions */}
+              <div className="lg:col-span-1">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Quick Actions</h2>
+                <div className="grid grid-cols-1 gap-4">
+                  {quickActions.map((action, index) => (
+                    <div 
+                      key={index} 
+                      onClick={action.action}
+                      className={`${action.bgColor} border ${action.borderColor} dark:bg-gray-800 dark:border-gray-700 rounded-xl p-4 cursor-pointer transition-all hover:shadow-md flex items-center justify-between`}
+                    >
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-100 flex items-center justify-center shadow-sm mr-4">
+                          {action.icon}
                         </div>
-                        <FaChevronRight className="text-gray-400" />
+                        <div>
+                          <h3 className="font-medium text-gray-800 dark:text-gray-100">{action.title}</h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{action.description}</p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                  
-                  {/* Medications */}
-                  <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="border-b px-5 py-4 flex justify-between items-center">
-                      <h2 className="font-semibold text-gray-800">Current Medications</h2>
-                      <button
-                        onClick={() => navigate(PATH.dashboard.medications)}
-                        className="text-[var(--color-primary67)] hover:text-[var(--color-[var(--color-primary-7)])] text-xs font-medium"
-                      >
-                        View All
-                      </button>
+                      <FaChevronRight className="text-gray-400 dark:text-gray-500" />
                     </div>
-                    
-                    <div className="divide-y divide-gray-100">
-                      {prescriptions?.length > 0 ? prescriptions?.map((med, index) => (
-                        <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h3 className="font-medium text-gray-800">{med.name}</h3>
-                              <p className="text-sm text-gray-500">{med.dosage} - {med.schedule}</p>
-                            </div>
-                            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              med.remainingDays <= 7 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                            }`}>
-                              {med.remainingDays <= 7 ? 'Refill Soon' : `${med.remainingDays} days left`}
-                            </div>
-                          </div>
-                        </div>
-                      )) : (
-                        <div className="p-6 text-center">
-                          <p className="text-gray-500">No active medications</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  ))}
                 </div>
-                
-                {/* Upcoming Appointments */}
-                <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="border-b px-5 py-4 flex justify-between items-center">
-                    <h2 className="font-semibold text-gray-800">Upcoming Appointments</h2>
+          
+                {/* Medications */}
+                <div className="mt-8 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                  <div className="border-b dark:border-gray-700 px-5 py-4 flex justify-between items-center">
+                    <h2 className="font-semibold text-gray-800 dark:text-gray-100">Current Medications</h2>
                     <button
-                      onClick={handleAppointments}
+                      onClick={() => navigate(PATH.dashboard.medications)}
                       className="text-[var(--color-primary67)] hover:text-[var(--color-primary-7)] text-xs font-medium"
                     >
                       View All
                     </button>
                   </div>
-                  
-                  <div className="divide-y divide-gray-100">
-                    {upcomingAppointments.length > 0 ? upcomingAppointments.map((appointment, index) => (
-                      <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center">
-                          {appointment.avatar ? (
-                            <img 
-                              src={appointment.avatar} 
-                              alt={appointment.doctorName} 
-                              className="w-10 h-10 rounded-full mr-4 object-cover border border-gray-200"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full mr-4 bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
-                              {appointment.doctorName?.charAt(0) || 'D'}
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">{appointment.consultant.firstName || 'Doctor'}</p>
-                            <p className="text-xs text-gray-500">{appointment.consultant.specialty || 'Specialist'}</p>
-                            <div className="flex items-center text-xs text-gray-500 mt-1">
-                              <span className="text-[var(--color-primary67)] mr-1">
-                                <FaCalendarAlt size={10} />
-                              </span>
-                              <span>
-                                {appointment.date ? (
-                                  typeof appointment.date === 'string' && !appointment.date.includes('-') ? 
-                                  appointment.date : 
-                                  new Date(appointment.date).toLocaleDateString()
-                                ) : 'Date not set'}, 
-                                {appointment.time || (appointment.startTime ? new Date(appointment.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '00:00')}
-                              </span>
-                            </div>
+          
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {prescriptions?.length > 0 ? prescriptions?.map((med, index) => (
+                      <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="font-medium text-gray-800 dark:text-gray-100">{med.name}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{med.dosage} - {med.schedule}</p>
                           </div>
-                          <div className="ml-4 flex-shrink-0">
-                            <button 
-                              onClick={() => navigate(`${PATH.dashboard.appointments}/${appointment.id || appointment._id}`)}
-                              className="px-3 py-1 bg-primary-50 text-[var(--color-primary67)] rounded-full text-xs font-medium hover:bg-primary-100 transition-colors">
-                              Details
-                            </button>
+                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            med.remainingDays <= 7 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                          }`}>
+                            {med.remainingDays <= 7 ? 'Refill Soon' : `${med.remainingDays} days left`}
                           </div>
                         </div>
                       </div>
                     )) : (
                       <div className="p-6 text-center">
-                        <p className="text-gray-500">No upcoming appointments</p>
-                        <button 
-                          onClick={handleAppointments}
-                          className="mt-2 px-4 py-2 bg-primary-50 text-[var(--color-primary67)] rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors"
-                        >
-                          Book Now
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-4 bg-gray-50">
-                    <button 
-                      onClick={handleCreateAppointments}
-                      className="w-full py-2 bg-white border border-gray-300 rounded-lg text-[var(--color-primary67)] hover:bg-gray-50 text-sm font-medium transition-colors"
-                    >
-                      + New Appointment
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Recent Activities */}
-                <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                  <div className="border-b px-5 py-4 flex justify-between items-center">
-                    <h2 className="font-semibold text-gray-800">Recent Activities</h2>
-                    <button 
-                      onClick={handleHistory}
-                      className="text-[var(--color-primary67)] hover:text-[var(--color-primary-7)] text-xs font-medium"
-                    >
-                      View All
-                    </button>
-                  </div>
-                  
-                  <div className="overflow-hidden">
-                    {loading ? (
-                      <div className="flex justify-center items-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary67)]"></div>
-                      </div>
-                    ) : error ? (
-                      <div className="p-6 text-center text-red-500">{error}</div>
-                    ) : calls && calls.length > 0 ? (
-                      <div className="overflow-x-auto">
-                        <DTable calls={calls} loading={loading} limit={5} />
-                      </div>
-                    ) : (
-                      <div className="p-6 text-center">
-                        <p className="text-gray-500">No recent activities</p>
+                        <p className="text-gray-500 dark:text-gray-400">No active medications</p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
+          
+              {/* Upcoming Appointments */}
+              <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                <div className="border-b dark:border-gray-700 px-5 py-4 flex justify-between items-center">
+                  <h2 className="font-semibold text-gray-800 dark:text-gray-100">Upcoming Appointments</h2>
+                  <button
+                    onClick={handleAppointments}
+                    className="text-[var(--color-primary67)] hover:text-[var(--color-primary-7)] text-xs font-medium"
+                  >
+                    View All
+                  </button>
+                </div>
+          
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {upcomingAppointments.length > 0 ? upcomingAppointments.map((appointment, index) => (
+                    <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="flex items-center">
+                        {appointment.avatar ? (
+                          <img 
+                            src={appointment.avatar} 
+                            alt={appointment.doctorName} 
+                            className="w-10 h-10 rounded-full mr-4 object-cover border border-gray-200 dark:border-gray-700"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full mr-4 bg-primary-100 text-primary-700 dark:bg-primary-200 dark:text-primary-900 flex items-center justify-center font-bold">
+                            {appointment.doctorName?.charAt(0) || 'D'}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{appointment.consultant.firstName || 'Doctor'}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{appointment.consultant.specialty || 'Specialist'}</p>
+                          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <span className="text-[var(--color-primary67)] mr-1">
+                              <FaCalendarAlt size={10} />
+                            </span>
+                            <span>
+                              {appointment.date ? (
+                                typeof appointment.date === 'string' && !appointment.date.includes('-') ? 
+                                appointment.date : 
+                                new Date(appointment.date).toLocaleDateString()
+                              ) : 'Date not set'}, 
+                              {appointment.time || (appointment.startTime ? new Date(appointment.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '00:00')}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="ml-4 flex-shrink-0">
+                          <button 
+                            onClick={() => navigate(`${PATH.dashboard.appointments}/${appointment.id || appointment._id}`)}
+                            className="px-3 py-1 bg-primary-50 text-[var(--color-primary67)] rounded-full text-xs font-medium hover:bg-primary-100 transition-colors"
+                          >
+                            Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="p-6 text-center">
+                      <p className="text-gray-500 dark:text-gray-400">No upcoming appointments</p>
+                      <button 
+                        onClick={handleAppointments}
+                        className="mt-2 px-4 py-2 bg-primary-50 text-[var(--color-primary67)] rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors"
+                      >
+                        Book Now
+                      </button>
+                    </div>
+                  )}
+                </div>
+          
+                <div className="p-4 bg-gray-50 dark:bg-gray-800">
+                  <button 
+                    onClick={handleCreateAppointments}
+                    className="w-full py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-[var(--color-primary67)] hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
+                  >
+                    + New Appointment
+                  </button>
+                </div>
+              </div>
+          
+              {/* Recent Activities */}
+              <div className="lg:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                <div className="border-b dark:border-gray-700 px-5 py-4 flex justify-between items-center">
+                  <h2 className="font-semibold text-gray-800 dark:text-gray-100">Recent Activities</h2>
+                  <button 
+                    onClick={handleHistory}
+                    className="text-[var(--color-primary67)] hover:text-[var(--color-primary-7)] text-xs font-medium"
+                  >
+                    View All
+                  </button>
+                </div>
+          
+                <div className="overflow-hidden">
+                  {loading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary67)]"></div>
+                    </div>
+                  ) : error ? (
+                    <div className="p-6 text-center text-red-500">{error}</div>
+                  ) : calls && calls.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <DTable calls={calls} loading={loading} limit={5} />
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center">
+                      <p className="text-gray-500 dark:text-gray-400">No recent activities</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
+          </div>
+          
           }
 
 

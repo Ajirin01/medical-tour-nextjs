@@ -8,26 +8,28 @@ import { useSidebar } from "@/context/admin/SidebarContext";
 import { fetchData } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useUser  } from "@/context/UserContext"
+import { signOut } from 'next-auth/react';
 import {
-  BoxCubeIcon,
-  ChevronDownIcon,
-  GridIcon,
-  HorizontaLDots,
-  DocsIcon,
-  ShoppingBagIcon,
-  BeakerIcon,
-  OrderIcon,
-  ShippingIcon,
-  PlaneIcon,
-  CalenderIcon,
-  UserIcon,
-  PillIcon,
-  CallSessionIcon,
-  FeedbackIcon,
-  GalleryIcon,
-  HospitalIcon,
-  BlogIcon
-} from "../icons/index";
+  Box,
+  ChevronDown,
+  LayoutGrid,
+  MoreHorizontal,
+  FileText,
+  ShoppingBag,
+  FlaskConical,
+  Receipt,
+  Truck,
+  Plane,
+  Calendar,
+  User,
+  Pill,
+  Video,
+  MessageCircle,
+  Image as image,
+  Building2,
+  Newspaper,
+  LogOut
+} from 'lucide-react';
 
 const AppSidebar = () => {
   const { isExpanded, isMobileOpen, toggleMobileSidebar, isHovered, setIsHovered } = useSidebar();
@@ -135,6 +137,11 @@ const AppSidebar = () => {
   }, [token]);
   
   
+  const handleLogout = () => {
+    signOut({
+      callbackUrl: '/login', 
+    });
+  };
 
   const getNavItems = () => {
     const role = session?.user?.role;
@@ -155,28 +162,28 @@ const AppSidebar = () => {
     const items =  [
       // dashboard
       {
-        icon: <GridIcon />,
+        icon: <LayoutGrid />,
         name: "Dashboard",
         path: "/admin",
         roles: ["admin", "user", "specialist", "consultant"]
       },
       // availability
       {
-        icon: <UserIcon />,
+        icon: <User />,
         name: "Specialists",
         path: "/admin/specialists",
         roles: ["admin"]
       },
       // availability
       {
-        icon: <CalenderIcon />,
+        icon: <Calendar />,
         name: "Availabilities",
         path: "/admin/availabilities",
         roles: ["admin", "specialist", "consultant"]
       },
       // products
       {
-        icon: <BoxCubeIcon />,
+        icon: <Box />,
         name: "Products",
         subItems: [
           { name: "All Products", path: "/admin/products" },
@@ -188,7 +195,7 @@ const AppSidebar = () => {
       },
       // prescriptions
       {
-        icon: <DocsIcon />,
+        icon: <FileText />,
         name: "Prescriptions",
         isUnverified: pendingUploadedPrescriptionCount > 0 || pendingLinkedPrescriptionCount > 0,
         subItems: [
@@ -215,7 +222,7 @@ const AppSidebar = () => {
       },
       // pharmacy
       {
-        icon: <ShoppingBagIcon />,
+        icon: <ShoppingBag />,
         name: "Pharmacies",
         isUnverified: unverifiedPharmCount > 0, 
         subItems: [
@@ -232,7 +239,7 @@ const AppSidebar = () => {
       },
       // laboratories
       {
-        icon: <BeakerIcon />,
+        icon: <FlaskConical />,
         name: "Laboratories",
         isUnverified: unverifiedLabCount > 0,
         subItems: [
@@ -250,41 +257,41 @@ const AppSidebar = () => {
         roles: ["admin", "labAdmin", "labEmployee", "user"]
       },
       // orders
-      {
-        icon: <OrderIcon />,
-        name: "Orders",
-        subItems: [
-          // General
-          { name: "All Orders", path: "/admin/orders" },
+      // {
+      //   icon: <Box />,
+      //   name: "Orders",
+      //   subItems: [
+      //     // General
+      //     { name: "All Orders", path: "/admin/orders" },
 
-          // By Category
-          { name: "Medication Orders", path: "/admin/orders?category=Medication" },
-          { name: "Lab Service Orders", path: "/admin/orders?category=LabService" },
+      //     // By Category
+      //     { name: "Medication Orders", path: "/admin/orders?category=Medication" },
+      //     { name: "Lab Service Orders", path: "/admin/orders?category=LabService" },
       
-          // By Status
-          { name: "Pending Orders", path: "/admin/orders?status=pending" },
-          { name: "Paid Orders", path: "/admin/orders?status=paid" },
-          { name: "Shipped Orders", path: "/admin/orders?status=shipped" },
-          { name: "Completed Orders", path: "/admin/orders?status=completed" },
-          { name: "Cancelled Orders", path: "/admin/orders?status=cancelled" },
+      //     // By Status
+      //     { name: "Pending Orders", path: "/admin/orders?status=pending" },
+      //     { name: "Paid Orders", path: "/admin/orders?status=paid" },
+      //     { name: "Shipped Orders", path: "/admin/orders?status=shipped" },
+      //     { name: "Completed Orders", path: "/admin/orders?status=completed" },
+      //     { name: "Cancelled Orders", path: "/admin/orders?status=cancelled" },
       
-          // By Payment Status
-          { name: "Payment Pending", path: "/admin/orders?paymentStatus=pending" },
-          { name: "Payment Failed", path: "/admin/orders?paymentStatus=failed" },
-          { name: "Refunded Orders", path: "/admin/orders?paymentStatus=refunded" }
-        ],
-        roles: ["admin", "labAdmin", "labEmployee", "pharmacyAdmin", "pharmacyEmployee", "user"]
-      },
+      //     // By Payment Status
+      //     { name: "Payment Pending", path: "/admin/orders?paymentStatus=pending" },
+      //     { name: "Payment Failed", path: "/admin/orders?paymentStatus=failed" },
+      //     { name: "Refunded Orders", path: "/admin/orders?paymentStatus=refunded" }
+      //   ],
+      //   roles: ["admin", "labAdmin", "labEmployee", "pharmacyAdmin", "pharmacyEmployee", "user"]
+      // },
       // shipping addresses
-      {
-        icon: <ShippingIcon />,
-        name: "Shipping Addresses",
-        path: "/admin/shipping-addresses" ,
-        roles: ["admin", "user"]
-      },
+      // {
+      //   icon: <Truck />,
+      //   name: "Shipping Addresses",
+      //   path: "/admin/shipping-addresses" ,
+      //   roles: ["admin", "user"]
+      // },
       // medical tourisms
       {
-        icon: <PlaneIcon />,
+        icon: <Plane />,
         name: "Medical Tourism",
         subItems: [
           { name: "Packages", path: "/admin/medical-tourism/packages"},
@@ -295,63 +302,63 @@ const AppSidebar = () => {
       },
       // Appointments
       {
-        icon: <CalenderIcon />,
+        icon: <Calendar />,
         name: "Appointments",
         path: "/admin/appointments",
         roles: ["admin", "specialist", "user"]
       },
       // Tourism appointment
       {
-        icon: <CalenderIcon />,
+        icon: <Calendar />,
         name: "Tourism Appointments",
         path: "/admin/medical-tourism/consultations/appointments",
         roles: ["admin"]
       },
       // Consult Specialist
       {
-        icon: <CalenderIcon />,
+        icon: <Calendar />,
         name: "Consult Specialist",
         path: "/admin/available-specialists",
         roles: ["user"]
       },
       // Doctor's prescription
       {
-        icon: <PillIcon />,
+        icon: <Pill />,
         name: "Doctor Prescriptions",
         path: "/admin/doctor-prescriptions",
         roles: ["user", "specialist", "admin"]
       },
       // Call sessions
       {
-        icon: <CallSessionIcon />,
+        icon: <Video />,
         name: "Call Sessions",
         path: "/admin/call-sessions",
         roles: ["user", "specialist", "admin"]
       },
       // Feedbacks
       {
-        icon: <FeedbackIcon />,
+        icon: <Receipt />,
         name: "Feedbacks",
         path: "/admin/feedbacks",
         roles: ["admin"]
       },
       // Galleries
       {
-        icon: <GalleryIcon />,
+        icon: <image />,
         name: "Galleries",
         path: "/admin/galleries",
         roles: ["admin"]
       },
       // Hospitals
       {
-        icon: <HospitalIcon />,
+        icon: <Building2 />,
         name: "Hospitals",
         path: "/admin/hospitals",
         roles: ["admin"]
       },
       // Blogs
       {
-        icon: <BlogIcon />,
+        icon: <Newspaper />,
         name: "Blogs",
         path: "/admin/blogs",
         roles: ["admin"]
@@ -374,9 +381,12 @@ const AppSidebar = () => {
             {item.subItems ? (
               <button
                 onClick={() => toggleSubmenu(itemKey)}
-                className={`menu-item group font-bold flex items-center w-full ${isOpen ? "menu-item-active" : "menu-item-inactive"}`}
+                className={`menu-item text-lg group font-bold flex items-center w-full ${isOpen ? "menu-item-active" : "menu-item-inactive"}`}
               >
-                <span className="menu-item-icon">{item.icon}</span>
+                <span className={`menu-item-icon font-bold ${isOpen 
+                  ? 'text-white'
+                  : 'text-gray-700' 
+                }`}>{item.icon}</span>
                 {(isExpanded || isHovered || isMobileOpen) && (
                   <span className="menu-item-text">{item.name}</span>
                 )}
@@ -391,18 +401,21 @@ const AppSidebar = () => {
                   
 
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <ChevronDownIcon
-                    className={`ml-auto w-5 h-5 transition-transform ${isOpen ? "rotate-180 text-brand-500" : ""}`}
+                  <ChevronDown
+                    className={`ml-auto w-5 h-5 transition-transform ${isOpen ? "rotate-180 text-white" : ""}`}
                   />
                 )}
               </button>
             ) : (
               <Link
                 href={item.path}
-                className={`menu-item group flex font-bold items-center ${isActive(item.path) ? "menu-item-active" : "menu-item-inactive"} transition-all duration-300`}
+                className={`menu-item group flex text-lg font-bold items-center ${isActive(item.path) ? "menu-item-active" : "menu-item-inactive"} transition-all duration-300`}
                 onClick={handleClick}
               >
-                <span className="menu-item-icon">{item.icon}</span>
+                <span className={`menu-item-icon font-bold ${isActive(item.path)
+                  ? 'text-white' 
+                  : 'text-gray-700'
+                }`}>{item.icon}</span>
                 {(isExpanded || isHovered || isMobileOpen) && (
                   <span className="menu-item-text flex items-center gap-2">
                     {item.name}
@@ -436,13 +449,14 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen z-50 transition-all duration-300 border-r border-gray-200
+      className={`fixed mb-6 mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen z-50 transition-all duration-300 border-r border-gray-200
         ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Logo */}
       <div
         className={`py-8 flex ${
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
@@ -457,37 +471,56 @@ const AppSidebar = () => {
             alt="Logo"
           />
           <img
-            width={154}
+            width={100}
             height={32}
             className="hidden dark:block"
             src="/images/logo/logo-dark.png"
             alt="Logo"
           />
         </a>
-
-        
       </div>
 
-      <div className="flex flex-col items-center p-4 border-b border-gray-200">
-        <img
-          src={user?.profileImage ? `${apiUrl}${user?.profileImage}` : defaultUser.src}
-          crossOrigin="anonymous"
-          alt="User" 
-          className="w-20 h-20 rounded-full mb-2 object-cover"
-        />
-        <h2 className="text-xl font-semibold text-gray-800">{user?.firstName}</h2>
-        <p className="text-sm text-gray-600">{user?.role}</p>
-      </div>
+      {/* Main Content & Logout Wrapper */}
+      <div className="flex flex-col justify-between h-full">
+        {/* User Info & Menu */}
+        <div className="flex flex-col overflow-y-auto no-scrollbar">
+          <div className="flex flex-col items-center p-4 border-b border-gray-200">
+            <img
+              src={user?.profileImage ? `${apiUrl}${user?.profileImage}` : defaultUser.src}
+              crossOrigin="anonymous"
+              alt="User"
+              className="w-20 h-20 rounded-full mb-2 object-cover"
+            />
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{user?.firstName}</h2>
+          </div>
 
-      <div className="flex flex-col overflow-y-auto no-scrollbar">
-        <nav className="mb-6">
-          <h2 className={`mb-4 text-md uppercase font-bold flex text-gray-500 ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
-            {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots />}
-          </h2>
-          {renderMenuItems(getNavItems())}
-        </nav>
+          <nav className="mb-6">
+            <h2
+              className={`mb-4 text-md uppercase font-bold flex text-gray-500 ${
+                !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+              }`}
+            >
+              {isExpanded || isHovered || isMobileOpen ? "" : <MoreHorizontal />}
+            </h2>
+            {renderMenuItems(getNavItems())}
+          </nav>
+        </div>
+
+        {/* Logout Button */}
+        <div className="fixed bottom-3 right-1 w-full py-2 border-t border-gray-200 bg-white dark:bg-gray-900 flex justify-center">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-red-600 hover:text-red-800 transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            {(isExpanded || isHovered || isMobileOpen) && <span>Logout</span>}
+          </button>
+        </div>
+
+
       </div>
     </aside>
+
   );
 };
 

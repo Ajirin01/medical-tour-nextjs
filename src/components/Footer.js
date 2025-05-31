@@ -73,14 +73,15 @@ const Footer = () => {
           <FooterSection title="Legal">
             <li><FooterLink href="/cookie-policy">Cookie Policy</FooterLink></li>
             <li><FooterLink href="/privacy-policy">Privacy Policy</FooterLink></li>
+            <li><FooterLink href="/data-privacy">Data Privacy</FooterLink></li>
             <div className="mt-6 text-white/80 text-sm">
               <div className="flex items-center gap-2 mb-2">
                 <FaEnvelope className="text-secondary-6" />
-                <span>support@globalhealthsolutions.com</span>
+                <span>Contact@sozodigicare.ie</span>
               </div>
               <div className="flex items-center gap-2">
-                <FaPhoneAlt className="text-secondary-6" />
-                <span>+1 (800) 123-4567</span>
+                {/* <FaPhoneAlt className="text-secondary-6" /> */}
+                {/* <span>+1 (800) 123-4567</span> */}
               </div>
             </div>
           </FooterSection>

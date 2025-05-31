@@ -11,7 +11,9 @@ import {
   Bell,
   ChevronDown,
   Menu,
-  LogOut 
+  LogOut, 
+  Receipt,
+  FileText
 } from 'lucide-react';
 
 import {
@@ -103,62 +105,15 @@ export default function TopNav({}) {
             <NavLink href="/" icon={<Home size={18} />} label="Home" active />
             <NavLink href="/about" icon={<Info size={18} />} label="About" />
             <NavLink href="/doctors" icon={<User size={18} />} label="Doctors" />
-
-            {/* Services dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setServicesOpen(!servicesOpen)}
-                className={`flex items-center ${
-                  servicesOpen ? 'text-blue-700 font-semibold' : 'text-gray-800'
-                } hover:text-blue-700`}
-              >
-                <FaCubes size={18} className="mr-1" />
-                Services <ChevronDown size={16} className="ml-1" />
-              </button>
-
-              {servicesOpen && (
-                <DropdownMenu
-                  links={links}
-                />
-              )}
-
-            </div>
+            <NavLink icon={<FileText size={18} />} href="/cert" label="Cert" />
 
             {/* Dashboard dropdown */}
             { isAuthenticated && 
-              <div className="relative">
-                <button
-                  onClick={() => setDashboardOpen(!dashboardOpen)}
-                  className={`flex items-center ${
-                    dashboardOpen ? 'text-blue-700 font-semibold' : 'text-gray-800'
-                  } hover:text-blue-700`}
-                >
-                  <Gauge size={18} className="mr-1" />
-                  Dashboard <ChevronDown size={16} className="ml-1" />
-                </button>
-
-                {dashboardOpen && (
-                  <DropdownMenu
-                    links={[
-                      {
-                        href: '/admin',
-                        label: 'Dashboard',
-                        icon: <Gauge size={16} className="text-blue-500" />
-                      },
-                      {
-                        href: '/dashboard/admin',
-                        label: 'Admin Panel',
-                        icon: <Gauge size={16} className="text-blue-500" />
-                      }
-                    ]}
-                  />
-                )}
-
-              </div>
+              <NavLink href="/doctors" icon={<Gauge size={18} />} label="Doctors" />
             }
           </nav>
 
-          <Bell size={20} className="text-gray-700 hidden md:inline" />
+          {/* <Bell size={20} className="text-gray-700 hidden md:inline" /> */}
           <div className="hidden md:flex items-center ml-6 space-x-3">
                 {isAuthenticated ? (
                   <div className="flex items-center space-x-3">
@@ -320,29 +275,10 @@ export default function TopNav({}) {
           <MobileNavLink icon={<Home size={18} />} href="/" label="Home" />
           <MobileNavLink icon={<Info size={18} />} href="/about" label="About" />
           <MobileNavLink icon={<User size={18} />} href="/doctors" label="Our Doctors" />
-          <MobileDropdown
-            icon={<FaCubes size={18} />}
-            label="Services"
-            links={links}
-          />
+          <MobileNavLink icon={<FileText size={18} />} href="/cert" label="Cert" />
 
           { isAuthenticated && 
-            <MobileDropdown
-              icon={<Gauge size={18} />}
-              label="Dashboard"
-              links={[
-                {
-                  href: '/dashboard/user',
-                  label: 'User Dashboard',
-                  icon: <Gauge size={16} className="text-blue-500" />
-                },
-                {
-                  href: '/dashboard/admin',
-                  label: 'Admin Panel',
-                  icon: <Gauge size={16} className="text-blue-500" />
-                }
-              ]}
-            />
+            <MobileNavLink icon={<Gauge size={18} />} href="/admin" label="Dashboard" />
           }
 
         </div>
@@ -374,23 +310,6 @@ function NavLink({ href, icon, label, active }) {
       {icon}
       <span>{label}</span>
     </Link>
-  );
-}
-
-function DropdownMenu({ links }) {
-  return (
-    <div className="absolute top-8 left-0 bg-white shadow-md rounded-md py-2 w-48 z-10">
-      {links.map(link => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-        >
-          {link.icon}
-          <span>{link.label}</span>
-        </Link>
-      ))}
-    </div>
   );
 }
 

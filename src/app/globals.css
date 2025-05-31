@@ -244,7 +244,7 @@ layer(base);
 }
 
 @utility menu-item-active {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+  @apply bg-[var(--color-primary-7)] text-white;
 }
 
 @utility menu-item-inactive {

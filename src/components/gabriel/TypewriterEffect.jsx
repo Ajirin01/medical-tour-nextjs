@@ -44,7 +44,7 @@ const TypewriterEffect = ({ words, typingSpeed = 150, erasingSpeed = 100, delayB
   }, []);
 
   return (
-    <span className="text-primary-9">
+    <span className="text-[var(--color-primary-9)]">
       {currentText}
       <span className={`cursor ${showCursor ? 'opacity-100' : 'opacity-0'}`}>|</span>
     </span>
