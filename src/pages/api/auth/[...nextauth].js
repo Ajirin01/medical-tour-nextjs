@@ -52,7 +52,7 @@ export default NextAuth({
         token.email = user.user.email;
         token.role = user.user.role;
         token.name = user.user.name;
-        token.isHealthQuestionsAnswered = user.user.isHealthQuestionsAnswered ?? false;
+        // token.isHealthQuestionsAnswered = user.user.isHealthQuestionsAnswered ?? false;
         token.approvalStatus = user.user.approvalStatus ?? "pending";
 
         try {

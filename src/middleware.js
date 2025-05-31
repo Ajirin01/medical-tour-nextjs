@@ -59,15 +59,15 @@ export async function middleware(req) {
       }
 
       // Third: user health questions check
-      if (
-        token.role === "user" &&
-        pathname.startsWith("/admin") &&
-        !token.isHealthQuestionsAnswered
-      ) {
-        const url = req.nextUrl.clone();
-        url.pathname = "/health-questions";
-        return NextResponse.redirect(url);
-      }
+      // if (
+      //   token.role === "user" &&
+      //   pathname.startsWith("/admin") &&
+      //   !token.isHealthQuestionsAnswered
+      // ) {
+      //   const url = req.nextUrl.clone();
+      //   url.pathname = "/health-questions";
+      //   return NextResponse.redirect(url);
+      // }
     }
   }
 

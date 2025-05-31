@@ -7,6 +7,8 @@ import Calendar from "react-calendar";
 import { CheckCircle, X } from "lucide-react";
 import 'react-calendar/dist/Calendar.css';
 
+import ConsultationBookingPageContent from "@/components/BookingPage"
+
 export default function CertificatesConsultationPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCert, setSelectedCert] = useState(null);
@@ -156,58 +158,26 @@ export default function CertificatesConsultationPage() {
       </section>
 
       {/* Booking Dialog */}
-      <Dialog open={isOpen} onClose={closeDialog} className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-        <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6">
-          {/* Close button */}
-          <button onClick={closeDialog} className="absolute top-4 right-4 text-gray-500 hover:text-red-500">
-            <X size={20} />
-          </button>
-
-          {/* Steps */}
-          <div className="w-1/2 space-y-4 border-r pr-4">
-            <h3 className="text-xl font-semibold">How to Book</h3>
-            <ol className="space-y-3 text-sm">
-              {steps.map((step, index) => {
-                const stepNumber = index + 1;
-                const isCompleted = currentStep > stepNumber;
-                const isActive = currentStep === stepNumber;
-                return (
-                  <li
-                    key={index}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
-                      isCompleted
-                        ? "bg-green-50 border-green-300 text-green-700"
-                        : isActive
-                        ? "bg-blue-50 border-blue-300 text-blue-700"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle size={16} className="text-green-500" />
-                    ) : (
-                      <span className="w-4 h-4 rounded-full bg-gray-300 inline-block"></span>
-                    )}
-                    <span>{step}</span>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-
-          {/* Calendar Step */}
-          <div className="w-1/2">
-            <h3 className="text-lg font-medium mb-2">Choose a Date</h3>
-            <Calendar onChange={setSelectedDate} value={selectedDate} />
-            <p className="text-sm mt-2 text-gray-600">Selected: {selectedDate.toDateString()}</p>
+      <Dialog
+        open={isOpen}
+        onClose={closeDialog}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        >
+        <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh] max-w-[90vw]">
+            {/* Close button */}
             <button
-              onClick={() => setCurrentStep((s) => Math.min(s + 1, steps.length))}
-              className="mt-4 py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition w-full"
+            onClick={closeDialog}
+            className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
             >
-              Continue
+            <X size={20} />
             </button>
-          </div>
+            {/* Calendar Step */}
+            <div className="w-full">
+            <ConsultationBookingPageContent />
+            </div>
         </div>
-      </Dialog>
+        </Dialog>
+
     </div>
   );
 }
