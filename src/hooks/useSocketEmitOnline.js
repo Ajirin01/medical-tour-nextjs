@@ -2,18 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useUser } from "@/context/UserContext";
 import { getSocket } from "@/lib/socket";
-import { postData, fetchData, updateData } from "@/utils/api";
+import { postData, fetchData } from "@/utils/api";
+import IncomingCallDialog from "@/components/IncomingCallDialog"; // ensure this component exists
 
 export default function useSocketEmitOnline() {
   const { data: session } = useSession();
   const { user } = useUser();
   const socketRef = useRef(null);
   const ringtoneRef = useRef(null);
-  const listenerAttached = useRef(false);
 
   const [showSoundPrompt, setShowSoundPrompt] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(false);
-  
+  const [incomingCall, setIncomingCall] = useState(null);
 
   const enableSoundNotifications = () => {
     const silentAudio = new Audio("/sounds/silence.mp3");
@@ -22,7 +22,7 @@ export default function useSocketEmitOnline() {
       .then(() => {
         setSoundEnabled(true);
         localStorage.setItem("soundEnabled", "true");
-        localStorage.setItem("soundPromptShown", "true");  // Mark sound prompt as shown
+        localStorage.setItem("soundPromptShown", "true");
         console.log("🔊 Sound notifications enabled.");
       })
       .catch((err) => {
@@ -30,13 +30,74 @@ export default function useSocketEmitOnline() {
       });
   };
 
+  const handleAccept = async (appointmentId) => {
+    socketRef.current.emit("accept-call", {
+      specialistId: user._id,
+      appointmentId,
+    });
+
+    try {
+      const appointment = await fetchData(`consultation-appointments/${appointmentId}`);
+      const payload = {
+        appointment: appointmentId,
+        specialist: user._id,
+        user: appointment.patient,
+      };
+
+      console.log(payload)
+
+      const res = await postData("video-sessions", payload, session?.user?.jwt);
+      if (res.success) {
+        const sessionData = res.session;
+        const { specialistToken, patientToken } = sessionData;
+
+        localStorage.setItem(
+          "activeVideoSession",
+          JSON.stringify({ session: sessionData, specialistToken, patientToken })
+        );
+
+        if (specialistToken && patientToken) {
+          socketRef.current.emit("session-created", {
+            appointmentId,
+            session: sessionData,
+            specialistToken,
+            patientToken,
+          });
+        }
+
+        window.location.href = `/admin/appointments/session/${sessionData._id}`;
+      } else {
+        console.error("❌ Failed to create session:", res.message);
+      }
+    } catch (err) {
+      console.error("💥 Error creating session:", err);
+    } finally {
+      if (ringtoneRef.current) {
+        ringtoneRef.current.pause();
+        ringtoneRef.current.currentTime = 0;
+      }
+      setIncomingCall(null);
+    }
+  };
+
+  const handleReject = (appointmentId) => {
+    socketRef.current.emit("reject-call", {
+      specialistId: user._id,
+      appointmentId,
+    });
+    if (ringtoneRef.current) {
+      ringtoneRef.current.pause();
+      ringtoneRef.current.currentTime = 0;
+    }
+    setIncomingCall(null);
+  };
+
   useEffect(() => {
     if (
       typeof window === "undefined" ||
       !session?.user ||
       !["specialist", "consultant"].includes(session.user.role) ||
-      !user ||
-      !soundEnabled // Prevent socket connection if sound is not enabled yet
+      !user
     )
       return;
 
@@ -64,99 +125,45 @@ export default function useSocketEmitOnline() {
       emitSpecialistOnline();
     });
 
-    // Clean up any existing listener before adding the new one
     socketRef.current.off("incoming-call");
 
-    socketRef.current.on("incoming-call", ({ appointmentId }) => {
-      fetchData(`consultation-appointments/${appointmentId}`)
-      .then((appointment) => {
+    socketRef.current.on("incoming-call", async ({ appointmentId }) => {
+      try {
+        const appointment = await fetchData(`consultation-appointments/${appointmentId}`);
+
         if (soundEnabled && ringtoneRef.current) {
           ringtoneRef.current.play().catch((err) => {
             console.warn("🔇 Ringtone play error:", err);
           });
         }
-  
-        if (showSoundPrompt) {
-          // If sound prompt is still showing, don't show the confirmation dialog yet
-          return;
-        }
-  
-        // Show confirmation dialog for incoming call
-        const accept = window.confirm(`Incoming call for Appointment ID: ${appointmentId}. Accept?`);
-  
-        if (ringtoneRef.current) {
-          ringtoneRef.current.pause();
-          ringtoneRef.current.currentTime = 0;
-        }
-  
-        if (accept) {
-          socketRef.current.emit("accept-call", {
-            specialistId: user._id,
-            appointmentId,
-          });
-        
-          const payload = {
-            appointment: appointmentId,
-            specialist: user._id,
-            user: appointment.patient, // You should receive this with the incoming call payload
-          };
-        
-          // Create the session via HTTP and handle the result locally
-          const token = session?.user?.jwt;
-          postData("video-sessions", payload, token).then((res) => {
-            if (res.success) {
-              const session = res.session;
-              const specialistToken = res.session.specialistToken;  // Assuming the server sends back this token
-              const patientToken = res.session.patientToken;  // Assuming the server sends back this token
-        
-              // Store the session and tokens locally for the specialist
-              localStorage.setItem("activeVideoSession", JSON.stringify({ session, specialistToken, patientToken }));
-        
-              // Emit session-created to the patient with tokens
-              // console.log("🔑 Tokens before emit:", specialistToken, patientToken); // Should show actual values
 
-              if (specialistToken && patientToken) {
-                socketRef.current.emit("session-created", {
-                  appointmentId,
-                  session,
-                  specialistToken,
-                  patientToken,
-                });
-              } else {
-                console.warn("⚠️ Tokens not available yet!");
-              }
-        
-              // Navigate to the specialist's session page
-              window.location.href = `/admin/appointments/session/${session._id}`;
-            } else {
-              console.error("❌ Failed to create session:", res.message);
-            }
-          }).catch((err) => {
-            console.error("💥 Error creating session:", err);
-          });
-        }else {
-          socketRef.current.emit("reject-call", {
-            specialistId: user._id,
-            appointmentId,
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to fetch appointment:", error);
-        // Optionally show a toast or error message to user
-      });
+        if (showSoundPrompt) return;
+
+        setIncomingCall({ appointmentId, appointment });
+      } catch (err) {
+        console.error("Failed to fetch appointment:", err);
+      }
     });
 
-    // Reset the dialog state when the session/user changes or component unmounts
     return () => {
-      setShowSoundPrompt(false); // Hide the sound prompt on cleanup
+      setShowSoundPrompt(false);
       socketRef.current?.off("incoming-call");
     };
-  }, [session, user, soundEnabled, showSoundPrompt]); // watch showSoundPrompt as well
+  }, [session, user, soundEnabled, showSoundPrompt]);
+
+  const IncomingCallDialogWrapper =
+    incomingCall && !showSoundPrompt ? (
+      <IncomingCallDialog
+        appointment={incomingCall}
+        onAccept={() => handleAccept(incomingCall.appointmentId)}
+        onReject={() => handleReject(incomingCall.appointmentId)}
+      />
+    ) : null;
 
   return {
     showSoundPrompt,
     setShowSoundPrompt,
     enableSoundNotifications,
+    IncomingCallDialogWrapper,
   };
 }

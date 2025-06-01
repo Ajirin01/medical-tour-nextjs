@@ -12,6 +12,8 @@ import { ThemeProvider } from "@/context/admin/ThemeContext";
 import useSocketEmitOnline from "@/hooks/useSocketEmitOnline";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import PushNotificationButton from "@/components/PushNotificationButton"; // Import your component
+import { usePathname } from "next/navigation";
+import IncomingCallDialog from "@/components/IncomingCallDialog";
 
 export default function AdminLayout({ children }) {
   return (
@@ -27,10 +29,9 @@ export default function AdminLayout({ children }) {
   );
 }
 
-// Extracted Admin Layout Content to prevent `useSidebar` error
 function AdminLayoutContent({ children }) {
+  const pathname = usePathname();
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-
   const { data: session } = useSession();
   const role = session?.user?.role;
 
@@ -38,7 +39,10 @@ function AdminLayoutContent({ children }) {
     showSoundPrompt,
     setShowSoundPrompt,
     enableSoundNotifications,
+    IncomingCallDialogWrapper,
   } = useSocketEmitOnline();
+
+  const isSessionPage = /^\/admin\/appointments\/session\/[^\/]+$/.test(pathname);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -51,7 +55,7 @@ function AdminLayoutContent({ children }) {
           console.error('❌ Service Worker registration failed:', error);
         });
     }
-  }, []);  
+  }, []);
 
   const mainContentMargin = isMobileOpen
     ? "ml-0"
@@ -60,16 +64,20 @@ function AdminLayoutContent({ children }) {
     : "lg:ml-[90px]";
 
   return (
-    <div className="min-h-screen xl:flex dark:bg-gray-900 dark:text-gray-300">
-      <AppSidebar />
-      <Backdrop />
+    <div className={`min-h-screen xl:flex dark:bg-gray-900 dark:text-gray-300`}>
+      {!isSessionPage && <AppSidebar />}
+      {!isSessionPage && <Backdrop />}
+
       <div
-        className={`flex-1 transition-all duration-300 ease-in-out ${mainContentMargin}`}
+        className={`flex-1 transition-all duration-300 ease-in-out ${
+          !isSessionPage ? mainContentMargin : ""
+        }`}
       >
-        <AppHeader />
-        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 dark:bg-gray-900 dark:text-gray-300">
+        {!isSessionPage && <AppHeader />}
+        <div className={`p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6`}>
           {children}
         </div>
+        {IncomingCallDialogWrapper}
 
         {((role === "specialist" || role === "consultant") && showSoundPrompt) && (
           <ConfirmationDialog

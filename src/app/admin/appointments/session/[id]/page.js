@@ -18,10 +18,8 @@ import PrescriptionDialog from "@/components/admin/PrescriptionDialog";
 import QuestionsDialog from "@/components/admin/QuestionsDialog";
 
 import useAppointment from "@/hooks/useAppointment";
-import useSessionSocket from "@/hooks/useSessionSocket";
 
 import { postData, fetchData, updateData } from "@/utils/api";
-import { useSidebar } from "@/context/admin/SidebarContext";
 import { getSocket } from "@/lib/socket";
 
 
@@ -29,8 +27,6 @@ import { getSocket } from "@/lib/socket";
 const SessionPage = () => {
   const { id } = useParams();
   const router = useRouter();
-
-  const { isExpanded, isMobileOpen, toggleMobileSidebar } = useSidebar();
   
 
   const videoUrl = `https://videowidget.sozodigicare.com/?room=${id}`
@@ -97,19 +93,15 @@ const SessionPage = () => {
   };
 
   useEffect(()=> {
-    if(appointmentRef.current?.session?.appointment?.status === "completed" && !appointmentRef.current?.session?.feedback){
-      setShowRatingField(true)
+    if(appointment?.session?.appointment?.status === "completed"){
+      setIsTimerRunning(false)
+      router.push(`/admin/appointments/session/completed/${id}`)
     }
   }, [appointment])
 
   useEffect(()=> {
-      toggleMobileSidebar()
-  }, [])
-
-  useEffect(()=> {
     if(appointmentRef.current?.session && appointmentRef.current?.session?.appointment?.status === "pending"){
       setIsTimerRunning(true)
-      toggleMobileSidebar()
     }
   }, [appointmentRef.current])
 
@@ -135,7 +127,7 @@ const SessionPage = () => {
       handleEndCall();
       setIsTimerRunning(false);
       setEndingSession(false);
-      toggleMobileSidebar()
+      router.push(`/admin/appointments/session/completed/${id}`)
     }
   };
 
@@ -200,28 +192,6 @@ const SessionPage = () => {
       setPatientToken(sessionData?.session?.patientToken || sessionData?.patientToken);
     }
   }, []);
-
-  const handleRateSession = async () => {
-    const storedSession = localStorage.getItem('activeVideoSession');
-    const session = storedSession ? JSON.parse(storedSession) : null;
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        session: session._id,
-        user: session.user._id,
-        rating,
-        feedbackText: comment
-      };
-      await postData('session-feedback', payload, token);
-      addToast('Thank you for your feedback!', 'success');
-      setShowRatingField(false);
-    } catch (err) {
-      console.error(err);
-      addToast('Failed to submit feedback', 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleSaveNotes = async () => {
     const currentAppointment = appointmentRef.current;
@@ -322,8 +292,8 @@ const SessionPage = () => {
         setIsTimerRunning(false);
         setShowRatingField(true);
         handleEndCall();
-        toggleMobileSidebar()
         addToast("Specialist ended the session", "info", 5000);
+        router.push(`/admin/appointments/session/completed/${id}`)
       } else {
         console.warn("⚠️ session-ended received but session or user ID did not match");
       }
@@ -352,8 +322,8 @@ const SessionPage = () => {
   
 
   return (
-    <div className={`relative ${isTimerRunning ? "bottom-25 bg-black" : "bottom-0 bg-white"} transition-all duration-300`}>
-      <div className={`min-h-screen ${isTimerRunning ? "bg-black" : "bg-white"}`}>
+    <div className={`absolute top-0 left-0 w-full transition-all duration-300`}>
+      <div className="bg-black">
         <div className="absolute top-4 right-4 flex gap-2 z-9999999">
           {/* <button
             onClick={() => setIsFullScreen(!isFullScreen)}
@@ -371,7 +341,7 @@ const SessionPage = () => {
         </div>
         
         {/* Timer */}
-        { isTimerRunning && <div className="absolute top-10 left-1/2 transform -translate-x-1/2 mb-6 z-999999">
+        <div className="absolute top-10 left-1/2 transform -translate-x-1/2 mb-6 z-999999">
           <SessionTimer
             appointment={appointment}
             setRemainingTime={setRemainingTime}
@@ -381,7 +351,7 @@ const SessionPage = () => {
             handleEndCall={handleEndCall}
             addToast={addToast}
           />
-        </div>}
+        </div>
 
         {/* Video Area */}
         <div className="mb-6">
@@ -396,15 +366,6 @@ const SessionPage = () => {
             iframeUrl={videoUrl}
             id={id}
             videoRef={videoRef}
-            showRatingField={showRatingField}
-            showRatingForm={showRatingForm}
-            setShowRatingForm={setShowRatingForm}
-            rating={rating}
-            setRating={setRating}
-            comment={comment}
-            setComment={setComment}
-            handleRateSession={handleRateSession}
-            isSubmitting={isSubmitting}
             handleSessionEnded={handleSessionEnded}
           />
         </div>

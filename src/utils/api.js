@@ -1,6 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_NODE_API_BASE_URL || "http://localhost:5000";
 
-// Timeout Fetch
 // Timeout Fetch with Retry
 export async function fetchWithTimeout(resource, options = {}, timeout = 10000, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -15,7 +14,6 @@ export async function fetchWithTimeout(resource, options = {}, timeout = 10000, 
       });
 
       clearTimeout(id);
-
       return res; // Success
     } catch (err) {
       clearTimeout(id);
@@ -33,28 +31,36 @@ export async function fetchWithTimeout(resource, options = {}, timeout = 10000, 
         throw err;
       }
 
-      // Optional: wait before retrying (simple backoff)
       await new Promise((res) => setTimeout(res, 500 * attempt));
     }
   }
 }
 
+// Unified error handler
+async function handleResponse(res) {
+  if (res?.aborted) {
+    return { aborted: true };
+  }
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const error = {
+      status: res.status,
+      data: data,
+      message: data?.message || `Error: ${res.statusText}`,
+    };
+    throw error;
+  }
+
+  return data;
+}
 
 // GET
 export async function fetchData(endpoint, token = null) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, { headers });
-
-  if (res?.aborted) {
-    return { aborted: true };
-  }
-
-  if (!res.ok) {
-    const errorResponse = await res.json().catch(() => ({}));
-    throw new Error(errorResponse.message || `Error: ${res.statusText}`);
-  }
-
-  return await res.json();
+  return handleResponse(res);
 }
 
 // POST
@@ -72,16 +78,7 @@ export async function postData(endpoint, data, token = null, isFormData = false)
     body: isFormData ? data : JSON.stringify(data),
   });
 
-  if (res?.aborted) {
-    return { aborted: true };
-  }
-
-  if (!res.ok) {
-    const errorResponse = await res.json().catch(() => ({}));
-    throw new Error(errorResponse.message || `Error: ${res.statusText}`);
-  }
-
-  return await res.json();
+  return handleResponse(res);
 }
 
 // PUT
@@ -91,7 +88,7 @@ export async function updateData(endpoint, data, token = null, isFormData = fals
         Authorization: `Bearer ${token}`,
         ...(isFormData ? {} : { "Content-Type": "application/json" }),
       }
-    : {};
+    : { "Content-Type": "application/json" };
 
   const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
     method: "PUT",
@@ -99,34 +96,17 @@ export async function updateData(endpoint, data, token = null, isFormData = fals
     body: isFormData ? data : JSON.stringify(data),
   });
 
-  if (res?.aborted) {
-    return { aborted: true };
-  }
-
-  if (!res.ok) {
-    const errorResponse = await res.json().catch(() => ({}));
-    throw new Error(errorResponse.message || `Error: ${res.statusText}`);
-  }
-
-  return await res.json();
+  return handleResponse(res);
 }
 
 // DELETE
 export async function deleteData(endpoint, token = null) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
   const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
     method: "DELETE",
     headers,
   });
 
-  if (res?.aborted) {
-    return { aborted: true };
-  }
-
-  if (!res.ok) {
-    const errorResponse = await res.json().catch(() => ({}));
-    throw new Error(errorResponse.message || `Error: ${res.statusText}`);
-  }
-
-  return await res.json();
+  return handleResponse(res);
 }

@@ -36,7 +36,7 @@ export default function LoginPage() {
 
     if (res?.error) {
       let friendlyMessage = "An unexpected error occurred. Please try again.";
-      if (res.error.toLowerCase().includes("credentials")) {
+      if (res.error.toLowerCase().includes("credentials" || "Unauthorized")) {
         friendlyMessage = "Incorrect email or password.";
       } else if (res.error.toLowerCase().includes("network")) {
         friendlyMessage = "Network error. Please check your connection.";
