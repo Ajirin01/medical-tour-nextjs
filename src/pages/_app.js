@@ -1,5 +1,5 @@
-// pages/_app.js
 import { useEffect } from 'react';
+import { ToastProvider } from '@/context/ToastContext';
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
@@ -17,7 +17,11 @@ function MyApp({ Component, pageProps }) {
     }
   }, []);
 
-  return <Component {...pageProps} />;
+  return (
+    <ToastProvider>
+      <Component {...pageProps} />
+    </ToastProvider>
+  );
 }
 
 export default MyApp;

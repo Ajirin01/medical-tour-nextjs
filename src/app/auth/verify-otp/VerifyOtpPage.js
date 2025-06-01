@@ -103,7 +103,8 @@ export default function VerifyOtpPage() {
       }
 
     } catch (err) {
-      setError(err.response || 'An error occurred');
+      setError(err.message || 'An error occurred');
+      alertError(err.message || 'An error occurred')
       setMessage('');
     } finally {
       setLoading(false);

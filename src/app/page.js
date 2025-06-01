@@ -25,7 +25,8 @@ import {
   doctorIcon, 
   medicMask, 
   pngwing1, 
-  roboDoc, 
+  roboDoc,
+  aidoc,
   userIcon } from '@/assets';
 import SimpleCarousel from '@/components/gabriel/SimpleCarousel';
 import Button from '@/components/gabriel/Button';
@@ -250,7 +251,7 @@ export default function HomePage() {
             <span className="relative z-10">Sign Up for Free</span>
           </Button> 
         </div>
-        <img src={roboDoc.src} alt="robo doctor" className="absolute right-0 bottom-0 w-lg max-w-lg opacity-30 md:opacity-100" />
+        <img src={aidoc.src} alt="robo doctor" className="absolute right-0 bottom-0 w-lg max-w-lg opacity-30 md:opacity-100" />
       </section>
 
       <section className="services-section py-8 bg-white rounded-3xl mx-4 mt-8">

@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { doctors2 } from '@/assets';
 import { FaSpinner } from "react-icons/fa";
+import { useToast } from "@/context/ToastContext";
 
 const formInput =
   "border-[3px] border-primary-5 text-primary-2 rounded-[20px] overflow-hidden p-3 w-full placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-5";
@@ -18,6 +19,9 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  const { addToast } = useToast();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,8 +42,10 @@ export default function LoginPage() {
         friendlyMessage = "Network error. Please check your connection.";
       }
       setError(friendlyMessage);
+      addToast(friendlyMessage, "error")
       setIsSubmitting(false);
     } else {
+      addToast("Login successful!", "success")
       router.push("/admin");
     }
   };
@@ -124,17 +130,17 @@ export default function LoginPage() {
                 </div>
               </form>
 
-              <div className="mt-6 text-center">
+              {/* <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
                   Are you a healthcare specialist?{" "}
                   <Link
-                    href="/auth/doctor-login"
+                    href="/auth/sign-up?role=specialist"
                     className="font-medium text-blue-600 hover:text-blue-500"
                   >
                     Sign in here
                   </Link>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

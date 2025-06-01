@@ -27,6 +27,8 @@ import {
   FaPlaneDeparture
 } from 'react-icons/fa';
 
+import { defaultUser } from '@/assets';
+
 import Button from "@/components/gabriel/Button";
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -107,6 +109,19 @@ export default function TopNav({}) {
             <NavLink href="/doctors" icon={<User size={18} />} label="Doctors" />
             <NavLink icon={<FileText size={18} />} href="/cert" label="Cert" />
 
+            <div className="hidden md:flex items-center ml-6 space-x-3">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 px-3 py-1.5 border-2 rounded border-[var(--color-primary-7)]">
+                  <button
+                    onClick={() => router.push("/auth/sign-up?role=specialist")}
+                    className="text-[var(--color-primary-7)] hover:text-primary-6 transition-colors duration-200 text-sm font-medium ml-2"
+                  >
+                    Become Our Doctor
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Dashboard dropdown */}
             { isAuthenticated && 
               <NavLink href="/admin" icon={<Gauge size={18} />} label="Dashboard" />
@@ -167,7 +182,7 @@ export default function TopNav({}) {
                     </Button>
                   </>
                 )}
-              </div>
+          </div>
 
 
           {/* Mobile menu button */}
@@ -276,6 +291,19 @@ export default function TopNav({}) {
           <MobileNavLink icon={<Info size={18} />} href="/about" label="About" />
           <MobileNavLink icon={<User size={18} />} href="/doctors" label="Our Doctors" />
           <MobileNavLink icon={<FileText size={18} />} href="/cert" label="Cert" />
+
+          <div className="md:flex items-center space-x-3">
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 px-3 py-1.5 border-2 rounded border-[var(--color-primary-7)]">
+                <button
+                  onClick={() => router.push("/auth/sign-up?role=specialist")}
+                  className="text-[var(--color-primary-7)] hover:text-primary-6 transition-colors duration-200 text-sm font-medium ml-2"
+                >
+                  Become Our Doctor
+                </button>
+              </div>
+            </div>
+          </div>
 
           { isAuthenticated && 
             <MobileNavLink icon={<Gauge size={18} />} href="/admin" label="Dashboard" />

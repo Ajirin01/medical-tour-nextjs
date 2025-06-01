@@ -29,3 +29,5 @@ export { default as allergist } from "./allergist.jpg";
 export { default as medicalTourismHero } from "./medical-tourism-hero.jpg";
 export { default as medicalDevicesHero } from "./medicalDevicesHero.jpg";
 export { default as labServicesHero } from "./labServicesHero.jpg";
+export { default as aidoc } from "./aidoc.png";
+

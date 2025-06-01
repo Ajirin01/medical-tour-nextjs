@@ -28,7 +28,8 @@ import {
   Image as image,
   Building2,
   Newspaper,
-  LogOut
+  LogOut,
+  Camera
 } from 'lucide-react';
 
 const AppSidebar = () => {
@@ -344,7 +345,7 @@ const AppSidebar = () => {
       },
       // Galleries
       {
-        icon: <image />,
+        icon: <Camera />,
         name: "Galleries",
         path: "/admin/galleries",
         roles: ["admin"]

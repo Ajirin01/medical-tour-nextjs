@@ -125,7 +125,7 @@ export default function Ecommerce() {
 
   const quickActions = [
     {
-      title: "AI Health Assistant",
+      title: "Symptoms Checker",
       description: "Get instant health advice",
       icon: <FaRobot className="text-cyan-500" size={20} />,
       bgColor: "bg-cyan-50",
@@ -166,7 +166,7 @@ export default function Ecommerce() {
         new Date(upcomingAppointments[0].date).toLocaleDateString() : 
         "None",
       change: upcomingAppointments.length > 0 ? 
-        `with Dr. ${upcomingAppointments[0].consultant.firstName || 'Specialist'}` : 
+        `with Dr. ${upcomingAppointments[0].consultant?.firstName || 'Specialist'}` : 
         "No scheduled appointments",
       icon: <FaCalendarAlt className="text-green-600" size={20} />,
       bgColor: "bg-green-50",
