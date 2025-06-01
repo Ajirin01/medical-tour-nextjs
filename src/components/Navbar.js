@@ -328,13 +328,23 @@ export default function TopNav({}) {
 
 // Subcomponents
 function NavLink({ href, icon, label, active }) {
+  const className = `flex items-center space-x-1 ${
+    active
+      ? 'text-blue-700 border-b-2 border-blue-700 pb-1'
+      : 'text-gray-800 hover:text-blue-700'
+  }`;
+
+  if (label === "Dashboard") {
+    return (
+      <a href={href} className={className}>
+        {icon}
+        <span>{label}</span>
+      </a>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      className={`flex items-center space-x-1 ${
-        active ? 'text-blue-700 border-b-2 border-blue-700 pb-1' : 'text-gray-800 hover:text-blue-700'
-      }`}
-    >
+    <Link href={href} className={className}>
       {icon}
       <span>{label}</span>
     </Link>
@@ -342,19 +352,28 @@ function NavLink({ href, icon, label, active }) {
 }
 
 
+
 function MobileNavLink({ href, label, icon }) {
+  const className =
+    "flex items-center gap-4 text-gray-800 font-medium px-3 py-3 rounded-lg hover:bg-gray-100 transition";
+
+  if (label === "Dashboard") {
+    return (
+      <a href={href} className={className}>
+        <div className="bg-gray-100 text-blue-600 p-2 rounded-lg">{icon}</div>
+        <span className="text-sm">{label}</span>
+      </a>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      className="flex items-center gap-4 text-gray-800 font-medium px-3 py-3 rounded-lg hover:bg-gray-100 transition"
-    >
-      <div className="bg-gray-100 text-blue-600 p-2 rounded-lg">
-        {icon}
-      </div>
+    <Link href={href} className={className}>
+      <div className="bg-gray-100 text-blue-600 p-2 rounded-lg">{icon}</div>
       <span className="text-sm">{label}</span>
     </Link>
   );
 }
+
 
 
 function MobileDropdown({ label, icon, links }) {
