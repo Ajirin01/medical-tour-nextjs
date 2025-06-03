@@ -13,7 +13,6 @@ import useSocketEmitOnline from "@/hooks/useSocketEmitOnline";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import PushNotificationButton from "@/components/PushNotificationButton"; // Import your component
 import { usePathname } from "next/navigation";
-import IncomingCallDialog from "@/components/IncomingCallDialog";
 
 export default function AdminLayout({ children }) {
   return (
@@ -56,6 +55,10 @@ function AdminLayoutContent({ children }) {
         });
     }
   }, []);
+
+  // useEffect(() => {
+  //   setShowSoundPrompt(!Boolean(localStorage.getItem("soundEnabled")))
+  // }, [])
 
   const mainContentMargin = isMobileOpen
     ? "ml-0"

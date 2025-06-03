@@ -125,8 +125,9 @@ const ConsultationBookingPageContent = () => {
 
       const allSlots = []
       for (const specialist of specialistsByCategory) {
-        const res = await fetchData(`availabilities/slots/by?userRole=specialist&consultantId=${specialist._id}`, token)
-
+        const res = await fetchData(`availabilities/slots/by?userRole=specialist&consultantId=${specialist._id}&isBooked=false`, token)
+        
+        console.log(res.data)
         const filtered = res.data.filter((slot) => {
           if (slot.type === 'recurring') {
             return slot.dayOfWeek === selectedDayName
@@ -161,7 +162,7 @@ const ConsultationBookingPageContent = () => {
     setModalContent("checkoutModal");
     dispatch(setConsultMode("appointment"));
     dispatch(setSpecialist(selectedSlot.consultant))
-    dispatch(setAppointmentDate(selectedSlot.date))
+    dispatch(setAppointmentDate(selectedDate.toISOString()))
     dispatch(setSlot(selectedSlot))
     setShowModal(true);
   };

@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { PlayIcon, UsersIcon   } from "@heroicons/react/24/outline";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Trash } from "lucide-react";
 import { fetchData, deleteData } from "@/utils/api";
 import { useToast } from "@/context/ToastContext";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
@@ -79,6 +79,7 @@ const ConsultationAppointmentsPageContent  = () => {
       addToast("Appointment deleted successfully", "success");
       setAppointments((prev) => prev.filter((a) => a._id !== itemToDelete._id));
     } catch (error) {
+      console.log(error)
       addToast("Failed to delete appointment", "error");
     } finally {
       setIsDialogOpen(false);
@@ -237,6 +238,7 @@ const ConsultationAppointmentsPageContent  = () => {
                                     Available Doctors
                                   </Link>
                                 </MenuItem>
+                                
                               </>}
 
                               { session?.user?.role === "user" &&
@@ -251,14 +253,27 @@ const ConsultationAppointmentsPageContent  = () => {
                             </MenuItem>}
 
                             { session?.user?.role === "admin" &&
-                            <MenuItem>
-                              <Link
-                                href={`/admin/medical-tourism/consultations/appointments/edit/${appointment._id}`}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              >
-                                ✏️ Edit Appointment
-                              </Link>
-                            </MenuItem>}
+                              <>
+                                <MenuItem>
+                                  <Link
+                                    href={`/admin/medical-tourism/consultations/appointments/edit/${appointment._id}`}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  >
+                                    ✏️ Edit Appointment
+                                  </Link>
+                                </MenuItem>
+
+                                <MenuItem>
+                                  <button
+                                    onClick={() => {setIsDialogOpen(true); setItemToDelete(appointment)}}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                                  >
+                                    <Trash className="w-4 h-4 text-red-500" />
+                                    Delete
+                                  </button>
+                                </MenuItem>
+                              </>
+                            }
                           </div>
                         </MenuItems>
                       </Menu>

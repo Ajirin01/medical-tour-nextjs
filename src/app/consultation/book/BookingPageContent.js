@@ -72,8 +72,8 @@ export default function ConsultationBookingPageContent() {
   useEffect(() => {
     const fetchAvailableSlots = async () => {
       try {
-        const res = await fetchData(`availabilities/slots/by?userRole=specialist`, token)
-        console.log(res)
+        const res = await fetchData(`availabilities/slots/by?userRole=specialist&isBooked=false`, token)
+        console.log(res.data)
         if (Array.isArray(res.data)) {
           setAvailableSlots(res.data)
         }

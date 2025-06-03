@@ -9,20 +9,24 @@ import { toSmallestUnit } from "@/utils/helperFunctions";
 import { useSession } from "next-auth/react";
 import { postData } from "@/utils/api";
 import { useUser } from "@/context/UserContext";
+import { useToast } from "@/context/ToastContext";
 
 const CheckoutModal = ({
   closeModal,
   amount,
   currency = "USD",
   duration,
-  initiateCallAPI
+  initiateCallAPI,
+  date
 }) => {
   const specialist = useSelector((state) =>  state.specialist.specialist);
-  const appointmentDate = useSelector((state) => state.specialist.appointmentDate);
+  const appointmentDate = useSelector((state) => state.specialist.appointmentDate) || date;
   const consultMode = useSelector((state) => state.specialist.consultMode);
   const slot = useSelector((state) => state.specialist.slot);
+  
+  const { addToast } = useToast()
 
-  // console.log(specialist, appointmentDate, consultMode, slot)
+  console.log(appointmentDate)
 
 
   const { user } = useUser();
@@ -89,7 +93,7 @@ const CheckoutModal = ({
         throw new Error("No order data found");
       }
 
-      console.log(orderData)
+      // console.log(orderData)
 
       // return
 
@@ -109,8 +113,7 @@ const CheckoutModal = ({
         consultant: orderData.consultant,
         date: orderData.date,
         mode: orderData.mode,
-        startTime: orderData.startTime,
-        endTime: orderData.endTime,
+        slot,
         duration: orderData.duration,
         type: orderData.type,
         paymentStatus: "paid",
@@ -136,6 +139,8 @@ const CheckoutModal = ({
         throw new Error("Failed to book the appointment");
       }
     } catch (err) {
+      addToast(err.message, 'error')
+      setCallStatus(null)
       setError("Failed to book the appointment");
       console.error(err);
     } finally {
@@ -291,7 +296,7 @@ const CheckoutModal = ({
               <p className="mb-4">
                 {callStatus === "initiating"
                   ? "We're setting up your call. This may take a moment."
-                  : "We've notified the specialist. Please wait while they accept the call."}
+                  : "We've notified the specialist. Please wait..."}
               </p>
             </>
             }
