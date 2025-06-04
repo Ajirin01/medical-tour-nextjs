@@ -36,6 +36,9 @@ import { faqItems } from '@/data/faqData';
 import { useMediaQuery } from 'react-responsive'; 
 import TypewriterEffect from '@/components/gabriel/TypewriterEffect';
 import { useRouter } from 'next/navigation';
+import { openChatBot, triggerChatbotAttention } from '@/store/popUpSlice';
+
+import { useDispatch } from 'react-redux';
 
 
 function classNames(...classes) {
@@ -51,6 +54,8 @@ export default function HomePage() {
   const [activeIndex, setActiveIndex] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  const dispatch = useDispatch()
+
   const router = useRouter()
 
   const [selectedService, setSelectedService] = useState(null);
@@ -63,14 +68,14 @@ export default function HomePage() {
       title: "Free Symptoms Checker",
       description: "Utilize our advanced self-assessment tools to quickly and accurately identify possible health concerns based on your symptoms, helping you make informed decisions about your next steps.",
       animation: "M10 10 L50 50 L90 10",
-      link: "/"
+      link: "ai"
     },
     {
       icon: <FaComments className="text-5xl text-[var(--color-primary-6)]" />,
       title: "Real-time Medical Consultation",
       description: "Connect instantly with licensed healthcare professionals through secure video or chat, receiving expert medical advice, diagnosis, and personalized treatment recommendations anytime, anywhere.",
       animation: "M10 50 Q50 10 90 50 Q50 90 10 50",
-      link: "/admin/consultion/book"
+      link: "/admin/available-specialists"
     },
     {
       icon: <FaFileMedicalAlt className="text-5xl text-[var(--color-primary-6)]" />,
@@ -141,6 +146,11 @@ export default function HomePage() {
     fetchHospitals();
     fetchPackages();
   }, []);
+
+  const handleChat = () => {
+    dispatch(triggerChatbotAttention());
+    dispatch(openChatBot(true));
+  };
   
   const FAQ = () => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -295,7 +305,7 @@ export default function HomePage() {
                 </div>
 
                 <button
-                  onClick={() => window.location.href = service.link} // Update this if using Next.js router
+                  onClick={() => service.link === "ai" ? handleChat() : window.location.href = service.link} // Update this if using Next.js router
                   className="mt-6 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
                 >
                   Get Started

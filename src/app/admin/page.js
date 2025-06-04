@@ -5,7 +5,9 @@ import { useSession } from "next-auth/react";
 import { 
   FaUserAlt, FaCalendarAlt, FaHistory, FaRobot, FaUserMd, 
   FaFileMedical, FaHeartbeat, FaChartLine, FaSearch,
-  FaBell, FaClipboardList, FaEllipsisH, FaPills, FaChevronRight
+  FaBell, FaClipboardList, FaEllipsisH, FaPills, FaChevronRight,
+  FaClock,
+  FaMoneyBill
 } from 'react-icons/fa';
 
 import { useRouter } from "next/navigation";
@@ -20,11 +22,17 @@ import DemographicCard from "@/components/admin/ecommerce/DemographicCard";
 import { useUser } from "@/context/UserContext";
 import { fetchData } from "@/utils/api";
 
+import { triggerChatbotAttention, openChatBot } from "@/store/popUpSlice";
+import { useDispatch } from "react-redux";
+import RecentTransactions from "@/components/admin/ecommerce/RecentTransactions";
+
 
 export default function Ecommerce() {
   const { data: session } = useSession();
   const userRole = session?.user?.role ?? "user";
   const token = session?.user?.jwt
+
+  const dispatch = useDispatch()
 
   const router = useRouter()
 
@@ -38,6 +46,10 @@ export default function Ecommerce() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [prescriptions, setPrescriptions] = useState(null)
+  const [patients, setPatients] = useState(null)
+  const [doctors, setDoctors] = useState(null)
+  const [revenue, setRevenue] = useState(null)
+  const [pharmacies, setPharmacies] = useState(null)
 
 
   // Fetch video session statistics
@@ -45,7 +57,7 @@ export default function Ecommerce() {
     try {
       const response = await fetchData("video-sessions/by-user/all", token); // Adjust to your actual endpoint
       const sessions = response.sessions;
-      console.log(response.sessions)
+      // console.log(response.sessions)
       // Prepare data for chart (e.g., sessions count by month)
       const sessionCountsByMonth = Array(12).fill(0);
       const prescriptionCountsByMonth = Array(12).fill(0);
@@ -76,13 +88,87 @@ export default function Ecommerce() {
   const fetchAppointmentData = async () => {
     if(!user) return
     try {
-      const response = await fetchData(`consultation-appointments/all/paginated?patient=${user?._id}&status=pending`, token); // Adjust to your actual endpoint
+      let url = ""
+      if(userRole === "user"){
+        url = `consultation-appointments/all/paginated?patient=${user?._id}&status=pending` 
+      }else if( userRole === "specialist" ){
+        url = `consultation-appointments/all/paginated?consultant=${user?._id}&status=pending`
+      }else{
+        url = `consultation-appointments/all/paginated`
+      }
+      const response = await fetchData(url, token);
       console.log(response.data)
       setUpcomingAppointments(response.data);
     } catch (error) {
       console.error("Error fetching session data:", error);
     }
   };
+
+  const fetchPatients = async () => {
+    try {
+       const url = `users/get-all/no-pagination`
+      const response = await fetchData(url, token);
+      // console.log(response)
+      setPatients(response);
+    } catch (error) {
+      console.error("Error fetching session data:", error);
+    }
+  }
+
+  const fetchDoctors = async () => {
+    try {
+      const url = `users/get-all/doctors/no-pagination`
+      const response = await fetchData(url, token);
+      // console.log(response)
+      setDoctors(response);
+    } catch (error) {
+      console.error("Error fetching session data:", error);
+    }
+  }
+
+  const calTotalRevnue = (revenuesObj) => {
+    const totalRevenue = revenuesObj?.reduce((sum, payment) => {
+      return sum + (payment.amount || 0) / 10;
+    }, 0);
+
+    return totalRevenue
+  }
+ 
+
+  const fetchRevenue = async () => {
+    try {
+      const url = `payments/all/no-pagination`;
+      const response = await fetchData(url, token);
+      console.log(response.payments);
+      setRevenue(response.payments);
+  
+      // console.log("Total Revenue:", calTotalRevnue(response.payments).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching session data:", error);
+    }
+  };
+  
+
+  const fetchPharmacies = async () => {
+    try {
+      const url = `pharmacies/get-all/no-pagination`
+      const response = await fetchData(url, token);
+      // console.log(response)
+      setPharmacies(response);
+    } catch (error) {
+      console.error("Error fetching session data:", error);
+    }
+    
+  }
+
+  useEffect(() => {
+    if (userRole === "admin") {
+      fetchPatients();
+      fetchDoctors();
+      fetchPharmacies();
+      fetchRevenue();
+    }
+  }, [userRole]);
 
   // Simulated fetch
   useEffect(() => {
@@ -110,11 +196,17 @@ export default function Ecommerce() {
     return date.toLocaleDateString();
   };
 
-  const handleChat = () => {};
+  const handleChat = () => {
+      dispatch(triggerChatbotAttention());
+      dispatch(openChatBot(true));
+  };
+
   const handleConsult = () => {
     router.push("admin/available-specialists")
   };
+
   const handleMedicalRecords = () => {};
+
   const handleAppointments = () => {
     router.push("admin/appointments")
   };
@@ -166,11 +258,12 @@ export default function Ecommerce() {
         new Date(upcomingAppointments[0].date).toLocaleDateString() : 
         "None",
       change: upcomingAppointments.length > 0 ? 
-        `with Dr. ${upcomingAppointments[0].consultant?.firstName || 'Specialist'}` : 
+        `with ${ userRole === "user" ? 'Dr.'+ upcomingAppointments[0].consultant?.firstName || 'Specialist' : upcomingAppointments[0].patient?.firstName}` : 
         "No scheduled appointments",
       icon: <FaCalendarAlt className="text-green-600" size={20} />,
       bgColor: "bg-green-50",
-      iconBg: "bg-green-100"
+      iconBg: "bg-green-100",
+      visible: userRole === "user" || userRole === "specialist"
     },
     {
       title: "Medical Records",
@@ -178,7 +271,8 @@ export default function Ecommerce() {
       change: lastUpdated ? `Last updated ${formatLastUpdated(lastUpdated)}` : "No records yet",
       icon: <FaFileMedical className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
-      iconBg: "bg-blue-100"
+      iconBg: "bg-blue-100",
+      visible: userRole === "specialist"
     },
     {
       title: "Prescriptions",
@@ -188,7 +282,8 @@ export default function Ecommerce() {
         "No active prescriptions",
       icon: <FaPills className="text-purple-600" size={20} />,
       bgColor: "bg-purple-50",
-      iconBg: "bg-purple-100"
+      iconBg: "bg-purple-100",
+      visible: userRole === "user"
     },
     {
       title: "Consultations",
@@ -198,7 +293,64 @@ export default function Ecommerce() {
         "No past consultations",
       icon: <FaUserMd className="text-red-600" size={20} />,
       bgColor: "bg-red-50",
-      iconBg: "bg-red-100"
+      iconBg: "bg-red-100",
+      visible: userRole === "user" || userRole === "specialist"
+    },
+    {
+      title: "Earning",
+      value: `$${calls.reduce((total, call) => total + (call.durationInMinutes || 0) * 2, 0)}`,
+      change: calls.length > 0
+        ? `Last: $${(calls[calls.length - 1].durationInMinutes || 0) * 2}`
+        : "No past earning",
+      icon: <FaMoneyBill className="text-blue-600" size={20} />,
+      bgColor: "bg-blue-50",
+      iconBg: "bg-blue-100",
+      visible: userRole === "specialist"
+    },
+
+    {
+      title: "Patients",
+      value: patients?.length?.toString(),
+      change: patients?.length > 0
+        ? `Latest: ${patients[patients?.length - 1].firstName || 'Patient'}`
+        : "No patients found",
+      icon: <FaUserAlt className="text-green-600" size={20} />,
+      bgColor: "bg-green-50",
+      iconBg: "bg-green-100",
+      visible: userRole === "admin"
+    },
+    {
+      title: "Doctors",
+      value: doctors?.length.toString(),
+      change: doctors?.length > 0
+        ? `${doctors?.filter(doc => doc?.approvalStatus === "pending").length} pending approval(s)`
+        : "No active pharmacies",
+      icon: <FaUserMd className="text-blue-600" size={20} />,
+      bgColor: "bg-blue-50",
+      iconBg: "bg-blue-100",
+      visible: userRole === "admin"
+    },
+    {
+      title: "Pharmacies",
+      value: pharmacies?.length?.toString(),
+      change: pharmacies?.length > 0
+        ? `${pharmacies?.filter(pharm => pharm?.status === "unverified").length} pending approval(s)`
+        : "No active pharmacies",
+      icon: <FaPills className="text-purple-600" size={20} />,
+      bgColor: "bg-purple-50",
+      iconBg: "bg-purple-100",
+      visible: userRole === "admin"
+    },
+    {
+      title: "Revenue",
+      value: `$${revenue ? calTotalRevnue(revenue)?.toFixed(2) : 'loading...'}`,
+      change: calls.length > 0
+        ? `Last: ${revenue ? new Date(revenue[0].created * 1000).toLocaleDateString() : 'loading...'}`
+        : "No past payments",
+      icon: <FaMoneyBill className="text-red-600" size={20} />,
+      bgColor: "bg-red-50",
+      iconBg: "bg-red-100",
+      visible: userRole === "admin"
     }
   ];
 
@@ -216,6 +368,11 @@ export default function Ecommerce() {
                 <div>
                   <h2 className="text-2xl font-bold">Welcome back, {user?.firstName || 'User'}</h2>
                   <p className="mt-1 opacity-90">Your health matters to us. How can we help you today?</p>
+                  { !user?.firstName  || !user?.lastName && (
+                    <p className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                      Please complete your profile
+                    </p>
+                  )}
                 </div>
                 <div className="mt-4 md:mt-0 flex space-x-3">
                   <button 
@@ -238,10 +395,50 @@ export default function Ecommerce() {
           </div>
         }
 
+        { userRole === "specialist" && 
+          <div className="mb-8 bg-gradient-to-r from-[var(--color-primary-6)] to-[var(--color-primary-8)] rounded-2xl shadow-md">
+            <div className="p-6 md:p-8 text-white">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">Welcome back, Dr. {user?.firstName || 'User'}</h2>
+                  { userRole === "user" && <p className="mt-1 opacity-90">Your health matters to us. How can we help you today?</p>}
+                  { userRole === "specialist" && 
+                    <p className="mt-1 opacity-90">
+                      Ready for another day of making a difference? Let’s help your patients feel better, one consultation at a time.
+                    </p> 
+                  }
+
+                  { !user?.firstName  || !user?.lastName && (
+                    <p className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                      Please complete your profile
+                    </p>
+                  )}
+                </div>
+                <div className="mt-4 md:mt-0 flex space-x-3">
+                  <button 
+                    onClick={handleAppointments}
+                    className="bg-white text-[var(--color-primary-7)] px-4 py-2 rounded-lg font-medium shadow-sm hover:shadow-md transition-all flex items-center"
+                  >
+                    <FaCalendarAlt className="mr-2" />
+                    Appointments
+                  </button>
+                  <button 
+                    onClick={handleConsult}
+                    className="bg-white/20 text-white border border-white/40 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-white/30 transition-all flex items-center"
+                  >
+                    <FaClock className="mr-2" />
+                    Availability
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {stats.map((stat, index) => (
-            <div key={index} className={`${stat.bgColor} rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md`}>
+            <div key={index} className={`${stat.bgColor} ${!stat.visible ? 'hidden' : ''} rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md`}>
               <div className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className={`${stat.iconBg} w-10 h-10 rounded-full flex items-center justify-center`}>
@@ -304,7 +501,7 @@ export default function Ecommerce() {
                 </div>
           
                 {/* Medications */}
-                <div className="mt-8 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                {/* <div className="mt-8 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                   <div className="border-b dark:border-gray-700 px-5 py-4 flex justify-between items-center">
                     <h2 className="font-semibold text-gray-800 dark:text-gray-100">Current Medications</h2>
                     <button
@@ -320,7 +517,6 @@ export default function Ecommerce() {
                       <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                         <div className="flex justify-between items-center">
                           <div>
-                            {/* {JSON.stringify(med)} */}
                             <h3 className="font-medium text-gray-800 dark:text-gray-100">{med.medication}</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400">{med.dosage} - {med.schedule}</p>
                           </div>
@@ -337,7 +533,7 @@ export default function Ecommerce() {
                       </div>
                     )}
                   </div>
-                </div>
+                </div> */}
               </div>
           
               {/* Upcoming Appointments */}
@@ -453,21 +649,25 @@ export default function Ecommerce() {
               </div>
             </div>
           </div>
-          
           }
 
 
-          {userRole === "admin" && (
+          {/* {userRole === "admin" && (
             <div className="col-span-12 xl:col-span-5">
               <DemographicCard />
             </div>
+          )} */}
+          {userRole === "admin" && (
+            <div className="col-span-12">
+              <RecentTransactions />
+            </div>
           )}
 
-          {userRole !== "specialist" && (
+          {/* {userRole !== "specialist" && (
             <div className="col-span-12">
               <RecentOrders />
             </div>
-          )}
+          )} */}
         </div>
       </main>
     </div>

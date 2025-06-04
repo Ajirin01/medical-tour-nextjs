@@ -180,47 +180,47 @@ const AppSidebar = () => {
         icon: <Calendar />,
         name: "Availabilities",
         path: "/admin/availabilities",
-        roles: ["admin", "specialist", "consultant"]
+        roles: ["specialist", "consultant"]
       },
       // products
-      {
-        icon: <Box />,
-        name: "Products",
-        subItems: [
-          { name: "All Products", path: "/admin/products" },
-          { name: "Add Product", path: "/admin/products/add" },
-          { name: "Brands", path: "/admin/brands" },
-          { name: "Categories", path: "/admin/categories" },
-        ],
-        roles: ["admin", "pharmacyAdmin", "pharmacyEmployee"]
-      },
+      // {
+      //   icon: <Box />,
+      //   name: "Products",
+      //   subItems: [
+      //     { name: "All Products", path: "/admin/products" },
+      //     { name: "Add Product", path: "/admin/products/add" },
+      //     { name: "Brands", path: "/admin/brands" },
+      //     { name: "Categories", path: "/admin/categories" },
+      //   ],
+      //   roles: ["admin", "pharmacyAdmin", "pharmacyEmployee"]
+      // },
       // prescriptions
-      {
-        icon: <FileText />,
-        name: "Prescriptions",
-        isUnverified: pendingUploadedPrescriptionCount > 0 || pendingLinkedPrescriptionCount > 0,
-        subItems: [
-          {
-            name: "Uploads",
-            isUnverified: pendingUploadedPrescriptionCount > 0,
-            subItems: [
-              { name: "Pending Approvals", path: "/admin/prescriptions/uploads?status=pending", badge: pendingUploadedPrescriptionCount },
-              { name: "Approved", path: "/admin/prescriptions/uploads?status=approved" },
-              { name: "Rejected", path: "/admin/prescriptions/uploads?status=rejected" },
-            ],
-          },
-          {
-            name: "Linked Prescriptions",
-            isUnverified: pendingLinkedPrescriptionCount > 0,
-            subItems: [
-              { name: "Pending Approvals", path: "/admin/prescriptions/linked?status=pending", badge: pendingLinkedPrescriptionCount,  },
-              { name: "Approved", path: "/admin/prescriptions/linked?status=approved" },
-              { name: "Rejected", path: "/admin/prescriptions/linked?status=rejected" },
-            ],
-          },
-        ],
-        roles: ["admin", "pharmacyAdmin", "pharmacyEmployee", "labAdmin", "labEmployee"]
-      },
+      // {
+      //   icon: <FileText />,
+      //   name: "Prescriptions",
+      //   isUnverified: pendingUploadedPrescriptionCount > 0 || pendingLinkedPrescriptionCount > 0,
+      //   subItems: [
+      //     {
+      //       name: "Uploads",
+      //       isUnverified: pendingUploadedPrescriptionCount > 0,
+      //       subItems: [
+      //         { name: "Pending Approvals", path: "/admin/prescriptions/uploads?status=pending", badge: pendingUploadedPrescriptionCount },
+      //         { name: "Approved", path: "/admin/prescriptions/uploads?status=approved" },
+      //         { name: "Rejected", path: "/admin/prescriptions/uploads?status=rejected" },
+      //       ],
+      //     },
+      //     {
+      //       name: "Linked Prescriptions",
+      //       isUnverified: pendingLinkedPrescriptionCount > 0,
+      //       subItems: [
+      //         { name: "Pending Approvals", path: "/admin/prescriptions/linked?status=pending", badge: pendingLinkedPrescriptionCount,  },
+      //         { name: "Approved", path: "/admin/prescriptions/linked?status=approved" },
+      //         { name: "Rejected", path: "/admin/prescriptions/linked?status=rejected" },
+      //       ],
+      //     },
+      //   ],
+      //   roles: ["admin", "pharmacyAdmin", "pharmacyEmployee", "labAdmin", "labEmployee"]
+      // },
       // pharmacy
       {
         icon: <ShoppingBag />,
@@ -291,16 +291,16 @@ const AppSidebar = () => {
       //   roles: ["admin", "user"]
       // },
       // medical tourisms
-      {
-        icon: <Plane />,
-        name: "Medical Tourism",
-        subItems: [
-          { name: "Packages", path: "/admin/medical-tourism/packages"},
-          { name: "Appointments", path: "/admin/medical-tourism/consultations/appointments"},
-          { name: "Documentations", path: "/admin/medical-tourism/consultations/documentations"}
-        ],
-        roles: ["admin", "consultant"]
-      },
+      // {
+      //   icon: <Plane />,
+      //   name: "Medical Tourism",
+      //   subItems: [
+      //     { name: "Packages", path: "/admin/medical-tourism/packages"},
+      //     { name: "Appointments", path: "/admin/medical-tourism/consultations/appointments"},
+      //     { name: "Documentations", path: "/admin/medical-tourism/consultations/documentations"}
+      //   ],
+      //   roles: ["admin", "consultant"]
+      // },
       // Appointments
       {
         icon: <Calendar />,
@@ -309,12 +309,12 @@ const AppSidebar = () => {
         roles: ["admin", "specialist", "user"]
       },
       // Tourism appointment
-      {
-        icon: <Calendar />,
-        name: "Tourism Appointments",
-        path: "/admin/medical-tourism/consultations/appointments",
-        roles: ["admin"]
-      },
+      // {
+      //   icon: <Calendar />,
+      //   name: "Tourism Appointments",
+      //   path: "/admin/medical-tourism/consultations/appointments",
+      //   roles: ["admin"]
+      // },
       // Consult Specialist
       {
         icon: <Calendar />,
@@ -351,19 +351,19 @@ const AppSidebar = () => {
         roles: ["admin"]
       },
       // Hospitals
-      {
-        icon: <Building2 />,
-        name: "Hospitals",
-        path: "/admin/hospitals",
-        roles: ["admin"]
-      },
+      // {
+      //   icon: <Building2 />,
+      //   name: "Hospitals",
+      //   path: "/admin/hospitals",
+      //   roles: ["admin"]
+      // },
       // Blogs
       {
         icon: <Newspaper />,
         name: "Blogs",
         path: "/admin/blogs",
         roles: ["admin"]
-      },
+      }
     ];
 
     return filterByRole(items);
@@ -484,7 +484,7 @@ const AppSidebar = () => {
       {/* Main Content & Logout Wrapper */}
       <div className="flex flex-col justify-between h-full">
         {/* User Info & Menu */}
-        <div className="flex flex-col overflow-y-auto no-scrollbar">
+        <div className="flex pb-50 flex-col overflow-y-auto no-scrollbar">
           <div className="flex flex-col items-center p-4 border-b border-gray-200">
             <img
               src={user?.profileImage ? `${apiUrl}${user?.profileImage}` : defaultUser.src}

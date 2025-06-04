@@ -16,14 +16,20 @@ const PrescriptionsList = () => {
 
   const isDoctor = user?.role === "specialist";
   const isUser = user?.role === "user";
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
     const loadPrescriptions = async () => {
       setLoading(true);
       try {
-        const endpoint = isDoctor
-          ? `video-sessions/by-specialist/${user?._id}/prescriptions`
-          : `video-sessions/by-user/${user?._id}/prescriptions`;
+        let endpoint= ""
+        if(isDoctor){
+          endpoint = `video-sessions/by-specialist/${user?._id}/prescriptions`
+        }else if(isUser){
+          endpoint = `video-sessions/by-user/${user?._id}/prescriptions`;
+        }else if(isAdmin){
+          endpoint = `video-sessions/by-user/${user?._id}/prescriptions`
+        }
 
         const res = await fetchData(endpoint, token);
         console.log(res)
