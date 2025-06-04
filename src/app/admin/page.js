@@ -354,45 +354,49 @@ export default function Ecommerce() {
           
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
                   {upcomingAppointments.length > 0 ? upcomingAppointments.map((appointment, index) => (
-                    <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                      <div className="flex items-center">
-                        {appointment.avatar ? (
-                          <img 
-                            src={appointment.avatar} 
-                            alt={appointment.doctorName} 
-                            className="w-10 h-10 rounded-full mr-4 object-cover border border-gray-200 dark:border-gray-700"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full mr-4 bg-primary-100 text-primary-700 dark:bg-primary-200 dark:text-primary-900 flex items-center justify-center font-bold">
-                            {appointment.doctorName?.charAt(0) || 'D'}
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{appointment.consultant.firstName || 'Doctor'}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{appointment.consultant.specialty || 'Specialist'}</p>
-                          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            <span className="text-[var(--color-primary67)] mr-1">
-                              <FaCalendarAlt size={10} />
-                            </span>
-                            <span>
-                              {appointment.date ? (
-                                typeof appointment.date === 'string' && !appointment.date.includes('-') ? 
-                                appointment.date : 
-                                new Date(appointment.date).toLocaleDateString()
-                              ) : 'Date not set'}, 
-                              {appointment.time || (appointment.startTime ? new Date(appointment.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '00:00')}
-                            </span>
+                    <div key={index}>
+                      { appointment.status === "pending" && appointment.mode !== "now" &&
+                        <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          <div className="flex items-center">
+                            {appointment.avatar ? (
+                              <img 
+                                src={appointment.avatar} 
+                                alt={appointment.doctorName} 
+                                className="w-10 h-10 rounded-full mr-4 object-cover border border-gray-200 dark:border-gray-700"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full mr-4 bg-primary-100 text-primary-700 dark:bg-primary-200 dark:text-primary-900 flex items-center justify-center font-bold">
+                                {appointment.doctorName?.charAt(0) || 'D'}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{appointment.consultant.firstName || 'Doctor'}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{appointment.consultant.specialty || 'Specialist'}</p>
+                              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                <span className="text-[var(--color-primary67)] mr-1">
+                                  <FaCalendarAlt size={10} />
+                                </span>
+                                <span>
+                                  {appointment.date ? (
+                                    typeof appointment.date === 'string' && !appointment.date.includes('-') ? 
+                                    appointment.date : 
+                                    new Date(appointment.date).toLocaleDateString()
+                                  ) : 'Date not set'}, 
+                                  {appointment.time || (appointment.startTime ? new Date(appointment.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '00:00')}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="ml-4 flex-shrink-0">
+                              <button 
+                                onClick={() => router.push(`${PATH.dashboard.appointments}/${appointment.id || appointment._id}`)}
+                                className="px-3 py-1 bg-primary-50 text-[var(--color-primary67)] rounded-full text-xs font-medium hover:bg-primary-100 transition-colors"
+                              >
+                                Details
+                              </button>
+                            </div>
                           </div>
                         </div>
-                        <div className="ml-4 flex-shrink-0">
-                          <button 
-                            onClick={() => router.push(`${PATH.dashboard.appointments}/${appointment.id || appointment._id}`)}
-                            className="px-3 py-1 bg-primary-50 text-[var(--color-primary67)] rounded-full text-xs font-medium hover:bg-primary-100 transition-colors"
-                          >
-                            Details
-                          </button>
-                        </div>
-                      </div>
+                      }
                     </div>
                   )) : (
                     <div className="p-6 text-center">

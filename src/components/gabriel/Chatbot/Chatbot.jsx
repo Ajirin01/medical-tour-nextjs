@@ -6,13 +6,14 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { FiSend } from "react-icons/fi";
 import { toSnakeCase } from "@/helperFunctions";
 import { symptoms } from "@/data/symptoms";
-import axiosInstance from "@/utils/axiosConfig";
-import { useDispatch, useSelector } from "react-redux";
-import { openChatBot, resetChatbotAttention } from "@/states/popUpSlice";
-import { useNavigate } from "react-router";
-import { PATH } from "@/routes/path";
+import { useSelector, useDispatch } from "react-redux";
+import { openChatBot, resetChatbotAttention } from "@/store/popUpSlice";
+import { useRouter } from "next/navigation";
+import { postData } from "@/utils/api";
+import { useSession } from "next-auth/react";
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_NODE_BASE_URL;
+
 const exampleMessages = [
   { text: "Hi there!", sender: "bot" },
   {
@@ -22,19 +23,19 @@ const exampleMessages = [
 ];
 
 const MessageWithDisclaimer = ({ text, sender, showDisclaimer }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div className={`message ${sender} max-w-[85%] ${
       sender === 'bot' 
         ? 'bg-blue-50 border-blue-200 border ml-2' 
-        : 'bg-primary-7 ml-auto mr-2'
+        : 'bg-[var(--color-primary-7)] ml-auto mr-2'
     } rounded-lg p-4 shadow-md relative`}>
       {sender === 'bot' && (
         <div className="absolute -left-2 top-4 w-4 h-4 bg-blue-50 border-l border-t border-blue-200 transform rotate-45" />
       )}
       {sender === 'user' && (
-        <div className="absolute -right-2 top-4 w-4 h-4 bg-primary-7 transform rotate-45" />
+        <div className="absolute -right-2 top-4 w-4 h-4 bg-[var(--color-primary-7)] transform rotate-45" />
       )}
       <p className={`${
         sender === 'bot' 
@@ -49,7 +50,7 @@ const MessageWithDisclaimer = ({ text, sender, showDisclaimer }) => {
             Disclaimer: This AI assistant is not qualified to give medical advice. Please consult with a healthcare professional for accurate diagnosis and treatment.
           </p>
           <button
-            onClick={() => navigate(PATH.dashboard.consultant)}
+            onClick={() => router.push("/admin/available-specialists")}
             className="mt-2 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors bg-white/50 px-3 py-1 rounded-full"
           >
             <RiCustomerService2Fill /> Speak to a Consultant
@@ -74,14 +75,15 @@ const ChatBot = () => {
   const [messages, setMessages] = useState(exampleMessages);
   const chatbotRef = useRef(null);
   const messageAreaRef = useRef(null);
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isAttentionEffect, setIsAttentionEffect] = useState(false);
   const [userInput, setUserInput] = useState("");
 
   const tabs = ["home", "symptoms", "faq"];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
 
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
 
   const toggleChatBot = () => {
     if (!isOpen) {
@@ -148,7 +150,7 @@ const ChatBot = () => {
     const newMessage = { 
       text, 
       sender,
-      showDisclaimer: sender === 'bot' && text.includes('response') // Only show disclaimer for bot responses
+      showDisclaimer: sender === 'bot' && text?.includes('response') // Only show disclaimer for bot responses
     };
     setTimeout(() => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -157,19 +159,19 @@ const ChatBot = () => {
 
   const sendTags = async (message) => {
     let packet = message.map((tag) => toSnakeCase(tag));
-
+  
     setLoading(true);
     try {
-      const response = await axiosInstance.post("/chatbot/predict_disease", {
+      const data = await postData("chatbot/predict_disease", {
         symptoms: packet,
       });
       setLoading(false);
-      addMessage(response.data.response, "bot");
+      addMessage(data.message || data.error, "bot");
       addMessage(
         "Try a different set of symptoms, or would you like to contact a consultant?",
         "bot"
       );
-      console.log("Response:", response.data);
+      console.log("Response:", data);
     } catch (error) {
       console.error("Error:", error);
       setLoading(false);
@@ -187,18 +189,41 @@ const ChatBot = () => {
 
   const sendQuestion = async (question) => {
     setLoading(true);
+
+  
     try {
-      const response = await axiosInstance.post("/chatbot/predict_disease", {
-        question: question,
+      const data = await postData("/chatbot/predict_disease", {
+        symptoms: question,
       });
+  
       setLoading(false);
-      addMessage(response.data.response, "bot");
+  
+      if (data.error) {
+        addMessage(data.error, "bot");
+        return;
+      }
+  
+      if (data.predicted_diseases && data.predicted_diseases.length > 0) {
+        const result = `Possible conditions:\n- ${data.predicted_diseases.join("\n- ")}`;
+        addMessage(result, "bot");
+  
+        if (data.disclaimer) {
+          addMessage(data.disclaimer, "bot");
+        }
+  
+        return;
+      }
+  
+      // Fallback
+      addMessage(data.message || "Hmm, I couldn't determine anything from that. Try more symptoms.", "bot");
     } catch (error) {
       console.error("Error:", error);
       setLoading(false);
       addMessage("There was a problem with the response, please try again.", "bot");
     }
   };
+  
+  
 
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
@@ -248,7 +273,7 @@ const ChatBot = () => {
         {isAuthenticated ? (
           <>
             {selectedTab === tabs[0] && (
-              <div className="flex flex-col bg-gradient-to-b from-primary-7 via-primary-5 to-white custom-scrollbar overflow-auto scroll-2 p-6 pl-10 h-full">
+              <div className="flex flex-col bg-gradient-to-b from-[var(--color-primary-7)] via-[var(--color-primary-5)] to-white custom-scrollbar overflow-auto scroll-2 p-6 pl-10 h-full">
                 <div className="flex flex-row justify-center m-4">
                   <div className="flex justify-center items-center ml-6 w-10 h-10 bg-blue-500 rounded-full border-2 border-white relative">
                     <RiCustomerService2Fill color="white" size={20} />
@@ -276,7 +301,7 @@ const ChatBot = () => {
             )}
             {selectedTab === tabs[1] && (
               <div className="flex flex-col h-full">
-                <div className="relative bg-primary-9 p-2 flex justify-center text-white font-bold">
+                <div className="relative bg-[var(--color-primary-9)] p-2 flex justify-center text-white font-bold">
                   <IoMdArrowBack
                     color={"white"}
                     size={25}
@@ -301,7 +326,7 @@ const ChatBot = () => {
                   ))}
                   {loading && (
                     <div className="flex items-center justify-center h-full">
-                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-7"></div>
+                      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[var(--color-primary-7)]"></div>
                     </div>
                   )}
                 </div>
@@ -323,21 +348,21 @@ const ChatBot = () => {
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full bg-white p-6">
-            <RiCustomerService2Fill className="text-6xl text-primary-7 mb-4" />
+            <RiCustomerService2Fill className="text-6xl text-[var(--color-primary-7)] mb-4" />
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Login Required</h2>
             <p className="text-gray-600 text-center mb-4">
               Please log in or sign up to use the AI chat feature.
             </p>
             <div className="flex flex-col space-y-3 w-full max-w-xs">
               <button
-                onClick={() => navigate(PATH.general.loginCrossroad)}
-                className="w-full bg-primary-7 text-white px-6 py-2 rounded-full hover:bg-primary-8 transition-colors duration-300"
+                onClick={() => router.push("/login")}
+                className="w-full bg-[var(--color-primary-7)] text-white px-6 py-2 rounded-full hover:bg-[var(--color-primary-8)] transition-colors duration-300"
               >
                 Log In
               </button>
               <button
-                onClick={() => navigate(PATH.general.signUp)}
-                className="w-full bg-white text-primary-7 px-6 py-2 rounded-full border-2 border-primary-7 hover:bg-primary-1 transition-colors duration-300"
+                onClick={() => router.push("/auth/sign-up")}
+                className="w-full bg-white text-[var(--color-primary-7)] px-6 py-2 rounded-full border-2 border-[var(--color-primary-7)] hover:bg-primary-1 transition-colors duration-300"
               >
                 Sign Up
               </button>

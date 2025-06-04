@@ -14,6 +14,9 @@ import Footer from "@/components/Footer";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
 
+import { ChatBot } from '@/components/gabriel';
+import { openChatBot, triggerChatbotAttention } from '@/store/popUpSlice';
+
 export default function RootLayout({ children }) {
   const pathname = usePathname();
 
@@ -21,6 +24,11 @@ export default function RootLayout({ children }) {
 
   const handleScroll = () => {
     setIsVisible(window.scrollY > 300);
+  };
+
+  const handleChat = () => {
+    dispatch(triggerChatbotAttention());
+    dispatch(openChatBot(true));
   };
 
   const scrollToTop = () => {
@@ -58,16 +66,20 @@ export default function RootLayout({ children }) {
                   
                   {!isAdmin && <Navbar />}
                   {children} {/* Children will render as usual */}
+
+                  <ChatBot />
+
                 </CartProvider>
               </ToastProvider>
             </Provider>
           </UserProvider>
         </AuthSessionProvider>
-        
+
+
         {isVisible && 
           <button
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 z-50 p-2 bg-blue-600 text-white rounded-full-important shadow-lg hover:bg-blue-700 transition"
+            className="fixed bottom-25 right-9 z-50 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition"
             aria-label="Scroll to top"
           >
             <ArrowUpCircleIcon className="w-6 h-6" />

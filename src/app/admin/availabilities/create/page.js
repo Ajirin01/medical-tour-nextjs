@@ -15,6 +15,7 @@ import "react-clock/dist/Clock.css";
 const CreateConsultantAvailabilityPage = () => {
   const [form, setForm] = useState({
     type: "recurring",
+    category: "general",
     dayOfWeek: "",
     date: new Date(),
     startTime: "09:00",
@@ -64,6 +65,7 @@ const CreateConsultantAvailabilityPage = () => {
       type: form.type,
       startTime: form.startTime,
       endTime: form.endTime,
+      category: form.category,
       ...(form.type === "recurring"
         ? { dayOfWeek: form.dayOfWeek }
         : { date: form.date }),
@@ -105,6 +107,20 @@ const CreateConsultantAvailabilityPage = () => {
           >
             <option value="recurring">Recurring (weekly)</option>
             <option value="one-time">One-Time</option>
+          </select>
+        </div>
+
+        {/* Type Selector */}
+        <div>
+          <label className="block mb-1 font-medium">Consultation Reason <br/> (<small className="text-red-500">Note: No action required if consultation is not for medical certificate</small>)</label>
+          <select
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            className="w-full rounded border px-3 py-2 bg-white dark:bg-gray-800 dark:text-gray-200"
+          >
+            <option value="general">General Consultation</option>
+            <option value="cert">Medical Certificate Consultation</option>
           </select>
         </div>
 

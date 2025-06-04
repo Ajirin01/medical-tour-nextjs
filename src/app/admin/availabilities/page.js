@@ -70,6 +70,7 @@ const AvailabilityListPage = () => {
             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
               <TableRow>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Type</TableCell>
+                <TableCell isHeader className="px-5 py-3 font-medium text-start">category</TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Date / Day</TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Time Range</TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-start">Actions</TableCell>
@@ -80,6 +81,7 @@ const AvailabilityListPage = () => {
                 availabilities.map((slot) => (
                   <TableRow key={slot._id}>
                     <TableCell className="px-5 py-4 capitalize">{slot.type}</TableCell>
+                    <TableCell className="px-5 py-4 capitalize">{slot.category}</TableCell>
                     <TableCell className="px-5 py-4">
                       {slot.type === "recurring" ? slot.dayOfWeek : format(new Date(slot.date), "PPP")}
                     </TableCell>

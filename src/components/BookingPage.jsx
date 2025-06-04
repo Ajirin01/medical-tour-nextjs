@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { fetchData, postData } from '@/utils/api'
 import { useUser } from '@/context/UserContext'
 import { useSession } from 'next-auth/react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import { useToast } from '@/context/ToastContext'
 
 import { useSelector, useDispatch } from "react-redux";
@@ -36,9 +36,9 @@ import { loadStripe } from '@stripe/stripe-js'
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 
-const ConsultationBookingPageContent = () => {
+const ConsultationBookingPageContent = (isCertPage) => {
   const dispatch = useDispatch();
-
+  
   const specialist = useSelector((state) => state.specialist.specialist);
   const price = useSelector((state) => state.specialist.price);
   const duration = useSelector((state) => state.specialist.duration);
@@ -46,6 +46,9 @@ const ConsultationBookingPageContent = () => {
   const appointmentDate = useSelector(
     (state) => state.specialist.appointmentDate
   );
+
+  useEffect(()=>{ console.log("%%%%%%%%%%%", isCertPage.isCertPage) }, [])
+  
 
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState(null);
@@ -113,41 +116,76 @@ const ConsultationBookingPageContent = () => {
       setLoadingCategories(false)
     }
   }
-
+  
   const fetchAvailableSlots = async () => {
-    setLoadingSlots(true)
-    setAvailableSlots([])
-
+    setLoadingSlots(true);
+    setAvailableSlots([]);
+  
     try {
-      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      const selectedDayName = weekdays[selectedDate.getDay()]
-      const selectedDateString = selectedDate.toISOString().split('T')[0]
-
-      const allSlots = []
+      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const selectedDayName = weekdays[selectedDate.getDay()];
+      const selectedDateString = selectedDate.toISOString().split('T')[0];
+  
+      const allSlots = [];
+  
+      // 1. Fetch appointments for selected date
+      const appointmentRes = await fetchData(
+        `consultation-appointments/all/no/pagination/?dateFrom=${selectedDateString}&dateTo=${selectedDateString}`,
+        token
+      );
+      const bookedAppointments = appointmentRes || [];
+  
+      // 2. Create a set of booked slot IDs for fast lookup
+      const bookedSlotIds = new Set(
+        bookedAppointments.map((appointment) => appointment.slot?._id)
+      );
+  
+      // 3. Loop through all specialists in the selected category
       for (const specialist of specialistsByCategory) {
-        const res = await fetchData(`availabilities/slots/by?userRole=specialist&consultantId=${specialist._id}`, token)
-
+        const res = await fetchData(
+          `availabilities/slots/by?userRole=specialist&consultantId=${specialist._id}&isBooked=false`,
+          token
+        );
+  
         const filtered = res.data.filter((slot) => {
-          if (slot.type === 'recurring') {
-            return slot.dayOfWeek === selectedDayName
-          } else if (slot.type === 'one-time') {
-            return new Date(slot.date).toISOString().split('T')[0] === selectedDateString
+          const slotId = slot._id;
+          if (bookedSlotIds.has(slotId)) return false; // Exclude already booked slots
+  
+          if (isCertPage.isCertPage) {
+            if (slot.category !== "cert") return false;
+  
+            if (slot.type === 'recurring') {
+              return slot.dayOfWeek === selectedDayName;
+            } else if (slot.type === 'one-time') {
+              return new Date(slot.date).toISOString().split('T')[0] === selectedDateString;
+            }
+          } else {
+            if (slot.category !== "general") return false;
+  
+            if (slot.type === 'recurring') {
+              return slot.dayOfWeek === selectedDayName;
+            } else if (slot.type === 'one-time') {
+              return new Date(slot.date).toISOString().split('T')[0] === selectedDateString;
+            }
           }
-          return false
-        })
-
+  
+          return false;
+        });
+  
         filtered.forEach((slot) => {
-          allSlots.push({ ...slot, consultant: specialist })
-        })
+          allSlots.push({ ...slot, consultant: specialist });
+        });
       }
-      setAvailableSlots(allSlots)
+  
+      setAvailableSlots(allSlots);
     } catch (err) {
-      console.error('Error fetching slots:', err)
-      addToast('Failed to load slots', 'error')
+      console.error('Error fetching slots:', err);
+      addToast('Failed to load slots', 'error');
     } finally {
-      setLoadingSlots(false)
+      setLoadingSlots(false);
     }
-  }
+  };
+  
 
   if (!mounted) return null
 
@@ -161,7 +199,7 @@ const ConsultationBookingPageContent = () => {
     setModalContent("checkoutModal");
     dispatch(setConsultMode("appointment"));
     dispatch(setSpecialist(selectedSlot.consultant))
-    dispatch(setAppointmentDate(selectedSlot.date))
+    dispatch(setAppointmentDate(selectedDate.toISOString()))
     dispatch(setSlot(selectedSlot))
     setShowModal(true);
   };
@@ -254,9 +292,16 @@ const ConsultationBookingPageContent = () => {
                     <div className="text-sm text-gray-600">
                       Specialist: {slot.consultant.firstName} {slot.consultant.lastName}
                     </div>
-                    <div className="text-sm text-indigo-700 font-semibold mt-1">
-                      Appointment Fee: ${ getMinutesDifference(slot.startTime, slot.endTime) * COST_PER_MINUTE}
-                    </div>
+
+                    { isCertPage.isCertPage ? 
+                      <div className="text-sm text-indigo-700 font-semibold mt-1">
+                        Service Fee: ${price}
+                      </div>
+                    :
+                      <div className="text-sm text-indigo-700 font-semibold mt-1">
+                        Appointment Fee: ${ getMinutesDifference(slot.startTime, slot.endTime) * COST_PER_MINUTE}
+                      </div>
+                    }
                   </div>
                 ))}
               </div>
@@ -278,7 +323,7 @@ const ConsultationBookingPageContent = () => {
               { selectedSlot && 
                 <button
                   onClick={() => openCheckoutModal(
-                    getMinutesDifference(selectedSlot.startTime, selectedSlot.endTime) * COST_PER_MINUTE,
+                    isCertPage.isCertPage ? price : getMinutesDifference(selectedSlot.startTime, selectedSlot.endTime) * COST_PER_MINUTE,
                     getMinutesDifference(selectedSlot.startTime, selectedSlot.endTime)
                   )}
                   disabled={!selectedSlot || !reason || loadingBooking}
@@ -290,17 +335,6 @@ const ConsultationBookingPageContent = () => {
                   {loadingBooking ? 'Processing...' : 'Book Appointment'}
                 </button>
               }
-
-              {/* <button
-                onClick={handleBookAppointment}
-                disabled={!selectedSlot || !reason || loadingBooking}
-                className="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {loadingBooking && (
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                )}
-                {loadingBooking ? 'Processing...' : 'Book Appointment'}
-              </button> */}
             </>
           ) : (
             <div className="text-center text-gray-500">

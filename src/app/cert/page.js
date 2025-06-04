@@ -6,6 +6,14 @@ import { Dialog } from "@headlessui/react";
 import Calendar from "react-calendar";
 import { CheckCircle, X } from "lucide-react";
 import 'react-calendar/dist/Calendar.css';
+import { useSelector, useDispatch } from "react-redux";
+
+import { setPrice} from '@/store/specialistSlice'
+
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 import ConsultationBookingPageContent from "@/components/BookingPage"
 
@@ -15,53 +23,56 @@ export default function CertificatesConsultationPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentStep, setCurrentStep] = useState(1);
 
+  const dispatch = useDispatch()
+  
+
   const certificates = [
     {
       title: "Fitness Certificate",
       description: "Work and Student Sickness Certificate",
-      price: "€45.99",
+      price: "45.99",
       image: "/images/fitness.jpg",
     },
     {
       title: "Visa Medical Certificate",
       description: "Certificate of Good Health / Health Declaration",
-      price: "€45.99",
+      price: "45.99",
       image: "/images/travel.jpg",
     },
     {
       title: "Travel Cancellation Certificate",
       description: "Travel and Holiday Cancellation Certificate",
-      price: "€45.99",
+      price: "45.99",
       image: "/images/travel.jpg",
     },
     {
       title: "Fit to Work Certificate",
       description: "Fit-to-work Certificate",
-      price: "€45.99",
+      price: "45.99",
       image: "/images/work.jpg",
     },
     {
       title: "Travel With Medication Letter",
       description: "Travel With Medication Letter",
-      price: "€45.99",
+      price: "45.99",
       image: "/images/fitness.jpg",
     },
     {
       title: "GP Referral Letter",
       description: "Doctor Referral Letter",
-      price: "€45.99",
+      price: "45.99",
       image: "/images/youth.jpg",
     },
     {
       title: "Youth Camp Certificate",
       description: "Youth Camp or Trip Medical Certificate",
-      price: "€50.99",
+      price: "50.99",
       image: "/images/youth.jpg",
     },
     {
       title: "Fit to Cruise Certificate",
       description: "Fit-to-Cruise Medical Certificate",
-      price: "€50.99",
+      price: "50.99",
       image: "/images/travel.jpg",
     },
   ];
@@ -145,9 +156,9 @@ export default function CertificatesConsultationPage() {
               <img src={cert.image} alt={cert.title} className="w-full h-40 object-cover rounded-xl mb-4" />
               <h3 className="text-lg font-semibold text-center text-gray-800">{cert.title}</h3>
               <p className="text-sm text-gray-600 text-center">{cert.description}</p>
-              <p className="text-lg font-bold text-center text-[var(--color-primary-7)] mt-4">{cert.price}</p>
+              <p className="text-lg font-bold text-center text-[var(--color-primary-7)] mt-4">€{cert.price}</p>
               <button
-                onClick={() => openDialog(cert)}
+                onClick={() => {openDialog(cert); dispatch(setPrice(cert.price));}}
                 className="mt-4 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
               >
                 Book Appointment
@@ -173,7 +184,7 @@ export default function CertificatesConsultationPage() {
             </button>
             {/* Calendar Step */}
             <div className="w-full">
-            <ConsultationBookingPageContent />
+              <ConsultationBookingPageContent isCertPage={true} />
             </div>
         </div>
         </Dialog>

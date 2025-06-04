@@ -7,7 +7,7 @@ export { default as ImageCard } from "./ImageCard";
 // export { default as SignUpForm } from "./SignUpForm";
 // export { default as SpecialistSignUpForm } from "./SpecialistSignUp";
 // export { default as SignInForm } from "./SignInForm";
-// export { default as ChatBot } from "./Chatbot/Chatbot";
+export { default as ChatBot } from "./Chatbot/Chatbot";
 export { default as ImageSlide } from "./ImageSlide";
 export { default as BlogCard } from "./BlogCard";
 export { default as DTable } from "./DashboardTable";

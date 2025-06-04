@@ -30,7 +30,7 @@ import {
 import { defaultUser } from '@/assets';
 
 import Button from "@/components/gabriel/Button";
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { useUser } from '@/context/UserContext';
 import LogoutModal from "@/components/gabriel/LogoutModal";
@@ -45,6 +45,7 @@ export default function TopNav({}) {
 
   const router = useRouter();
 
+  const pathname = usePathname();
 
   const { user } = useUser() || {}
   const isAuthenticated = !!user;
@@ -104,10 +105,10 @@ export default function TopNav({}) {
         {/* Right: Desktop nav, notification, user */}
         <div className="flex items-center space-x-6">
           <nav className="hidden md:flex items-center space-x-6 text-sm">
-            <NavLink href="/" icon={<Home size={18} />} label="Home" active />
-            <NavLink href="/about" icon={<Info size={18} />} label="About" />
-            <NavLink href="/doctors" icon={<User size={18} />} label="Doctors" />
-            <NavLink icon={<FileText size={18} />} href="/cert" label="Cert" />
+            <NavLink href="/" icon={<Home size={18} />} label="Home" active={pathname === "/"} />
+            <NavLink href="/about" icon={<Info size={18} />} label="About" active={pathname === "/about"} />
+            <NavLink href="/doctors" icon={<User size={18} />} label="Doctors" active={pathname === "/doctors"} />
+            <NavLink icon={<FileText size={18} />} href="/cert" label="Cert" active={pathname === "/cart"} />
 
             <div className="hidden md:flex items-center ml-6 space-x-3">
               <div className="flex items-center space-x-3">
@@ -287,10 +288,10 @@ export default function TopNav({}) {
 
         {/* Mobile Links */}
         <div className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
-          <MobileNavLink icon={<Home size={18} />} href="/" label="Home" />
-          <MobileNavLink icon={<Info size={18} />} href="/about" label="About" />
-          <MobileNavLink icon={<User size={18} />} href="/doctors" label="Our Doctors" />
-          <MobileNavLink icon={<FileText size={18} />} href="/cert" label="Cert" />
+          <MobileNavLink icon={<Home size={18} />} href="/" label="Home" active={pathname === "/"} />
+          <MobileNavLink icon={<Info size={18} />} href="/about" label="About" active={pathname === "/about"} />
+          <MobileNavLink icon={<User size={18} />} href="/doctors" label="Our Doctors" active={pathname === "/doctors"} />
+          <MobileNavLink icon={<FileText size={18} />} href="/cert" label="Cert" active={pathname === "/cert"} />
 
           <div className="md:flex items-center space-x-3">
             <div className="flex items-center space-x-3">
