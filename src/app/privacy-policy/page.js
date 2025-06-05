@@ -10,7 +10,7 @@ const PrivacyPolicy = () => {
           At Sozo Digicare, we are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This Privacy Policy outlines how we collect, use, disclose, and safeguard your information when you use our services. By accessing or using our services, you agree to the terms of this Privacy Policy.
         </p>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">1. Information We Collect</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">1. Information We Collect</h2>
         <h3 className="font-semibold mb-2">1.1 Personal Information</h3>
         <ul className="list-disc list-inside mb-4 text-gray-700 pl-4">
           <li>Name</li>
@@ -27,7 +27,7 @@ const PrivacyPolicy = () => {
           <li>Usage Data (pages visited, time spent on the website, clickstream data)</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">2. How We Use Your Information</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">2. How We Use Your Information</h2>
         <ul className="list-disc list-inside mb-6 text-gray-700 pl-4">
           <li>Providing Services such as consultations and health information</li>
           <li>Managing Appointments</li>
@@ -37,7 +37,7 @@ const PrivacyPolicy = () => {
           <li>Compliance with legal obligations</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">3. How We Share Your Information</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">3. How We Share Your Information</h2>
         <ul className="list-disc list-inside mb-6 text-gray-700 pl-4">
           <li>Service Providers for processing and customer support</li>
           <li>Healthcare Professionals for care coordination</li>
@@ -45,17 +45,17 @@ const PrivacyPolicy = () => {
           <li>Business Transfers such as mergers and acquisitions</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">4. Data Security</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">4. Data Security</h2>
         <p className="text-gray-700 mb-6">
           We implement industry-standard measures including encryption, secure servers, and access controls to protect your personal data. However, we cannot guarantee absolute security.
         </p>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">5. Data Retention</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">5. Data Retention</h2>
         <p className="text-gray-700 mb-6">
           We retain your personal information only as long as necessary for the intended purpose or legal compliance. We securely delete or anonymize data when no longer needed.
         </p>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">6. Your Rights</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">6. Your Rights</h2>
         <ul className="list-disc list-inside mb-6 text-gray-700 pl-4">
           <li>Access and receive a copy of your data</li>
           <li>Correct or update your data</li>
@@ -64,27 +64,27 @@ const PrivacyPolicy = () => {
           <li>Request data portability</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">7. Cookies and Tracking</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">7. Cookies and Tracking</h2>
         <p className="text-gray-700 mb-6">
           We use cookies to improve functionality and analyze usage. You can control cookies through your browser settings.
         </p>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">8. Third-Party Links</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">8. Third-Party Links</h2>
         <p className="text-gray-700 mb-6">
           We are not responsible for the privacy practices of third-party websites. Please review their policies independently.
         </p>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">9. Children’s Privacy</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">9. Children’s Privacy</h2>
         <p className="text-gray-700 mb-6">
           Our services are not intended for individuals under 18. We do not knowingly collect data from children.
         </p>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">10. Changes to This Policy</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">10. Changes to This Policy</h2>
         <p className="text-gray-700 mb-6">
           We may update this policy periodically. Continued use of our services after changes means you accept the updated terms.
         </p>
 
-        <h2 className="text-2xl font-semibold text-primary-6 mb-4">11. Contact Us</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-primary-6)] mb-4">11. Contact Us</h2>
         <p className="text-gray-700 mb-6">
           If you have questions or concerns about our privacy practices, contact us at:
           <br /> <strong>Email:</strong> contact@SozoDigicare.ie
