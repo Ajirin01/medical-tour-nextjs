@@ -94,7 +94,7 @@ const ConsultationBookingPageContent = (isCertPage) => {
   const fetchSpecialistCategories = async () => {
     setLoadingCategories(true)
     try {
-      const res = await fetchData('users/get-all/no-pagination?role=specialist', token)
+      const res = await fetchData('users/get-all/doctors/no-pagination', token)
       const grouped = res.reduce((acc, specialist) => {
         const category = specialist.category || 'Uncategorized'
         if (!acc[category]) acc[category] = []
