@@ -6,9 +6,21 @@ import { toast } from 'react-toastify';
 import { defaultUser } from '@/assets';
 import { FaCalendarAlt, FaLocationArrow, FaStar, FaGraduationCap, FaUserMd, FaSearch, FaFilter } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { Dialog } from "@headlessui/react";
+
+import DirectSpecialistBook from "@/components/DirectSpecialistBook"
+import { X } from "lucide-react";
+
+import { useSelector, useDispatch } from "react-redux";
+
+import { setSpecialist} from '@/store/specialistSlice'
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
 
 
 const DoctorsPage = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
 //   const navigate = useNavigate();
   const [specialists, setSpecialists] = useState([]);
   const [filteredSpecialists, setFilteredSpecialists] = useState([]);
@@ -22,6 +34,9 @@ const DoctorsPage = () => {
   const [sortOption, setSortOption] = useState('rating'); // 'rating', 'experience', 'name'
   
   const apiUrl = process.env.NEXT_PUBLIC_NODE_BASE_URL;
+
+  const dispatch = useDispatch()
+
 
   // Fetch specialists data
   useEffect(() => {
@@ -108,25 +123,18 @@ const DoctorsPage = () => {
     document.body.style.overflow = 'auto';
   };
 
+  const closeDialog = () => {
+    setIsOpen(false);
+    setSelectedCert(null);
+  };
+
+  const openDialog = (doctor) => {
+    setSelectedDoctor(doctor);
+    setIsOpen(true);
+  };
+
   const handleBookAppointment = (doctor) => {
-    // Check if user is logged in
-    const token = getToken();
-    if (!token) {
-      // If not logged in, redirect to login page with returnUrl
-      toast.info("Please login to book an appointment");
-    //   navigate(PATH.general.login, { 
-    //     state: { 
-    //       returnUrl: `${PATH.general.doctors}`,
-    //       message: "Please login to book an appointment with our specialists" 
-    //     } 
-    //   });
-      return;
-    }
-    
-    // If logged in, proceed to appointment creation
-    // navigate(PATH.dashboard.createAppointment, { 
-    //   state: { selectedSpecialty: doctor.category } 
-    // });
+    openDialog(doctor); dispatch(setSpecialist(doctor));
   };
 
   const DoctorImage = ({ profileImage, alt = 'Doctor' }) => {
@@ -526,6 +534,27 @@ const DoctorsPage = () => {
                     Book Appointment
                   </button>
                 </div>
+
+                {/* Booking Dialog */}
+                <Dialog
+                  open={isOpen}
+                  onClose={closeDialog}
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+                  >
+                  <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh] max-w-[90vw]">
+                      {/* Close button */}
+                      <button
+                      onClick={closeDialog}
+                      className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+                      >
+                      <X size={20} />
+                      </button>
+                      {/* Calendar Step */}
+                      <div className="w-full">
+                        <DirectSpecialistBook specialist={selectedDoctor} />
+                      </div>
+                  </div>
+                </Dialog>
               </div>
             </div>
           </motion.div>

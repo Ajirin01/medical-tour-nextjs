@@ -103,7 +103,8 @@ const PrescriptionReceipt = () => {
                     className="inline-block"
                 />
                 <p className="italic text-sm">Dr. {appointmentSession.specialist?.firstName} {appointmentSession.specialist?.lastName}</p>
-                </div>
+                <p className="italic text-sm">Reg. NO:  {appointmentSession.specialist?.licenseNumber}</p>
+              </div>
 
             </div>
 
