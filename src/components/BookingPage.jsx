@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { fetchData, postData } from '@/utils/api'
 import { useUser } from '@/context/UserContext'
 import { useSession } from 'next-auth/react'
-import { useSearchParams, usePathname } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useToast } from '@/context/ToastContext'
 
 import { useSelector, useDispatch } from "react-redux";
@@ -47,8 +47,8 @@ const ConsultationBookingPageContent = (isCertPage) => {
     (state) => state.specialist.appointmentDate
   );
 
-  useEffect(()=>{ console.log("%%%%%%%%%%%", isCertPage.isCertPage) }, [])
   
+  const router = useRouter()
 
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState(null);
@@ -209,6 +209,10 @@ const ConsultationBookingPageContent = (isCertPage) => {
     setModalContent(null);
     dispatch(resetBooking());
   };
+
+  if(!session){
+    router.push("/login")
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-0">

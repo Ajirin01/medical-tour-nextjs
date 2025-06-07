@@ -8,8 +8,6 @@ import { CheckCircle, X } from "lucide-react";
 import 'react-calendar/dist/Calendar.css';
 import { useSelector, useDispatch } from "react-redux";
 
-import { useRouter } from "next/navigation";
-
 import { setPrice} from '@/store/specialistSlice'
 
 import { Elements } from '@stripe/react-stripe-js'
@@ -24,8 +22,6 @@ export default function CertificatesConsultationPage() {
   const [selectedCert, setSelectedCert] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentStep, setCurrentStep] = useState(1);
-
-  const router = useRouter()
 
   const dispatch = useDispatch()
   
@@ -98,10 +94,6 @@ export default function CertificatesConsultationPage() {
     "Confirm and pay",
     "Receive your confirmation"
   ];
-
-  if(!session){
-    router.push("/login")
-  }
 
   return (
     <div className="min-h-screen px-6 bg-gray-50">
