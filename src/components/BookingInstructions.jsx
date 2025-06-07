@@ -30,7 +30,7 @@ const BookingInstructions = () => {
       {showInstructions && (
         <div
           id="booking-instructions"
-          className="bg-blue-50 w-100vw border border-blue-300 text-blue-800 p-4 rounded-md mt-3"
+          className="bg-blue-50 border border-blue-300 text-blue-800 p-4 rounded-md mt-3"
         >
           <ol className="list-decimal list-inside space-y-1 text-sm leading-relaxed">
             <li>Select a specialist category.</li>

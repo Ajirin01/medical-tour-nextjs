@@ -27,7 +27,7 @@ import {
 import {
   PricingModal,
   CheckoutModal,
-  FindSpecialistModal,
+  FindSpecialistModal,j
 } from "@/components/gabriel";
 
 import { Elements } from '@stripe/react-stripe-js'

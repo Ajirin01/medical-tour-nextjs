@@ -12,7 +12,6 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import { useToast } from '@/context/ToastContext'
 import { ClockIcon, DollarSignIcon, CheckCircleIcon } from "lucide-react";
 // import Link from "next/link";
-import { convertTo24Hour  } from '@/utils/helperFunctions'
 
 
 export default function ConsultationBookingPageContent() {
@@ -111,6 +110,55 @@ export default function ConsultationBookingPageContent() {
       setSelectedSlot(null)
     }
   }, [selectedDate])
+
+  useEffect(() => {
+      const appointmentId = searchParams.get('appointmentId');
+    
+      const fetchAppointmentOrConsultant = async () => {
+        try {
+          if (appointmentId) {
+            const apptRes = await fetchData(`/appointments/${appointmentId}`, token);
+            if (apptRes) {
+              setConsultant(apptRes.consultant); // use consultant from the fetched appointment
+            }
+          } else {
+            // No appointmentId → fallback to fetching default consultant
+            const res = await fetchData("users/get-all/no-pagination?role=specialist", token);
+            const targetEmail = "olagokemubarakishola@gmail.com"; // The name you want to select
+
+            const match = res.find(s => s.email === targetEmail);
+
+            // console.log(match)
+
+            if (match) {
+              setConsultant(match);
+            } else {
+              console.warn(`Specialist "${targetEmail}" not found`);
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching consultant/appointment:', err);
+        }
+      };
+    
+      if (token) {
+        fetchAppointmentOrConsultant();
+      }
+    }, [token, searchParams]);
+  
+  function convertTo24Hour(timeStr) {
+    const [time, modifier] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':');
+  
+    if (modifier === 'PM' && hours !== '12') {
+      hours = parseInt(hours, 10) + 12;
+    }
+    if (modifier === 'AM' && hours === '12') {
+      hours = '00';
+    }
+  
+    return `${hours}:${minutes}`; 
+  }
 
   const handleConfirm = async () => {
     event.preventDefault()
@@ -273,6 +321,12 @@ export default function ConsultationBookingPageContent() {
     })()
   : [];
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target
+  //   console.log(value)
+  //   setFormData({ ...formData, [name]: name === 'duration' ? parseInt(value) : value })
+  // }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -411,31 +465,65 @@ export default function ConsultationBookingPageContent() {
             </div>
           ) : (
             <form className="space-y-6 bg-white p-6 rounded-xl shadow">
-              <div>
-                <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-                  Duration (minutes)
-                </label>
-                <select
-                  required
-                  name="duration"
-                  id="duration"
-                  value={formData.duration}
-                  onChange={handleChange}
-                  disabled={consultMode === "appointment" && !selectedSlot}
-                  className="mt-1 block p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  {durationOptions.length === 0 ? (
-                    <option value="">Select a slot first</option>
-                  ) : (
-                    durationOptions.map((min) => (
-                      <option key={min} value={min}>
-                        {min} minutes
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
+              {consultMode === "now" ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-4">
+                  {[15, 30, 40, 60].map((min) => {
+                    const isActive = formData.duration === min.toString();
+                    const price = min * 2; // Customize pricing logic
+                    return (
+                      <div
+                        key={min}
+                        onClick={() => handleChange({ target: { name: "duration", value: min.toString() } })}
+                        className={`cursor-pointer rounded-2xl p-5 border transition-all duration-300 ${
+                          isActive
+                            ? "bg-indigo-600 text-white shadow-lg ring-2 ring-indigo-400"
+                            : "bg-white text-gray-900 border-gray-200 hover:shadow-md hover:border-indigo-300"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-lg font-bold">{min} Minutes</h4>
+                          {isActive && <CheckCircleIcon className="w-5 h-5 text-white" />}
+                        </div>
                 
+                        <div className="mt-4 flex items-center gap-2 text-sm">
+                          <ClockIcon className="w-4 h-4" />
+                          <span>{min} mins session</span>
+                        </div>
+                
+                        <div className="mt-2 flex items-center gap-2 text-sm">
+                          <DollarSignIcon className="w-4 h-4" />
+                          <span>${price.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div>
+                  <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+                    Duration (minutes)
+                  </label>
+                  <select
+                    required
+                    name="duration"
+                    id="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    disabled={consultMode === "appointment" && !selectedSlot}
+                    className="mt-1 block p-2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    {durationOptions.length === 0 ? (
+                      <option value="">Select a slot first</option>
+                    ) : (
+                      durationOptions.map((min) => (
+                        <option key={min} value={min}>
+                          {min} minutes
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+              )}
               <div className="text-sm text-gray-700">
                 Estimated Cost:{' '}
                 <span className="font-semibold text-gray-900">${calculatedCost}</span>

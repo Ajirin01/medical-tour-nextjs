@@ -20,6 +20,7 @@ import { openChatBot, triggerChatbotAttention } from '@/store/popUpSlice';
 export default function RootLayout({ children }) {
   const pathname = usePathname();
 
+
   const [isVisible, setIsVisible] = useState(false);
 
   const handleScroll = () => {
