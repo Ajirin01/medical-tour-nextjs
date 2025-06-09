@@ -162,7 +162,7 @@ export default function Ecommerce() {
   }
 
   useEffect(() => {
-    if (userRole === "admin") {
+    if (userRole === "admin" || userRole === "superAdmin") {
       fetchPatients();
       fetchDoctors();
       fetchPharmacies();
@@ -317,7 +317,7 @@ export default function Ecommerce() {
       icon: <FaUserAlt className="text-green-600" size={20} />,
       bgColor: "bg-green-50",
       iconBg: "bg-green-100",
-      visible: userRole === "admin"
+      visible: userRole === "admin" || userRole === "superAdmin"
     },
     {
       title: "Doctors",
@@ -328,7 +328,7 @@ export default function Ecommerce() {
       icon: <FaUserMd className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
       iconBg: "bg-blue-100",
-      visible: userRole === "admin"
+      visible: userRole === "admin" || userRole === "superAdmin"
     },
     {
       title: "Pharmacies",
@@ -339,7 +339,7 @@ export default function Ecommerce() {
       icon: <FaPills className="text-purple-600" size={20} />,
       bgColor: "bg-purple-50",
       iconBg: "bg-purple-100",
-      visible: userRole === "admin"
+      visible: userRole === "admin" || userRole === "superAdmin"
     },
     {
       title: "Revenue",
@@ -350,7 +350,7 @@ export default function Ecommerce() {
       icon: <FaMoneyBill className="text-red-600" size={20} />,
       bgColor: "bg-red-50",
       iconBg: "bg-red-100",
-      visible: userRole === "admin"
+      visible: userRole === "admin" || userRole === "superAdmin"
     }
   ];
 
@@ -460,7 +460,7 @@ export default function Ecommerce() {
 
         {/* Existing eCommerce Grid Layout */}
         <div className="grid grid-cols-12 gap-4 md:gap-6">
-        {userRole === "admin" &&
+        {userRole === "admin" || userRole === "superAdmin" &&
           <>
               <div className="col-span-6 xl:col-span-5">
                 <MonthlyTarget />
@@ -652,12 +652,12 @@ export default function Ecommerce() {
           }
 
 
-          {/* {userRole === "admin" && (
+          {/* {userRole === "admin" || userRole === "superAdmin" && (
             <div className="col-span-12 xl:col-span-5">
               <DemographicCard />
             </div>
           )} */}
-          {userRole === "admin" && (
+          {userRole === "admin" || userRole === "superAdmin" && (
             <div className="col-span-12">
               <RecentTransactions />
             </div>

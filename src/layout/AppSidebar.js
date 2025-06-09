@@ -166,14 +166,14 @@ const AppSidebar = () => {
         icon: <LayoutGrid />,
         name: "Dashboard",
         path: "/admin",
-        roles: ["admin", "user", "specialist", "consultant"]
+        roles: ["admin", "user", "specialist", "consultant", "superAdmin"]
       },
       // availability
       {
         icon: <User />,
         name: "Specialists",
         path: "/admin/specialists",
-        roles: ["admin"]
+        roles: ["admin", "superAdmin"]
       },
       // availability
       {
@@ -334,21 +334,21 @@ const AppSidebar = () => {
         icon: <Video />,
         name: "Call Sessions",
         path: "/admin/call-sessions",
-        roles: ["user", "specialist", "admin"]
+        roles: ["user", "specialist", "admin", "superAdmin"]
       },
       // Feedbacks
       {
         icon: <Receipt />,
         name: "Feedbacks",
         path: "/admin/feedbacks",
-        roles: ["admin"]
+        roles: ["admin", "superAdmin"]
       },
       // Galleries
       {
         icon: <Camera />,
         name: "Galleries",
         path: "/admin/galleries",
-        roles: ["admin"]
+        roles: ["admin", "superAdmin"]
       },
       // Hospitals
       // {
@@ -362,7 +362,7 @@ const AppSidebar = () => {
         icon: <Newspaper />,
         name: "Blogs",
         path: "/admin/blogs",
-        roles: ["admin"]
+        roles: ["admin", "superAdmin"]
       }
     ];
 
