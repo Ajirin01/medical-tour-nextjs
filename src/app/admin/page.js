@@ -460,7 +460,7 @@ export default function Ecommerce() {
 
         {/* Existing eCommerce Grid Layout */}
         <div className="grid grid-cols-12 gap-4 md:gap-6">
-        {userRole === "admin" || userRole === "superAdmin" &&
+        {(userRole === "admin" || userRole === "superAdmin") &&
           <>
               <div className="col-span-6 xl:col-span-5">
                 <MonthlyTarget />
@@ -657,7 +657,7 @@ export default function Ecommerce() {
               <DemographicCard />
             </div>
           )} */}
-          {userRole === "admin" || userRole === "superAdmin" && (
+          {(userRole === "admin" || userRole === "superAdmin") && (
             <div className="col-span-12">
               <RecentTransactions />
             </div>

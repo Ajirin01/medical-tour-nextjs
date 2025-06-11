@@ -229,7 +229,7 @@ const ConsultationAppointmentsPageContent  = () => {
                                     Start Session
                                   </Link>
                                 </MenuItem>
-                                <MenuItem>
+                                {/* <MenuItem>
                                   <Link
                                     href={`/admin/available-specialists?appointmentId=${appointment._id}`}
                                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -237,20 +237,21 @@ const ConsultationAppointmentsPageContent  = () => {
                                     <UsersIcon className="w-4 h-4 text-indigo-500" />
                                     Available Doctors
                                   </Link>
-                                </MenuItem>
+                                </MenuItem> */}
                                 
                               </>}
 
-                              { session?.user?.role === "user" &&
-                              <MenuItem>
-                              <Link
-                                href={`/admin/appointments/retake/${appointment._id}`}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                              >
-                                <RotateCcw className="w-4 h-4 text-red-500" />
-                                Retake
-                              </Link>
-                            </MenuItem>}
+                              {/* { session?.user?.role === "user" &&
+                                <MenuItem>
+                                  <Link
+                                    href={`/admin/appointments/retake/${appointment._id}`}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  >
+                                    <RotateCcw className="w-4 h-4 text-red-500" />
+                                    Retake
+                                  </Link>
+                                </MenuItem>
+                              } */}
 
                             { session?.user?.role === "admin" &&
                               <>
