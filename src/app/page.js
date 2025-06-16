@@ -5,6 +5,8 @@ import Swiper from 'swiper';
 import { fetchData } from '@/utils/api';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import LottieImage from '@/components/LottieBackground';
 import { 
   FaPlane, 
   FaStethoscope, 
@@ -19,7 +21,11 @@ import {
   FaChevronUp, 
   FaHeartbeat,  
   FaComments, 
-  FaFileMedicalAlt  } from 'react-icons/fa';
+  FaFileMedicalAlt,
+  FaChild, 
+  FaBrain, 
+  FaPhoneAlt  } from 'react-icons/fa';
+
 import { 
   consult, 
   doctorIcon, 
@@ -162,7 +168,7 @@ export default function HomePage() {
     };
   
     return (
-      <section className="faq-section py-20 bg-white rounded-3xl mx-4 mt-8 mb-8">
+      <section className="relative faq-section py-20 bg-white rounded-3xl mx-4 mt-8 mb-8">
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-primary-10">Frequently Asked Questions</h2>
           <div className="space-y-4">
@@ -281,11 +287,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className=" text-[var(--color-primary-7)] text-3xl md:text-4xl font-bold text-center mb-12">
+
+      <section className="relative comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
+        {/* Lottie Background */}
+        <div className="absolute inset-0 w-full opacity-5 h-full z-15">
+          <LottieImage
+            src="/background.json"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <h2 className="text-[var(--color-primary-7)] text-3xl md:text-4xl font-bold text-center mb-12">
             Our Comprehensive Services
           </h2>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
               <motion.div
@@ -305,7 +322,9 @@ export default function HomePage() {
                 </div>
 
                 <button
-                  onClick={() => service.link === "ai" ? handleChat() : window.location.href = service.link} // Update this if using Next.js router
+                  onClick={() =>
+                    service.link === "ai" ? handleChat() : (window.location.href = service.link)
+                  }
                   className="mt-6 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
                 >
                   Get Started
@@ -332,9 +351,183 @@ export default function HomePage() {
         </div>
       </section>
 
+       <section className="bg-[var(--color-primary-9)] py-16 px-6 lg:px-20 mx-0 text-white">
+        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-12">
+          Secure Online Video call with Irish Registered Doctors
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          
+          {/* Card 1 */}
+          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
+            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-6xl pr-2">
+              <FaHeartbeat />
+            </div>
+            <div className="border-l-2 border-white px-6">
+              <h3 className="font-bold text-lg">GP Consultation</h3>
+              <p className="text-sm mt-1 text-white/90">
+                Obtain accurate diagnoses and treatment plans specifically tailored to your health concerns.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
+            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
+              <FaChild />
+            </div>
+            <div className="border-l-2 border-white px-6">
+              <h3 className="font-bold text-lg">Children Consultation</h3>
+              <p className="text-sm mt-1 text-white/90">
+                Connect with experienced paediatric professionals to get medical advice for your child.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
+            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
+              <FaBrain />
+            </div>
+            <div className="border-l-2 border-white px-6">
+              <h3 className="font-bold text-lg">Same Day Appointment</h3>
+              <p className="text-sm mt-1 text-white/90">
+                Receive accurate assessments, and develop personalised treatment plans.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
+            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
+              <FaUserMd />
+            </div>
+            <div className="border-l-2 border-white px-6">
+              <h3 className="font-bold text-lg">Primary Dermatology Consultation</h3>
+              <p className="text-sm mt-1 text-white/90">
+                Receive comprehensive care for your skin health needs, including acne and other infections.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 5 */}
+          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
+            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
+              <FaPhoneAlt />
+            </div>
+            <div className="border-l-2 border-white px-6">
+              <h3 className="font-bold text-lg">Urgent Consultation</h3>
+              <p className="text-sm mt-1 text-white/90">
+                Get experienced GP opinion promptly for your emergent medical situations.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 6 */}
+          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
+            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
+              <FaClipboardList />
+            </div>
+            <div className="border-l-2 border-white px-6">
+              <h3 className="font-bold text-lg">Sick Leave Consultation</h3>
+              <p className="text-sm mt-1 text-white/90">
+                Create a customised plan for a successful return to work through expert advice.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <section className="relative comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
+        {/* Lottie Background */}
+        <div className="absolute inset-0 w-full  h-full z-10">
+          <LottieImage
+            src="/background.json"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-15">
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-12">
+            Sozo DigiCare has designed a streamlined, user-friendly and secure process for your Video or Phone Consultation. Here’s how it works, simplified into three easy steps:
+          </p>
+
+          <div className="relative max-w-6xl mx-auto z-10">
+            {/* Arrows between steps */}
+            <div className="hidden md:block absolute top-5 left-[20%] w-[25%] pointer-events-none z-0">
+              <svg className="w-full h-10" viewBox="0 0 100 20" preserveAspectRatio="none">
+                <path d="M0,10 C30,0 70,20 100,10" stroke="#F59E0B" strokeWidth="2" fill="none" strokeDasharray="4,4" markerEnd="url(#arrowhead1)" />
+                <defs>
+                  <marker id="arrowhead1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <polygon points="0 0, 6 3, 0 6" fill="#F59E0B" />
+                  </marker>
+                </defs>
+              </svg>
+            </div>
+
+            <div className="hidden md:block absolute top-5 left-[55%] w-[25%] pointer-events-none z-0">
+              <svg className="w-full h-10" viewBox="0 0 100 20" preserveAspectRatio="none">
+                <path d="M0,10 C30,0 70,20 100,10" stroke="#F59E0B" strokeWidth="2" fill="none" strokeDasharray="4,4" markerEnd="url(#arrowhead2)" />
+                <defs>
+                  <marker id="arrowhead2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <polygon points="0 0, 6 3, 0 6" fill="#F59E0B" />
+                  </marker>
+                </defs>
+              </svg>
+            </div>
+
+            {/* Steps */}
+            <div className="flex flex-col md:flex-row justify-between items-start gap-12">
+              {/* Step 1 */}
+              <div className="flex flex-col items-center text-center w-full md:w-1/3 relative z-10">
+                <div className="bg-blue-900 text-orange-500 rounded-full w-20 h-20 flex items-center justify-center text-3xl font-bold shadow-lg">
+                  1
+                </div>
+                <h3 className="text-xl text-gray-600 font-semibold mt-4">Book an Appointment</h3>
+                <p className="text-gray-600 mt-2">Choose your service and fill out your details.</p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex flex-col items-center text-center w-full md:w-1/3 relative z-10">
+                <div className="bg-blue-900 text-orange-500 rounded-full w-20 h-20 flex items-center justify-center text-3xl font-bold shadow-lg">
+                  2
+                </div>
+                <h3 className="text-xl text-gray-600 font-semibold mt-4">Receive a Confirmation</h3>
+                <p className="text-gray-600 mt-2">Get an email confirming your appointment.</p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex flex-col items-center text-center w-full md:w-1/3 relative z-10">
+                <div className="bg-blue-900 text-orange-500 rounded-full w-20 h-20 flex items-center justify-center text-3xl font-bold shadow-lg">
+                  3
+                </div>
+                <h3 className="text-xl text-gray-600 font-semibold mt-4">Get a Consultation</h3>
+                <p className="text-gray-600 mt-2">Talk with our doctor at the scheduled time.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <div className="mt-12">
+            <a href="#" className="bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-blue-800 transition inline-flex items-center">
+              Book an Appointment
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* <InteractiveChoice /> */}
-      <section className="become-specialist py-20 bg-[var(--color-primary-9)] text-white rounded-3xl mx-4 mt-8 mb-8">
+      <section className="relative become-specialist py-20 bg-[var(--color-primary-9)] text-white rounded-3xl mx-4 mt-8 mb-8">
+        <Image
+            src="/images/health.gif"
+            alt="Background Overlay"
+            fill
+            className="object-cover opacity-10 pointer-events-none z-0"
+          />
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Become One of Our Specialists</h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">Join our team of expert specialists and help us deliver cutting-edge healthcare services.</p>

@@ -37,7 +37,14 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-br from-[var(--color-primary-8)] to-[var(--color-primary-10)] rounded-t-3xl mx-4 mt-8 overflow-hidden">
+    <footer className="relative bg-gradient-to-br from-[var(--color-primary-8)] to-[var(--color-primary-10)] rounded-t-3xl mx-4 mt-8 overflow-hidden">
+    {/* Background Overlay Image */}
+    <Image
+      src="/images/pattern1.jpg"
+      alt="Background Overlay"
+      fill
+      className="object-cover opacity-2 pointer-events-none z-0"
+    />
       <div className="container mx-auto px-6 py-12">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">

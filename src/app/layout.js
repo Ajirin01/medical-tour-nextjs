@@ -10,7 +10,6 @@ import AuthWatcher from "@/components/AuthWatcher";
 import { ArrowUpCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
-
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -43,6 +43,11 @@ export default function TopNav({}) {
   const [isOpen, setIsOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
 
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useOutsideClick(dropdownRef, () => setShowDropdown(false));
+
   const router = useRouter();
 
   const pathname = usePathname();
@@ -62,6 +67,20 @@ export default function TopNav({}) {
       signOut({ callbackUrl: '/login' }); 
     }
   };
+
+  function useOutsideClick(ref, onClose) {
+    useEffect(() => {
+      function handleClickOutside(event) {
+        if (ref.current && !ref.current.contains(event.target)) {
+          onClose();
+        }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [ref, onClose]);
+  }
 
   const links = [
     {
@@ -104,7 +123,7 @@ export default function TopNav({}) {
 
         {/* Right: Desktop nav, notification, user */}
         <div className="flex items-center space-x-6">
-          <nav className="hidden md:flex items-center space-x-6 text-sm">
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-bold">
             <NavLink href="/" icon={<Home size={18} />} label="Home" active={pathname === "/"} />
             <NavLink href="/about" icon={<Info size={18} />} label="About" active={pathname === "/about"} />
             <NavLink href="/doctors" icon={<User size={18} />} label="Doctors" active={pathname === "/doctors"} />
@@ -115,7 +134,7 @@ export default function TopNav({}) {
                 <div className="flex items-center space-x-3 px-3 py-1.5 border-2 rounded border-[var(--color-primary-7)]">
                   <button
                     onClick={() => router.push("/auth/sign-up?role=specialist")}
-                    className="text-[var(--color-primary-7)] hover:text-primary-6 transition-colors duration-200 text-sm font-medium ml-2"
+                    className="text-[var(--color-primary-7)] hover:text-primary-6 transition-colors duration-200 text-sm font-bold ml-2"
                   >
                     Become Our Doctor
                   </button>
@@ -124,65 +143,84 @@ export default function TopNav({}) {
             </div>
 
             {/* Dashboard dropdown */}
-            { isAuthenticated && 
+            {/* { isAuthenticated && 
               <NavLink href="/admin" icon={<Gauge size={18} />} label="Dashboard" />
-            }
+            } */}
           </nav>
 
           {/* <Bell size={20} className="text-gray-700 hidden md:inline" /> */}
           <div className="hidden md:flex items-center ml-6 space-x-3">
                 {isAuthenticated ? (
-                  <div className="flex items-center space-x-3">
-                    {/* <Notification /> */}
-                    
-                    <div className="flex items-center space-x-3 bg-gray-50 rounded-full px-3 py-1.5 border border-gray-100">
-                      <div className="relative">
-                        <img
-                          className="h-8 w-8 rounded-full object-cover border-2 border-white shadow-sm"
-                          src={user.profileImage ? `${apiUrl}${user.profileImage}` : defaultUser}
-                          alt={user.firstName}
-                          crossOrigin="anonymous"
-                        />
-                        <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-white"></div>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-gray-700 font-medium text-sm leading-tight">
-                          {user.firstName}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => setShowLogout(true)}
-                        className="text-gray-500 hover:text-primary-6 transition-colors duration-200 text-sm font-medium ml-2"
-                      >
-                        Logout
-                      </button>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="flex items-center gap-2 bg-gray-50 rounded-full px-3 py-1.5 border border-gray-100"
+                  >
+                    <img
+                      className="h-8 w-8 rounded-full object-cover border-2 border-white shadow-sm"
+                      src={user.profileImage ? `${apiUrl}${user.profileImage}` : defaultUser}
+                      alt={user.firstName}
+                      crossOrigin="anonymous"
+                    />
+                    <span className="text-sm text-gray-800 font-medium">{user.firstName}</span>
+                    <ChevronDown size={16} className="text-gray-500" />
+                  </button>
+
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-50">
+                      <ul className="py-2">
+                        <li>
+                          <button
+                            onClick={() => {
+                              router.push("/admin");
+                              setShowDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700"
+                          >
+                            Dashboard
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => {
+                              setShowLogout(true);
+                              setShowDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-gray-700"
+                          >
+                            Logout
+                          </button>
+                        </li>
+                      </ul>
                     </div>
-                  </div>
-                ) : (
-                  <>
-                    <Button
-                      background="bg-white"
-                      textColor="text-[var(--color-primary-6)]"
-                      borderRadius="rounded-full"
-                      border="border-2 border-primary-6"
-                      hoverEffect="hover:bg-[var(--color-primary-6)] hover:text-white transition-colors duration-200"
-                      className="text-sm font-medium py-2 px-4"
-                      onClick={() => navigate("/login")}
-                    >
-                      Log In
-                    </Button>
-                    <Button
-                      background="bg-[var(--color-primary-6)]"
-                      textColor="text-white"
-                      borderRadius="rounded-full"
-                      hoverEffect="hover:bg-[var(--color-primary-7)] transition-colors duration-200"
-                      className="text-sm font-medium py-2 px-4"
-                      onClick={() => navigate("/auth/sign-up")}
-                    >
-                      Sign Up
-                    </Button>
-                  </>
-                )}
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Button
+                    background="bg-white"
+                    textColor="text-[var(--color-primary-6)]"
+                    borderRadius="rounded-full"
+                    border="border-2 border-primary-6"
+                    hoverEffect="hover:bg-[var(--color-primary-6)] hover:text-white transition-colors duration-200"
+                    className="text-sm font-medium py-2 px-4"
+                    onClick={() => navigate("/login")}
+                  >
+                    Log In
+                  </Button>
+                  <Button
+                    background="bg-[var(--color-primary-6)]"
+                    textColor="text-white"
+                    borderRadius="rounded-full"
+                    hoverEffect="hover:bg-[var(--color-primary-7)] transition-colors duration-200"
+                    className="text-sm font-medium py-2 px-4"
+                    onClick={() => navigate("/auth/sign-up")}
+                  >
+                    Sign Up
+                  </Button>
+                </div>
+              )}
+
           </div>
 
 
@@ -298,7 +336,7 @@ export default function TopNav({}) {
               <div className="flex items-center space-x-3 px-3 py-1.5 border-2 rounded border-[var(--color-primary-7)]">
                 <button
                   onClick={() => router.push("/auth/sign-up?role=specialist")}
-                  className="text-[var(--color-primary-7)] hover:text-primary-6 transition-colors duration-200 text-sm font-medium ml-2"
+                  className="text-[var(--color-primary-7)] hover:text-primary-6 transition-colors duration-200 text-sm font-bold ml-2"
                 >
                   Become Our Doctor
                 </button>
