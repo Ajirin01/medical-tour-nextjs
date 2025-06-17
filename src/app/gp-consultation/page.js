@@ -132,7 +132,7 @@ export default function CertificatesConsultationPage() {
               <p className="text-lg font-bold text-center text-[var(--color-primary-7)] mt-4">€{service.price}</p>
               <button
                     onClick={() => {
-                        openDialog(cert);
+                        openDialog(service);
                         dispatch(setPrice(service.price));
                     }}
                     className="mt-4 w-[40%] mx-auto text-center py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
@@ -150,7 +150,7 @@ export default function CertificatesConsultationPage() {
         onClose={closeDialog}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
         >
-        <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh] max-w-[90vw]">
+        <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh]">
             {/* Close button */}
             <button
             onClick={closeDialog}
@@ -160,7 +160,7 @@ export default function CertificatesConsultationPage() {
             </button>
             {/* Calendar Step */}
             <div className="w-full">
-              <ConsultationBookingPageContent isCertPage={true} />
+              <ConsultationBookingPageContent showSpecialistCategories={false} />
             </div>
         </div>
       </Dialog>

@@ -174,7 +174,7 @@ export default function CertificatesConsultationPage() {
         onClose={closeDialog}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
         >
-        <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh] max-w-[90vw]">
+        <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh]">
             {/* Close button */}
             <button
             onClick={closeDialog}
@@ -184,7 +184,7 @@ export default function CertificatesConsultationPage() {
             </button>
             {/* Calendar Step */}
             <div className="w-full">
-              <ConsultationBookingPageContent isCertPage={true} />
+              <ConsultationBookingPageContent showSpecialistCategories={false} />
             </div>
         </div>
       </Dialog>

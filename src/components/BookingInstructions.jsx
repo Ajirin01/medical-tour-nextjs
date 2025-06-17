@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const BookingInstructions = () => {
+const BookingInstructions = ({showSpecialistCateogies}) => {
   const [showInstructions, setShowInstructions] = useState(true)
 
   return (
@@ -11,7 +11,7 @@ const BookingInstructions = () => {
         aria-expanded={showInstructions}
         aria-controls="booking-instructions"
       >
-        <span>{showInstructions ? 'Close instructions' : 'New help booking? click here!'}</span>
+        <span>{showInstructions ? 'Close instructions' : 'Need help booking? click here!'}</span>
         <svg
           className={`w-5 h-5 transition-transform duration-300 ${
             showInstructions ? 'rotate-180' : 'rotate-0'
@@ -33,7 +33,7 @@ const BookingInstructions = () => {
           className="bg-blue-50 border border-blue-300 text-blue-800 p-4 rounded-md mt-3"
         >
           <ol className="list-decimal list-inside space-y-1 text-sm leading-relaxed">
-            <li>Select a specialist category.</li>
+            {showSpecialistCateogies && <li>Select a specialist category.</li>}
             <li>Choose a date from the calendar.</li>
             <li>Select an available time slot.</li>
             <li>

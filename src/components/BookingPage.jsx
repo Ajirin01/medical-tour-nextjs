@@ -36,8 +36,10 @@ import { loadStripe } from '@stripe/stripe-js'
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 
-const ConsultationBookingPageContent = (isCertPage) => {
+const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
   const dispatch = useDispatch();
+
+  // console.log(!showSpecialistCategories)
   
   const specialist = useSelector((state) => state.specialist.specialist);
   const price = useSelector((state) => state.specialist.price);
@@ -86,15 +88,23 @@ const ConsultationBookingPageContent = (isCertPage) => {
   }, [token])
 
   useEffect(() => {
-    if (token && selectedDate && specialistsByCategory.length > 0) {
-      fetchAvailableSlots()
+    if(showSpecialistCategories){
+      if (token && selectedDate && specialistsByCategory.length > 0) {
+        fetchAvailableSlots()
+      }
+    }else{
+      if (token && selectedDate) {
+        fetchAvailableSlots()
+      }
     }
+    
   }, [selectedDate, specialistsByCategory, token])
 
   const fetchSpecialistCategories = async () => {
     setLoadingCategories(true)
     try {
       const res = await fetchData('users/get-all/doctors/no-pagination', token)
+      
       const grouped = res.reduce((acc, specialist) => {
         const category = specialist.category || 'Uncategorized'
         if (!acc[category]) acc[category] = []
@@ -107,6 +117,10 @@ const ConsultationBookingPageContent = (isCertPage) => {
         count: members.length,
         members,
       }))
+
+      if(!showSpecialistCategories){
+        setSpecialistsByCategory(res)
+      }
 
       setCategories(categoryList)
     } catch (err) {
@@ -151,7 +165,7 @@ const ConsultationBookingPageContent = (isCertPage) => {
           const slotId = slot._id;
           if (bookedSlotIds.has(slotId)) return false; // Exclude already booked slots
   
-          if (isCertPage.isCertPage) {
+          if (!showSpecialistCategories) {
             if (slot.category !== "cert") return false;
   
             if (slot.type === 'recurring') {
@@ -217,36 +231,38 @@ const ConsultationBookingPageContent = (isCertPage) => {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-0">
       <h2 className="text-2xl font-bold mb-2">Book an Appointment</h2>
-      <BookingInstructions />
+      <BookingInstructions showSpecialistCategories={showSpecialistCategories} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="max-h-[500px] overflow-y-auto space-y-2 pr-2">
-          {loadingCategories ? (
-            <div className="flex justify-center items-center h-32">
-              <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : (
-            categories.map((cat) => (
-              <div
-                key={cat.name}
-                onClick={() => {
-                  setSelectedCategory(cat)
-                  setSpecialistsByCategory(cat.members)
-                  setAvailableSlots([])
-                  setSelectedSlot(null)
-                }}
-                className={`cursor-pointer p-3 rounded-md border transition-all duration-150 ${
-                  selectedCategory?.name === cat.name
-                    ? 'border-indigo-600 bg-indigo-50'
-                    : 'hover:border-indigo-400 hover:bg-gray-50'
-                }`}
-              >
-                <h4 className="text-base font-semibold">{cat.name}</h4>
-                <p className="text-xs text-gray-500">{cat.count} specialist{cat.count > 1 ? 's' : ''}</p>
+      <div className={`grid grid-cols-1 lg:grid-cols-2 [${showSpecialistCategories ? 'lg:grid-cols-3' : ''}] gap-3`}>
+        { (showSpecialistCategories) &&  
+          <div className="max-h-[500px] overflow-y-auto space-y-2 pr-2">
+            {loadingCategories ? (
+              <div className="flex justify-center items-center h-32">
+                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
-            ))
-          )}
-        </div>
+            ) : (
+              categories.map((cat) => (
+                <div
+                  key={cat.name}
+                  onClick={() => {
+                    setSelectedCategory(cat)
+                    setSpecialistsByCategory(cat.members)
+                    setAvailableSlots([])
+                    setSelectedSlot(null)
+                  }}
+                  className={`cursor-pointer p-3 rounded-md border transition-all duration-150 ${
+                    selectedCategory?.name === cat.name
+                      ? 'border-indigo-600 bg-indigo-50'
+                      : 'hover:border-indigo-400 hover:bg-gray-50'
+                  }`}
+                >
+                  <h4 className="text-base font-semibold">{cat.name}</h4>
+                  <p className="text-xs text-gray-500">{cat.count} specialist{cat.count > 1 ? 's' : ''}</p>
+                </div>
+              ))
+            )}
+          </div>
+        }
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -294,10 +310,10 @@ const ConsultationBookingPageContent = (isCertPage) => {
                       {slot.startTime} - {slot.endTime}
                     </div>
                     <div className="text-sm text-gray-600">
-                      Specialist: {slot.consultant.firstName} {slot.consultant.lastName}
+                      Consultant: {slot.consultant.firstName} {slot.consultant.lastName}
                     </div>
 
-                    { isCertPage.isCertPage ? 
+                    { !showSpecialistCategories ? 
                       <div className="text-sm text-indigo-700 font-semibold mt-1">
                         Service Fee: ${price}
                       </div>
@@ -327,7 +343,7 @@ const ConsultationBookingPageContent = (isCertPage) => {
               { selectedSlot && 
                 <button
                   onClick={() => openCheckoutModal(
-                    isCertPage.isCertPage ? price : getMinutesDifference(selectedSlot.startTime, selectedSlot.endTime) * COST_PER_MINUTE,
+                    !showSpecialistCategories ? price : getMinutesDifference(selectedSlot.startTime, selectedSlot.endTime) * COST_PER_MINUTE,
                     getMinutesDifference(selectedSlot.startTime, selectedSlot.endTime)
                   )}
                   disabled={!selectedSlot || !reason || loadingBooking}
