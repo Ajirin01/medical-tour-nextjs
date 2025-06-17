@@ -126,7 +126,7 @@ export default function TopNav({}) {
           <nav className="hidden md:flex items-center space-x-6 text-sm font-bold">
             <NavLink href="/" icon={<Home size={18} />} label="Home" active={pathname === "/"} />
             <NavLink href="/about" icon={<Info size={18} />} label="About" active={pathname === "/about"} />
-            <NavLink href="/doctors" icon={<User size={18} />} label="Doctors" active={pathname === "/doctors"} />
+            <NavLink href="/gp-consultation" icon={<User size={18} />} label="GP Services" active={pathname === "/gp-consultation"} />
             <NavLink icon={<FileText size={18} />} href="/cert" label="Cert" active={pathname === "/cart"} />
 
             <div className="hidden md:flex items-center ml-6 space-x-3">
@@ -328,7 +328,7 @@ export default function TopNav({}) {
         <div className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
           <MobileNavLink icon={<Home size={18} />} href="/" label="Home" active={pathname === "/"} />
           <MobileNavLink icon={<Info size={18} />} href="/about" label="About" active={pathname === "/about"} />
-          <MobileNavLink icon={<User size={18} />} href="/doctors" label="Our Doctors" active={pathname === "/doctors"} />
+          <MobileNavLink icon={<User size={18} />} href="/gp-consultation" label="Our GP Services" active={pathname === "/gp-consultation"} />
           <MobileNavLink icon={<FileText size={18} />} href="/cert" label="Cert" active={pathname === "/cert"} />
 
           <div className="md:flex items-center space-x-3">
