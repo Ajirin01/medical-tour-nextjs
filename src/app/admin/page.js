@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fa';
 
 import { useRouter } from "next/navigation";
+import { Dialog } from "@headlessui/react";
 
 import { DTable } from "@/components/gabriel";
 
@@ -26,6 +27,27 @@ import { triggerChatbotAttention, openChatBot } from "@/store/popUpSlice";
 import { useDispatch } from "react-redux";
 import RecentTransactions from "@/components/admin/ecommerce/RecentTransactions";
 
+import { setPrice, setSpecialist, setDuration } from '@/store/specialistSlice';
+import { CheckCircle, X } from "lucide-react";
+
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+
+import { gpServices } from "@/data/gpServices";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
+import ConsultationBookingPageContent from "@/components/BookingPage"
+import {
+  PricingModal,
+  CheckoutModal,
+  FindSpecialistModal,
+} from "@/components/gabriel";
+import ModalContainer from "@/components/gabriel/ModalContainer";
+
+import io from 'socket.io-client';
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
+
 
 export default function Ecommerce() {
   const { data: session } = useSession();
@@ -37,6 +59,8 @@ export default function Ecommerce() {
   const router = useRouter()
 
   const { user } = useUser()
+
+  const PRICE = 20;
 
   const [calls, setCalls] = useState([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
@@ -51,6 +75,55 @@ export default function Ecommerce() {
   const [revenue, setRevenue] = useState(null)
   const [pharmacies, setPharmacies] = useState(null)
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [modalContent, setModalContent] = useState(null);
+  const [onlineGPs, setOnlineGPs] = useState([]);
+
+  const services = gpServices;
+
+  useEffect(() => {
+    socket.emit("get-online-specialists");
+
+    socket.on("update-specialists", (data) => {
+        const gpsOnly = data.filter((specialist) => specialist.specialty === "Pathology");
+        // console.log(gpsOnly)
+        setOnlineGPs(gpsOnly);
+    });
+
+    return () => {
+      socket.off("update-specialists");
+    };
+  }, []);
+
+  // Utility function
+    const baseDuration = 900; // 15 mins in seconds
+
+    const getPrice = (duration, discountPercent = 0) => {
+        const timeRatio = duration / baseDuration;
+        const raw = PRICE * timeRatio;
+        const discounted = raw - (raw * discountPercent) / 100;
+        return Math.round(discounted);
+    };
+
+    const getOldPrice = (duration) => {
+        const timeRatio = duration / baseDuration;
+        const raw = PRICE * timeRatio;
+        return Math.round(raw);
+    };
+
+  const openDialog = () => {
+
+    setIsOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    // setSelectedService(null);
+    setModalContent(null);
+  };
+
+  const isOnline = onlineGPs[0];
 
   // Fetch video session statistics
   const fetchSessionData = async () => {
@@ -205,6 +278,17 @@ export default function Ecommerce() {
     router.push("admin/available-specialists")
   };
 
+  const handleConsultGP = () => {
+    if (isOnline) {
+      const specialist = onlineGPs[0];
+      dispatch(setSpecialist(specialist));
+      setModalContent("pricingModal");
+      setIsOpen(true);
+    } else {
+      openDialog();
+    }
+  };
+
   const handleMedicalRecords = () => {};
 
   const handleAppointments = () => {
@@ -225,21 +309,29 @@ export default function Ecommerce() {
       action: handleChat
     },
     {
-      title: "Consult Doctor",
-      description: "Book a consultation",
-      icon: <FaUserMd className="text-[var(--color-primary67)]" size={20} />,
-      bgColor: "bg-primary-50",
-      borderColor: "border-primary-200",
-      action: handleConsult
+      title: "Consult GP Doctor",
+      description: "General practice consult",
+      icon: <FaUserMd className="text-red-400" size={20} />,
+      bgColor: "bg-red-50",
+      borderColor: "border-red-200",
+      action: handleConsultGP
     },
     {
-      title: "Medical Records",
-      description: "View your records",
-      icon: <FaFileMedical className="text-blue-600" size={20} />,
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
-      action: handleMedicalRecords
+      title: "Consult Specialist",
+      description: "Book a consultation",
+      icon: <FaUserMd className="text-indigo-500" size={20} />,
+      bgColor: "bg-indigo-50",
+      borderColor: "border-indigo-200",
+      action: handleConsult
     },
+    // {
+    //   title: "Medical Records",
+    //   description: "View your records",
+    //   icon: <FaFileMedical className="text-blue-600" size={20} />,
+    //   bgColor: "bg-blue-50",
+    //   borderColor: "border-blue-200",
+    //   action: handleMedicalRecords
+    // },
     {
       title: "Appointments",
       description: "Manage appointments",
@@ -355,7 +447,7 @@ export default function Ecommerce() {
   ];
 
   
-
+  
 
   return (
     <div className="min-h-screen border-gray-200 bg-white dark:bg-gray-900 dark:text-gray-300">
@@ -383,7 +475,7 @@ export default function Ecommerce() {
                     Symptom Checker
                   </button>
                   <button 
-                    onClick={handleConsult}
+                    onClick={handleConsultGP}
                     className="bg-white/20 text-white border border-white/40 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-white/30 transition-all flex items-center"
                   >
                     <FaUserMd className="mr-2" />
@@ -499,41 +591,6 @@ export default function Ecommerce() {
                     </div>
                   ))}
                 </div>
-          
-                {/* Medications */}
-                {/* <div className="mt-8 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-                  <div className="border-b dark:border-gray-700 px-5 py-4 flex justify-between items-center">
-                    <h2 className="font-semibold text-gray-800 dark:text-gray-100">Current Medications</h2>
-                    <button
-                      onClick={() => router.push('/admin/doctor-prescription')}
-                      className="text-[var(--color-primary67)] hover:text-[var(--color-primary-7)] text-xs font-medium"
-                    >
-                      View All
-                    </button>
-                  </div>
-          
-                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {prescriptions?.length > 0 ? prescriptions?.map((med, index) => (
-                      <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-medium text-gray-800 dark:text-gray-100">{med.medication}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{med.dosage} - {med.schedule}</p>
-                          </div>
-                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            med.remainingDays <= 7 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                          }`}>
-                            {med.remainingDays <= 7 ? 'Refill Soon' : `${med.remainingDays} days left`}
-                          </div>
-                        </div>
-                      </div>
-                    )) : (
-                      <div className="p-6 text-center">
-                        <p className="text-gray-500 dark:text-gray-400">No active medications</p>
-                      </div>
-                    )}
-                  </div>
-                </div> */}
               </div>
           
               {/* Upcoming Appointments */}
@@ -551,7 +608,7 @@ export default function Ecommerce() {
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
                   {upcomingAppointments.length > 0 ? upcomingAppointments.map((appointment, index) => (
                     <div key={index}>
-                      { appointment.status === "pending" && appointment.mode !== "now" &&
+                      { (appointment.status === "pending" && appointment.mode !== "now" && index < 5) &&
                         <div key={index} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                           <div className="flex items-center">
                             {appointment.avatar ? (
@@ -663,11 +720,91 @@ export default function Ecommerce() {
             </div>
           )}
 
-          {/* {userRole !== "specialist" && (
-            <div className="col-span-12">
-              <RecentOrders />
+          {/* Booking Dialog */}
+          <Dialog
+            open={isOpen && modalContent === null}
+            onClose={closeDialog}
+            className="fixed inset-0 z-999999 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          >
+            <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh]">
+              <button
+                onClick={closeDialog}
+                className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+              >
+                <X size={20} />
+              </button>
+              <div className="w-full">
+                <ConsultationBookingPageContent showSpecialistCategories={false} />
+              </div>
             </div>
-          )} */}
+          </Dialog>
+
+          {/* Modals for Call Now */}
+          {isOpen && modalContent === "pricingModal" && (
+            <ModalContainer
+              modal={
+                <PricingModal
+                    closeModal={closeDialog}
+                    setPrice={(p) => dispatch(setPrice(p))}
+                    setDuration={(d) => dispatch(setDuration(d))}
+                    specialist={() => useSelector((state) => state.specialist.specialist)}
+                    currency="EUR"
+                    plans={[
+                        {
+                            title: "Basic",
+                            price: getPrice(900),
+                            oldPrice: getOldPrice(900),
+                            duration: 900,
+                            features: ["Duration: 15 mins", "Quick call", "Summary"],
+                        },
+                        {
+                            title: "Delux",
+                            price: getPrice(2700, 10),
+                            oldPrice: getOldPrice(2700),
+                            duration: 2700,
+                            features: [
+                                "Duration: 45 mins",
+                                "10% OFF",
+                                "Report",
+                                "Follow-up",
+                                "Pharmacy Referral",
+                            ],
+                            isRecommended: true,
+                        },
+                        {
+                            title: "Premium",
+                            price: getPrice(3600, 20),
+                            oldPrice: getOldPrice(3600),
+                            duration: 3600,
+                            features: [
+                                "Duration: 60 mins",
+                                "20% OFF",
+                                "Report",
+                                "Follow-up",
+                                "Pharmacy Referral",
+                                "Laboratory Referral",
+                            ],
+                        },
+                    ]}
+                />
+              }
+
+            />
+          )}
+
+          {isOpen && modalContent === "checkoutModal" && (
+            <ModalContainer
+              modal={
+                <CheckoutModal
+                  closeModal={closeDialog}
+                  currency="EUR"
+                  duration={() => useSelector(state => state.specialist.duration)}
+                  date={new Date()}
+                  consultMode="now"
+                />
+              }
+            />
+          )}
         </div>
       </main>
     </div>

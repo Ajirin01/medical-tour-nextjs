@@ -4,12 +4,20 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { FaUserMd, FaCalendarAlt, FaStar, FaTimes, FaRegSadTear } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { Dialog } from "@headlessui/react";
+import { X } from "lucide-react";
+import ConsultationBookingPageContent from "@/components/BookingPageSelectedCategory"
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ["websocket"] });
 
 const FindSpecialistModal = ({ category, closeModal, setTheSpecialist }) => {
   const [specialist, setSpecialist] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
+
+  console.log('$$$$$$$$$$$$$$$$$$$$$',category)
 
   useEffect(() => {
     socket.emit("get-online-specialists");
@@ -32,6 +40,16 @@ const FindSpecialistModal = ({ category, closeModal, setTheSpecialist }) => {
     setTheSpecialist(specialist);
   };
 
+  const openDialog = () => {
+    setIsOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    // setSelectedService(null);
+    setModalContent(null);
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
@@ -40,35 +58,69 @@ const FindSpecialistModal = ({ category, closeModal, setTheSpecialist }) => {
 
   if (!specialist) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-gradient-to-br from-blue-100 to-purple-100 p-8 rounded-lg shadow-xl max-w-md w-full mx-auto relative"
-      >
-        <button
-          onClick={closeModal}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+      <>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="bg-gradient-to-br from-blue-100 to-purple-100 p-8 rounded-lg shadow-xl max-w-md w-full mx-auto relative"
         >
-          <FaTimes className="text-xl" />
-        </button>
-        <div className="text-center space-y-6">
-          <FaRegSadTear className="text-6xl text-blue-500 mx-auto" />
-          <h2 className="text-3xl font-bold text-gray-800">We're Sorry</h2>
-          <p className="text-lg text-gray-600">
-            No specialists in <strong>{category}</strong> are online at the moment.
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={closeModal}
-            className="bg-blue-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-600 transition duration-300 ease-in-out"
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
           >
-            Close
-          </motion.button>
-        </div>
-      </motion.div>
+            <FaTimes className="text-xl" />
+          </button>
+          <div className="text-center space-y-6">
+            <FaRegSadTear className="text-6xl text-blue-500 mx-auto" />
+            <h2 className="text-3xl font-bold text-gray-800">We're Sorry</h2>
+            <p className="text-lg text-gray-600">
+              No specialists in <strong>{category}</strong> are online at the moment.
+            </p>
+
+            {/* Book Appointment Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={
+                  openDialog}
+              className="bg-blue-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-600 transition duration-300 ease-in-out w-full"
+            >
+              Book Appointment
+            </motion.button>
+
+            {/* Close Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={closeModal}
+              className="bg-white text-gray-700 px-6 py-3 rounded-full font-semibold border border-gray-300 hover:bg-gray-100 transition duration-300 ease-in-out w-full"
+            >
+              Close
+            </motion.button>
+          </div>
+        </motion.div>
+        {/* Booking Dialog */}
+        <Dialog
+          open={isOpen && modalContent === null}
+          onClose={closeDialog}
+          className="fixed inset-0 z-999999999 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        >
+          <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh]">
+            <button
+              onClick={closeDialog}
+              className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+            >
+              <X size={20} />
+            </button>
+            <div className="w-full">
+              <ConsultationBookingPageContent showSpecialistCategories={false} selectedCategory={category} />
+            </div>
+          </div>
+        </Dialog>
+      </>
     );
+
   }
 
   return (

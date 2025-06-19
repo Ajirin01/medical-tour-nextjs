@@ -36,7 +36,7 @@ import { loadStripe } from '@stripe/stripe-js'
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 
-const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
+const ConsultationBookingPageContent = ({showSpecialistCategories, selectedCategory}) => {
   const dispatch = useDispatch();
 
   // console.log(!showSpecialistCategories)
@@ -74,7 +74,7 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
   const [loadingCategories, setLoadingCategories] = useState(true)
 
   const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState(null)
+  // const [selectedCategory, setSelectedCategory] = useState(null)
   const [specialistsByCategory, setSpecialistsByCategory] = useState([])
 
   const COST_PER_MINUTE = 2
@@ -84,7 +84,7 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
   }, [])
 
   useEffect(() => {
-    if (token) fetchSpecialistCategories()
+    if (token) fetchSpecialistsByCategory()
   }, [token])
 
   useEffect(() => {
@@ -100,36 +100,25 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
     
   }, [selectedDate, specialistsByCategory, token])
 
-  const fetchSpecialistCategories = async () => {
-    setLoadingCategories(true)
+  const fetchSpecialistsByCategory = async () => {
+    setLoadingCategories(true);
     try {
-      const res = await fetchData('users/get-all/doctors/no-pagination', token)
-      
-      const grouped = res.reduce((acc, specialist) => {
-        const category = specialist.category || 'Uncategorized'
-        if (!acc[category]) acc[category] = []
-        acc[category].push(specialist)
-        return acc
-      }, {})
+      const res = await fetchData('users/get-all/doctors/no-pagination', token);
 
-      const categoryList = Object.entries(grouped).map(([name, members]) => ({
-        name,
-        count: members.length,
-        members,
-      }))
+      const filteredSpecialists = res.filter(
+        specialist => specialist.specialty === selectedCategory
+      );
 
-      if(!showSpecialistCategories){
-        setSpecialistsByCategory(res)
-      }
+      setSpecialistsByCategory(filteredSpecialists); // Directly set the filtered list
 
-      setCategories(categoryList)
     } catch (err) {
-      console.error('Failed to load categories:', err)
-      addToast('Could not load specialist categories.', 'error')
+      console.error('Failed to load specialists:', err);
+      addToast('Could not load specialists for this category.', 'error');
     } finally {
-      setLoadingCategories(false)
+      setLoadingCategories(false);
     }
-  }
+  };
+
   
   const fetchAvailableSlots = async () => {
     setLoadingSlots(true);
@@ -165,7 +154,7 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
           const slotId = slot._id;
           if (bookedSlotIds.has(slotId)) return false; // Exclude already booked slots
   
-          if (!showSpecialistCategories) {
+          if (!showSpecialistCategories && !selectedCategory) {
             if (slot.category !== "cert") return false;
   
             if (slot.type === 'recurring') {
@@ -230,43 +219,13 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-0">
-      <h2 className="text-2xl font-bold mb-2">Book an Appointment</h2>
+      <h2 className="text-2xl font-bold mb-2">Book {selectedCategory} Consultation Appointment</h2>
       <BookingInstructions showSpecialistCategories={showSpecialistCategories} />
 
       <div className={`grid grid-cols-1 lg:grid-cols-2 [${showSpecialistCategories ? 'lg:grid-cols-3' : ''}] gap-3`}>
-        { (showSpecialistCategories) &&  
-          <div className="max-h-[500px] overflow-y-auto space-y-2 pr-2">
-            {loadingCategories ? (
-              <div className="flex justify-center items-center h-32">
-                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : (
-              categories.map((cat) => (
-                <div
-                  key={cat.name}
-                  onClick={() => {
-                    setSelectedCategory(cat)
-                    setSpecialistsByCategory(cat.members)
-                    setAvailableSlots([])
-                    setSelectedSlot(null)
-                  }}
-                  className={`cursor-pointer p-3 rounded-md border transition-all duration-150 ${
-                    selectedCategory?.name === cat.name
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'hover:border-indigo-400 hover:bg-gray-50'
-                  }`}
-                >
-                  <h4 className="text-base font-semibold">{cat.name}</h4>
-                  <p className="text-xs text-gray-500">{cat.count} specialist{cat.count > 1 ? 's' : ''}</p>
-                </div>
-              ))
-            )}
-          </div>
-        }
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Date {selectedCategory && `for ${selectedCategory.name}`}
+            Select Date for your Appointment
           </label>
           <div className="mb-2 font-semibold text-lg text-gray-700">
             {selectedDayName}, {selectedDate.toLocaleDateString()}

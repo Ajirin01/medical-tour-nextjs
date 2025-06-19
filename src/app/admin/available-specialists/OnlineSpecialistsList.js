@@ -72,6 +72,7 @@ const SpecialistPage = () => {
       setModalContent("pricingModal");
       setShowModal(true);
     } else {
+      setSelectedCategory(category);
       setModalContent("findSpecialistModal");
       setShowModal(true);
     }
