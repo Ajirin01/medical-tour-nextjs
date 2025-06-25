@@ -24,7 +24,11 @@ import {
   FaFileMedicalAlt,
   FaChild, 
   FaBrain, 
-  FaPhoneAlt  } from 'react-icons/fa';
+  FaPhoneAlt,
+  FaPlaneDeparture, 
+  FaPrescriptionBottleAlt, 
+  FaFlask  } from 'react-icons/fa';
+
 
 import { 
   consult, 
@@ -43,7 +47,7 @@ import { useMediaQuery } from 'react-responsive';
 import TypewriterEffect from '@/components/gabriel/TypewriterEffect';
 import { useRouter } from 'next/navigation';
 import { openChatBot, triggerChatbotAttention } from '@/store/popUpSlice';
-
+import Illnesses from '@/components/Illnesses'
 import { useDispatch } from 'react-redux';
 
 
@@ -90,7 +94,28 @@ export default function HomePage() {
       animation: "M10 30 Q50 60 90 30 Q50 0 10 30",
       link: "/cert"
     },
-  ];  
+    {
+      icon: <FaPlaneDeparture className="text-5xl text-[var(--color-primary-6)]" />,
+      title: "Medical Tourism",
+      description: "Access international healthcare opportunities with assistance in finding top medical facilities abroad, booking appointments, and arranging travel for specialized treatments.",
+      animation: "M20 20 Q50 80 80 20",
+      link: "/medical-tourism"
+    },
+    {
+      icon: <FaPrescriptionBottleAlt className="text-5xl text-[var(--color-primary-6)]" />,
+      title: "Pharmacy Referral",
+      description: "Get prescriptions fulfilled quickly by connecting with trusted partner pharmacies near you or opt for doorstep delivery, ensuring timely access to your medications.",
+      animation: "M10 70 Q50 10 90 70",
+      link: "/pharmacy-referral"
+    },
+    {
+      icon: <FaFlask className="text-5xl text-[var(--color-primary-6)]" />,
+      title: "Laboratory Referral",
+      description: "Receive lab test referrals and connect with accredited laboratories for diagnostics, ensuring accurate results and seamless follow-up with your healthcare provider.",
+      animation: "M10 40 C40 90 60 -10 90 40",
+      link: "/lab-referral"
+    },
+  ];
 
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -267,179 +292,10 @@ export default function HomePage() {
             <span className="relative z-10">Sign Up for Free</span>
           </Button> 
         </div>
-        <img src={aidoc.src} alt="robo doctor" className="absolute right-0 bottom-0 w-lg max-w-lg opacity-30 md:opacity-100" />
+        <img src={aidoc.src} alt="robo doctor" className="absolute right-[-35px] bottom-0 w-[35rem] max-w-3xl opacity-30 md:opacity-100" />
       </section>
 
-      <section className="services-section py-8 bg-white rounded-3xl mx-4 mt-8">
-        <div className="container mx-auto mt-16 px-4">
-          <SimpleCarousel items={cards.map(renderServiceCard)} autoplay={true} autoplayInterval={2000} />
-          <div className="text-center mt-12">
-            <Button
-              className="py-6 px-8 text-lg mx-auto hover:shadow-lg transition-all duration-300"
-              borderRadius="rounded-full"
-              background="bg-[var(--color-secondary-6)]"
-              textColor="text-white"
-              onClick={() => router.push('/doctors')}
-            >
-              Our Consultants
-            </Button>
-          </div>
-        </div>
-      </section>
-
-
-      <section className="relative comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
-        {/* Lottie Background */}
-        <div className="absolute inset-0 w-full opacity-5 h-full z-15">
-          <LottieImage
-            src="/background.json"
-            style={{ width: '100%', height: '100%' }}
-          />
-        </div>
-
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <h2 className="text-[var(--color-primary-7)] text-3xl md:text-4xl font-bold text-center mb-12">
-            Our Comprehensive Services
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <motion.div
-                key={index}
-                className="bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden flex flex-col justify-between"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <div>
-                  <div className="flex justify-center mb-4">
-                    {service.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold text-[var(--color-primary-10)] text-center mb-2">
-                    {service.title}
-                  </h3>
-                  <p className="text-gray-600 text-center">{service.description}</p>
-                </div>
-
-                <button
-                  onClick={() =>
-                    service.link === "ai" ? handleChat() : (window.location.href = service.link)
-                  }
-                  className="mt-6 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
-                >
-                  Get Started
-                </button>
-
-                <motion.svg
-                  className="absolute bottom-0 left-0 w-full h-12 text-primary-1 opacity-10"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                >
-                  <motion.path
-                    d={service.animation}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-                  />
-                </motion.svg>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-       <section className="bg-[var(--color-primary-9)] py-16 px-6 lg:px-20 mx-0 text-white">
-        <h2 className="text-2xl md:text-3xl font-semibold text-center mb-12">
-          Secure Online Video call with Irish Registered Doctors
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          
-          {/* Card 1 */}
-          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
-            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-6xl pr-2">
-              <FaHeartbeat />
-            </div>
-            <div className="border-l-2 border-white px-6">
-              <h3 className="font-bold text-lg">GP Consultation</h3>
-              <p className="text-sm mt-1 text-white/90">
-                Obtain accurate diagnoses and treatment plans specifically tailored to your health concerns.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
-            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
-              <FaChild />
-            </div>
-            <div className="border-l-2 border-white px-6">
-              <h3 className="font-bold text-lg">Children Consultation</h3>
-              <p className="text-sm mt-1 text-white/90">
-                Connect with experienced paediatric professionals to get medical advice for your child.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
-            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
-              <FaBrain />
-            </div>
-            <div className="border-l-2 border-white px-6">
-              <h3 className="font-bold text-lg">Same Day Appointment</h3>
-              <p className="text-sm mt-1 text-white/90">
-                Receive accurate assessments, and develop personalised treatment plans.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4 */}
-          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
-            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
-              <FaUserMd />
-            </div>
-            <div className="border-l-2 border-white px-6">
-              <h3 className="font-bold text-lg">Primary Dermatology Consultation</h3>
-              <p className="text-sm mt-1 text-white/90">
-                Receive comprehensive care for your skin health needs, including acne and other infections.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 5 */}
-          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
-            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
-              <FaPhoneAlt />
-            </div>
-            <div className="border-l-2 border-white px-6">
-              <h3 className="font-bold text-lg">Urgent Consultation</h3>
-              <p className="text-sm mt-1 text-white/90">
-                Get experienced GP opinion promptly for your emergent medical situations.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 6 */}
-          <div className="border border-white rounded-lg p-6 flex items-center gap-4">
-            <div className="w-16 h-16 flex items-center justify-center text-orange-400 text-5xl pr-2">
-              <FaClipboardList />
-            </div>
-            <div className="border-l-2 border-white px-6">
-              <h3 className="font-bold text-lg">Sick Leave Consultation</h3>
-              <p className="text-sm mt-1 text-white/90">
-                Create a customised plan for a successful return to work through expert advice.
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-
+      {/* how it works */}
       <section className="relative comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
         {/* Lottie Background */}
         <div className="absolute inset-0 w-full  h-full z-10">
@@ -451,7 +307,7 @@ export default function HomePage() {
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-15">
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">SIMPLE STEPS TO CONSULTATION</h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-12">
             Sozo DigiCare has designed a streamlined, user-friendly and secure process for your Video or Phone Consultation. Here’s how it works, simplified into three easy steps:
           </p>
@@ -520,7 +376,86 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* <InteractiveChoice /> */}
+      {/* Comprehensive Services */}
+      <section className="relative comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
+        {/* Lottie Background */}
+        <div className="absolute inset-0 w-full opacity-5 h-full z-15">
+          <LottieImage
+            src="/background.json"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <h2 className="text-[var(--color-primary-7)] text-3xl md:text-4xl font-bold text-center mb-12">
+            Our Comprehensive Services
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service, index) => (
+              <motion.div
+                key={index}
+                className="bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden flex flex-col justify-between"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <div>
+                  <div className="flex justify-center mb-4">
+                    {service.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-[var(--color-primary-10)] text-center mb-2">
+                    {service.title}
+                  </h3>
+                  <p className="text-gray-600 text-center">{service.description}</p>
+                </div>
+
+                <button
+                  onClick={() =>
+                    service.link === "ai" ? handleChat() : (window.location.href = service.link)
+                  }
+                  className="mt-6 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
+                >
+                  Get Started
+                </button>
+
+                <motion.svg
+                  className="absolute bottom-0 left-0 w-full h-12 text-primary-1 opacity-10"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  <motion.path
+                    d={service.animation}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                  />
+                </motion.svg>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-16">
+        {/* Background layer with opacity */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          style={{ backgroundImage: "url('/images/illnessBG.png')" }}
+        />
+
+        {/* Foreground content */}
+        <div className="relative z-10">
+          <Illnesses />
+        </div>
+      </section>
+
+
+
+      {/* Become One of Our Specialists */}
       <section className="relative become-specialist py-20 bg-[var(--color-primary-9)] text-white rounded-3xl mx-4 mt-8 mb-8">
         <Image
             src="/images/health.gif"
@@ -529,7 +464,7 @@ export default function HomePage() {
             className="object-cover opacity-10 pointer-events-none z-0"
           />
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Become One of Our Specialists</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">JOIN US AS A DOCTOR</h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">Join our team of expert specialists and help us deliver cutting-edge healthcare services.</p>
           <Button
             className="py-3 px-8 text-lg hover:shadow-lg mx-auto transition-all duration-300"
