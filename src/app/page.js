@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import LottieImage from '@/components/LottieBackground';
+import SpecialistCategories from "@/components/SpecialistCategories";
 import { 
   FaPlane, 
   FaStethoscope, 
@@ -49,6 +50,7 @@ import { useRouter } from 'next/navigation';
 import { openChatBot, triggerChatbotAttention } from '@/store/popUpSlice';
 import Illnesses from '@/components/Illnesses'
 import { useDispatch } from 'react-redux';
+import WhyChooseSozo from '@/components/WhySozo';
 
 
 function classNames(...classes) {
@@ -440,6 +442,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Illlnesses */}
       <section className="relative py-16">
         {/* Background layer with opacity */}
         <div
@@ -453,7 +456,12 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Specialist Categories */}
+      <SpecialistCategories  />
 
+      {/* Why Choose Sozo Digicare */}
+      <WhyChooseSozo />
+      
 
       {/* Become One of Our Specialists */}
       <section className="relative become-specialist py-20 bg-[var(--color-primary-9)] text-white rounded-3xl mx-4 mt-8 mb-8">
@@ -477,6 +485,8 @@ export default function HomePage() {
           </Button>
         </div>
       </section>
+
+
 
       <section className='py-20 bg-gray-50 rounded-3xl mx-4 mt-8'>
         <div className="container mx-auto px-4">
