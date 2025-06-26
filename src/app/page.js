@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import LottieImage from '@/components/LottieBackground';
-import SpecialistCategories from "@/components/SpecialistCategories";
+import SpecialistCategories from "@/components/specialistCategories";
 import { 
   FaPlane, 
   FaStethoscope, 
