@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // import '@/mapIcons'; // Import the mapIcons file we just created
 import { FaPlane, FaHospital, FaUserMd, FaGlobe, FaMoneyBillWave, FaCalendarAlt, FaHandHoldingMedical, FaPassport, FaCut, FaBone, FaHeartbeat, FaBaby, FaTooth, FaStethoscope, FaWeight, FaYinYang } from 'react-icons/fa';
 import { services, specialties, destinations } from "./data"
+import { useRouter } from 'next/navigation';
 
 // const MapClientOnly = dynamic(() => import('@/components/MapClientOnly'), { ssr: false });
 
@@ -22,6 +23,7 @@ const MedicalTourism = () => {
 
   const [hasWindow, setHasWindow] = useState(false);
 
+  const router = useRouter()
   // useEffect(() => {
   //   setHasWindow(typeof window !== 'undefined');
   // }, []);
@@ -35,7 +37,7 @@ const MedicalTourism = () => {
   // }, [hasWindow]);
 
   const handleContactClick = () => {
-    navigate(PATH.general.contact);
+    router.push('contact');
   };
 
   useEffect(() => {

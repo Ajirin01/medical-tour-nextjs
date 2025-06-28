@@ -68,9 +68,9 @@ const PrescriptionReceipt = () => {
     <div className="relative p-6 max-w-3xl mx-auto bg-white shadow-xl rounded-lg mt-8 print:bg-white print:shadow-none print:p-0">
       <div ref={receiptRef} className="relative p-6 max-w-3xl mx-auto bg-white  rounded-lg mt-8">
             {/* Watermark Logo */}
-            <div className="absolute inset-0 opacity-10 z-0 flex items-center justify-center pointer-events-none print:hidden">
+            {/* <div className="absolute inset-0 opacity-10 z-0 flex items-center justify-center pointer-events-none print:hidden">
                 <Image src="/images/logo/logo.png" alt="Logo watermark" width={300} height={300} />
-            </div>
+            </div> */}
 
             {/* Header Logo */}
             <div className="text-center mb-4 z-10 relative">

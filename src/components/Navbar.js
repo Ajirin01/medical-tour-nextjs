@@ -13,7 +13,8 @@ import {
   Menu,
   LogOut, 
   Receipt,
-  FileText
+  FileText,
+  PlaneIcon
 } from 'lucide-react';
 
 import {
@@ -125,11 +126,11 @@ export default function TopNav({}) {
         <div className="flex items-center space-x-6">
           <nav className="hidden md:flex items-center space-x-6 text-sm font-bold">
             <NavLink href="/" icon={<Home size={18} />} label="Home" active={pathname === "/"} />
-            <NavLink href="/about" icon={<Info size={18} />} label="About" active={pathname === "/about"} />
+            {/* <NavLink href="/about" icon={<Info size={18} />} label="About" active={pathname === "/about"} /> */}
             <NavLink href="/gp-consultation" icon={<User size={18} />} label="GP Services" active={pathname === "/gp-consultation"} />
             <NavLink icon={<FileText size={18} />} href="/cert" label="Cert" active={pathname === "/cart"} />
-
-            <div className="hidden md:flex items-center ml-6 space-x-3">
+            <NavLink href="/medical-tourism" icon={<PlaneIcon size={18} />} label="Medical Tour" active={pathname === "/medical-tourism"} />
+            {/* <div className="hidden md:flex items-center ml-6 space-x-3">
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-3 px-3 py-1.5 border-2 rounded border-[var(--color-primary-7)]">
                   <button
@@ -140,7 +141,7 @@ export default function TopNav({}) {
                   </button>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Dashboard dropdown */}
             {/* { isAuthenticated && 

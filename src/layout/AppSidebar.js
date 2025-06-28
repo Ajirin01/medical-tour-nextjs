@@ -29,7 +29,8 @@ import {
   Building2,
   Newspaper,
   LogOut,
-  Camera
+  Camera,
+  MessageSquare 
 } from 'lucide-react';
 
 const AppSidebar = () => {
@@ -317,7 +318,7 @@ const AppSidebar = () => {
       // },
       // Consult Specialist
       {
-        icon: <Calendar />,
+        icon: <MessageSquare  />,
         name: "Consult Specialist",
         path: "/admin/available-specialists",
         roles: ["user"]
@@ -328,6 +329,12 @@ const AppSidebar = () => {
         name: "Doctor Prescriptions",
         path: "/admin/doctor-prescriptions",
         roles: ["user", "specialist", "admin"]
+      },
+      {
+        icon: <FlaskConical />,
+        name: "Laboratory Referrals",
+        path: "/admin/lab-referrals",
+        roles: ["admin", "superAdmin", "labAdmin", "specialist", "user"]
       },
       // Call sessions
       {
