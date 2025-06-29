@@ -345,8 +345,8 @@ export default function HomePage() {
                 <div className="bg-blue-900 text-orange-500 rounded-full w-20 h-20 flex items-center justify-center text-3xl font-bold shadow-lg">
                   1
                 </div>
-                <h3 className="text-xl text-gray-600 font-semibold mt-4">Book an Appointment</h3>
-                <p className="text-gray-600 mt-2">Choose your service and fill out your details.</p>
+                <h3 className="text-xl text-gray-600 font-semibold mt-4">Register</h3>
+                <p className="text-gray-600 mt-2">Fill in your details to create your account.</p>
               </div>
 
               {/* Step 2 */}
@@ -354,8 +354,8 @@ export default function HomePage() {
                 <div className="bg-blue-900 text-orange-500 rounded-full w-20 h-20 flex items-center justify-center text-3xl font-bold shadow-lg">
                   2
                 </div>
-                <h3 className="text-xl text-gray-600 font-semibold mt-4">Receive a Confirmation</h3>
-                <p className="text-gray-600 mt-2">Get an email confirming your appointment.</p>
+                <h3 className="text-xl text-gray-600 font-semibold mt-4">Click consult a doctor</h3>
+                <p className="text-gray-600 mt-2">Click to consult a doctor and receive your appointment confirmation.</p>
               </div>
 
               {/* Step 3 */}
@@ -363,8 +363,8 @@ export default function HomePage() {
                 <div className="bg-blue-900 text-orange-500 rounded-full w-20 h-20 flex items-center justify-center text-3xl font-bold shadow-lg">
                   3
                 </div>
-                <h3 className="text-xl text-gray-600 font-semibold mt-4">Get a Consultation</h3>
-                <p className="text-gray-600 mt-2">Talk with our doctor at the scheduled time.</p>
+                <h3 className="text-xl text-gray-600 font-semibold mt-4">Consult with a doctor</h3>
+                <p className="text-gray-600 mt-2">Meet with the doctor at your scheduled time.</p>
               </div>
             </div>
           </div>

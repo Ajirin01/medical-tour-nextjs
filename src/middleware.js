@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 const protectedRoutes = [
   {
     pathPrefix: "/admin",
-    requiredRoles: ["admin", "user", "pharmacyAdmin", "pharmacyEmployee", "specialist", "consultant", "superAdmin"],
+    requiredRoles: ["admin", "user", "pharmacyAdmin", "pharmacyEmployee", "labAdmin", "specialist", "consultant", "superAdmin"],
   },
   {
     pathPrefix: "/admin/products",

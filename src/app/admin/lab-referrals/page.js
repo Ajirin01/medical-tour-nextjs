@@ -22,18 +22,11 @@ const LabReferralsList = () => {
     const loadLabReferrals = async () => {
       setLoading(true);
       try {
-        let endpoint = "";
-        if (isDoctor) {
-          endpoint = `video-sessions/by-specialist/${user?._id}/lab-referrals`;
-        } else if (isUser) {
-          endpoint = `video-sessions/by-user/${user?._id}/lab-referrals`;
-        } else if (isAdmin) {
-          endpoint = `video-sessions/by-user/${user?._id}/lab-referrals`;
-        }
+        let endpoint = `lab-results/referrals/get-all/no-pagination`;
 
         const res = await fetchData(endpoint, token);
         console.log(res)
-        setSessions(res?.sessions || []);
+        setSessions(res || []);
       } catch (error) {
         console.error(error);
         addToast("Failed to load lab referrals", "error");
@@ -109,7 +102,7 @@ const LabReferralsList = () => {
 
           <div>
             <a
-              href={`/admin/lab-referrals/${session._id}`}
+              href={`/admin/lab-referrals/${session.session._id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-indigo-600 hover:underline mt-2 inline-block"

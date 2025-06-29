@@ -75,7 +75,7 @@ const PrescriptionReceipt = () => {
             {/* Header Logo */}
             <div className="text-center mb-4 z-10 relative">
                 <Image src="/images/logo/logo.png" alt="Logo" width={120} height={120} className="mx-auto mb-2" />
-                <h2 className="text-xl font-semibold">SozoDigiCare Medical Prescription</h2>
+                <h2 className="text-xl font-semibold">Medical Prescription</h2>
             </div>
 
             <div className="z-10 relative mb-20">

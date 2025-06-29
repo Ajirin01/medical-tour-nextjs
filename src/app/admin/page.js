@@ -6,8 +6,7 @@ import {
   FaUserAlt, FaCalendarAlt, FaHistory, FaRobot, FaUserMd, 
   FaFileMedical, FaHeartbeat, FaChartLine, FaSearch,
   FaBell, FaClipboardList, FaEllipsisH, FaPills, FaChevronRight,
-  FaClock,
-  FaMoneyBill
+  FaClock, FaMoneyBill, FaPlus, FaFlask 
 } from 'react-icons/fa';
 
 import { useRouter } from "next/navigation";
@@ -60,6 +59,8 @@ export default function Ecommerce() {
 
   const { user } = useUser()
 
+  const userId = user?._id
+
   const PRICE = 20;
 
   const [calls, setCalls] = useState([]);
@@ -74,6 +75,7 @@ export default function Ecommerce() {
   const [doctors, setDoctors] = useState(null)
   const [revenue, setRevenue] = useState(null)
   const [pharmacies, setPharmacies] = useState(null)
+  const [labExists, setLabExists] = useState(false)
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -154,8 +156,9 @@ export default function Ecommerce() {
     }
   };
 
+
   useEffect(() => {
-    if(token) fetchSessionData();
+    if(token && userRole !== "labAdmin" && userRole !== "pharmacyAdmin") fetchSessionData();
   }, [token]);
 
   const fetchAppointmentData = async () => {
@@ -176,6 +179,33 @@ export default function Ecommerce() {
       console.error("Error fetching session data:", error);
     }
   };
+
+  useEffect(() => {
+    const checkLabAdminLab = async () => {
+      if (token && userRole === "labAdmin" && userId) {
+        try {
+          // Get all labs (or ideally you could have a backend endpoint like `laboratories/by-admin/:id`)
+          const labs = await fetchData("laboratories/get-all/no-pagination", token);
+
+          // Find one where labAdmin matches current userId
+          const existingLab = labs?.labs?.find((lab) => lab.labAdmin === userId);
+
+          if (existingLab) {
+            setLabExists(true)
+            return;
+          }
+        } catch (err) {
+          console.error("Lab admin lab check failed:", err);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    checkLabAdminLab();
+  }, [token, userRole, userId]);
 
   const fetchPatients = async () => {
     try {
@@ -298,6 +328,14 @@ export default function Ecommerce() {
     router.push("admin/consultation/book")
   };
   const handleHistory = () => {};
+
+  const handleCreateLab = () => {
+    router.push("admin/laboratories/add")
+  };
+
+  const handleLabDashboard = () => {
+
+  }
 
   const quickActions = [
     {
@@ -526,6 +564,52 @@ export default function Ecommerce() {
             </div>
           </div>
         }
+
+        {userRole === "labAdmin" && (
+          <div className="mb-8 bg-gradient-to-r from-[var(--color-primary-6)] to-[var(--color-primary-8)] rounded-2xl shadow-md">
+            <div className="p-6 md:p-8 text-white">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    Welcome back{user?.firstName ? `, ${user.firstName}` : ''}!
+                  </h2>
+                  {labExists ? (
+                    <p className="mt-1 opacity-90">
+                      You're all set. Manage your laboratory activities and referrals below.
+                    </p>
+                  ) : (
+                    <p className="mt-1 opacity-90 text-yellow-200">
+                      You don't have a laboratory yet. Please create one to start receiving patient referrals.
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-4 md:mt-0 flex space-x-3">
+                  {labExists ? (
+                    <>
+                      <button 
+                        onClick={handleLabDashboard}
+                        className="bg-white text-[var(--color-primary-7)] px-4 py-2 rounded-lg font-medium shadow-sm hover:shadow-md transition-all flex items-center"
+                      >
+                        <FaFlask className="mr-2" />
+                        Manage Lab
+                      </button>
+                    </>
+                  ) : (
+                    <button 
+                      onClick={handleCreateLab}
+                      className="bg-white/20 text-white border border-white/40 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-white/30 transition-all flex items-center"
+                    >
+                      <FaPlus className="mr-2" />
+                      Create Laboratory
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">

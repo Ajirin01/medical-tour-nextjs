@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import { fetchData, uploadFile, postData } from "@/utils/api";
+import { fetchData, uploadFile, postData, updateData } from "@/utils/api";
 import Image from "next/image";
 import { useToast } from "@/context/ToastContext";
 import { useSession } from "next-auth/react";
@@ -80,13 +80,13 @@ const LabReferralReceipt = () => {
       formData.append("result", selectedFile);
       formData.append("sessionId", id);
 
-      const result = await uploadFile("video-sessions/upload-lab-result", formData, token);
+      const result = await updateData(`lab-results/referrals/${appointmentSession}`, formData, token, true);
       if (result.success) {
         addToast("Result uploaded successfully", "success");
-        setAppointmentSession((prev) => ({
-          ...prev,
-          labResultFile: result.fileUrl,
-        }));
+        // setAppointmentSession((prev) => ({
+        //   ...prev,
+        //   labResultFile: result.fileUrl,
+        // }));
       } else {
         addToast("Upload failed", "error");
       }
@@ -124,7 +124,7 @@ const LabReferralReceipt = () => {
       <div ref={receiptRef} className="relative p-6 bg-white rounded-lg mt-8">
         <div className="text-center mb-4 z-10 relative">
           <Image src="/images/logo/logo.png" alt="Logo" width={120} height={120} className="mx-auto mb-2" />
-          <h2 className="text-xl font-semibold">SozoDigiCare Laboratory Referral</h2>
+          <h2 className="text-xl font-semibold">Laboratory Referral</h2>
         </div>
 
         <div className="z-10 relative mb-20">
