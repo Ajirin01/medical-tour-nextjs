@@ -51,6 +51,8 @@ import { openChatBot, triggerChatbotAttention } from '@/store/popUpSlice';
 import Illnesses from '@/components/Illnesses'
 import { useDispatch } from 'react-redux';
 import WhyChooseSozo from '@/components/WhySozo';
+import BookAppointment from '@/components/BookAppointmnetBtn';
+import CertificateList from '@/components/CertificateList';
 
 
 function classNames(...classes) {
@@ -87,7 +89,7 @@ export default function HomePage() {
       title: "Real-time Medical Consultation",
       description: "Connect instantly with licensed healthcare professionals through secure video or chat, receiving expert medical advice, diagnosis, and personalized treatment recommendations anytime, anywhere.",
       animation: "M10 50 Q50 10 90 50 Q50 90 10 50",
-      link: "/admin/available-specialists"
+      link: "/gp-consultation"
     },
     {
       icon: <FaFileMedicalAlt className="text-5xl text-[var(--color-primary-6)]" />,
@@ -108,14 +110,14 @@ export default function HomePage() {
       title: "Pharmacy Referral",
       description: "Get prescriptions fulfilled quickly by connecting with trusted partner pharmacies near you or opt for doorstep delivery, ensuring timely access to your medications.",
       animation: "M10 70 Q50 10 90 70",
-      link: "/pharmacy-referral"
+      link: "/gp-consultation"
     },
     {
       icon: <FaFlask className="text-5xl text-[var(--color-primary-6)]" />,
       title: "Laboratory Referral",
       description: "Receive lab test referrals and connect with accredited laboratories for diagnostics, ensuring accurate results and seamless follow-up with your healthcare provider.",
       animation: "M10 40 C40 90 60 -10 90 40",
-      link: "/lab-referral"
+      link: "/gp-consultation"
     },
   ];
 
@@ -298,7 +300,7 @@ export default function HomePage() {
       </section>
 
       {/* how it works */}
-      <section className="relative comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
+      <section className="relative z-100 comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
         {/* Lottie Background */}
         <div className="absolute inset-0 w-full  h-full z-10">
           <LottieImage
@@ -369,17 +371,17 @@ export default function HomePage() {
             </div>
           </div>
 
+          
+
           {/* CTA Button */}
           <div className="mt-12">
-            <a href="#" className="bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-blue-800 transition inline-flex items-center">
-              Book an Appointment
-            </a>
+            <BookAppointment />
           </div>
         </div>
       </section>
 
       {/* Comprehensive Services */}
-      <section className="relative comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
+      <section className="relative z-30 comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
         {/* Lottie Background */}
         <div className="absolute inset-0 w-full opacity-5 h-full z-15">
           <LottieImage
@@ -389,7 +391,7 @@ export default function HomePage() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
           <h2 className="text-[var(--color-primary-7)] text-3xl md:text-4xl font-bold text-center mb-12">
             Our Comprehensive Services
           </h2>
@@ -414,7 +416,7 @@ export default function HomePage() {
 
                 <button
                   onClick={() =>
-                    service.link === "ai" ? handleChat() : (window.location.href = service.link)
+                    {service.link === "ai" ? handleChat() : ( router.push(service.link)); console.log(service.link)}
                   }
                   className="mt-6 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
                 >
@@ -453,11 +455,46 @@ export default function HomePage() {
         {/* Foreground content */}
         <div className="relative z-10">
           <Illnesses />
+          <div className="mt-12 text-center">
+            <Link href="/gp-consultation">
+              <button className="bg-[var(--color-primary-6)] hover:bg-[var(--color-primary-7)] text-white px-6 py-3 rounded-lg shadow-sm transition">
+                MORE
+              </button>
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Specialist Categories */}
       <SpecialistCategories  />
+
+      {/* Certificates */}
+      <section className="max-w-7xl mx-auto px-4 py-10">
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          transition={{ duration: 0.4 }} 
+          className="text-2xl font-bold text-gray-800 mb-8 text-center"
+        >
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
+              Available Certificates
+            </h2>
+          </div>
+          
+        </motion.h2>
+        
+        <CertificateList max={3} />
+
+        <div className="mt-12 text-center">
+            <Link href="/cert">
+              <button className="bg-[var(--color-primary-6)] hover:bg-[var(--color-primary-7)] text-white px-6 py-3 rounded-lg shadow-sm transition">
+                MORE
+              </button>
+            </Link>
+          </div>
+      </section>
 
       {/* Why Choose Sozo Digicare */}
       <WhyChooseSozo />

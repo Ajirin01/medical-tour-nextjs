@@ -1,6 +1,10 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import ModalContainer from "@/components/gabriel/ModalContainer";
+import { FindSpecialistModal } from "@/components/gabriel";
 
 const illnesses = [
   { name: "Cold & Flu", image: "/images/health-illness/body.png" },
@@ -44,12 +48,21 @@ const itemVariant = {
 };
 
 const GPServicesIllnesses = () => {
+  const [showModal, setShowModal] = useState(false);
+
+  const openFindModal = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-gray-800">
         Common Conditions We Treat
       </h2>
-      
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {illnesses.map((illness, index) => (
@@ -68,8 +81,13 @@ const GPServicesIllnesses = () => {
               className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
             />
             <div className="flex flex-col justify-between flex-1">
-              <h3 className="text-md font-semibold text-gray-800">{illness.name}</h3>
-              <button className="mt-2 w-fit text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition">
+              <h3 className="text-md font-semibold text-gray-800">
+                {illness.name}
+              </h3>
+              <button
+                onClick={openFindModal}
+                className="mt-2 w-fit text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+              >
                 CONSULT NOW
               </button>
             </div>
@@ -77,13 +95,17 @@ const GPServicesIllnesses = () => {
         ))}
       </div>
 
-      <div className="mt-12 text-center">
-        <Link href="/gp-services">
-          <button className="bg-[var(--color-primary-6)] hover:bg-[var(--color-primary-7)] text-white px-6 py-3 rounded-lg shadow-sm transition">
-            MORE
-          </button>
-        </Link>
-      </div>
+      {/* Modal for General Practitioner Consultation */}
+      {showModal && (
+        <ModalContainer
+          modal={
+            <FindSpecialistModal
+              category="General Practice"
+              closeModal={closeModal}
+            />
+          }
+        />
+      )}
     </div>
   );
 };

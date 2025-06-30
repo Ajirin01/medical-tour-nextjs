@@ -1,75 +1,66 @@
 export const faqItems = [
-    {
-      question: "What is Sozo Digicare Limited?",
-      answer: "We are an online telehealth platform fully compliant with regulatory standards, including GDPR and the guidelines of the Medical Council of Ireland..."
-    },
-    {
-      question: "How does Sozo Digicare work?",
-      answer: "First, complete a health questionnaire, and schedule an appointment immediately or for a future convenient date..."
-    },
-    {
-      question: "Does Sozo Digicare work for all patients?",
-      answer: "Since our doctors cannot physically examine you or access your full medical history, they take extra precautions..."
-    },
-  
-    {
-      question: "How quickly will Sozo Digicare confirm your appointment or consultation",
-      answer: "We work on scheduling an appointment immediately or for a future convenient date as you request. Once you complete your pre-consultation form, you will receive an email confirmation after the consultation."
-    },
-  
-    {
-      question: "Hours of service?",
-      answer: "The Sozo Digicare service is open 24 hours a day, 365 days a year ensuring you have access to medical care whenever you need it, be it day, night, or even the weekends. If you are looking to collect a prescription from a late-night pharmacy after 8pm please email contact@SozoDigicare.ie and we will do our very best to help."
-    },
-  
-    {
-      question: "Accessible from anywhere in Ireland?",
-      answer: "We have partner pharmacies and independent healthcare providers across Ireland."
-    },
-  
-    {
-      question: "What makes Sozo Digicare.ie different from other online doctor services in Ireland?",
-      answer: "Our commitment to accessible, affordable, round-the-clock care, experienced Irish-registered doctors, and a range of specialized services sets us apart."
-    },
-  
-    {
-      question: "How can I ensure confidentiality and security during an online consultation?",
-      answer: "We prioritize your privacy with encrypted communication channels, ensuring that all consultations are confidential and secure. Video Consultations are done via HIPAA compliant video call mediums."
-    },
-  
-    {
-      question: "What types of online doctor consultations do you provide?",
-      answer: "We provide a range of consultations, including general health check-ups, mental health support, dermatology, diabetes management, and more, all available via video consultation online."
-    },
-  
-    {
-      question: "What is the cost of an online doctor consultation in Ireland?",
-      answer: "Our online consultations start at €35.99, offering affordable and transparent pricing for various services."
-    },
-  
-    {
-      question: "Can I get a sick leave certificate through an online doctor consultation?",
-      answer: "Yes, you can request a sick leave certificate during your consultation, subject to the doctor's assessment."
-    },
-  
-    {
-      question: "Do you offer emergency consultations online?",
-      answer: "For urgent medical concerns, we offer emergency consultations. However, in case of life-threatening emergencies, it's crucial to call an ambulance immediately."
-    },
-    {
-      question: "How quickly will my prescription be processed?",
-      answer: "We will send your prescription to your preferred pharmacy or the nearest pharmacy to your desired location. We will let you know by email through our partner pharmacies once it is ready for pick-up or once dispatched."
-    },
-    {
-      question: "How are prescriptions sent to the pharmacy?",
-      answer: "Sozo Digicare does not dispense or deliver prescription medication. If the doctor prescribes medication, the prescription is submitted electronically through a secure service called Healthmail to the pharmacy of your choice. If you select “Home Delivery” we will forward the prescription to one of our partner pharmacies for delivery."
-    },
-    {
-      question: "What if I am having an issue at the pharmacy?",
-      answer: "Please advise the pharmacy that the prescription has been sent to the pharmacy's Healthmail email address. If for some reason they have not received it, send an email to contact@SozoDigicare.ie and we will rectify the issue immediately."
-    },
-    {
-      question: "Will I be contacted by Sozo Digicare when my prescription is ready?",
-      answer: "Yes, we will automatically notify you via email and text once your prescription is ready for pick-up or home delivery."
-    }
-  ];
+  {
+    question: "What is Sozo Digicare?",
+    answer: "Sozo Digicare is a global telehealth platform providing accessible and secure online medical consultations, fully compliant with international privacy and health regulations such as GDPR and HIPAA."
+  },
+  {
+    question: "How does Sozo Digicare work?",
+    answer: "Simply complete a health questionnaire and book an appointment instantly or choose a convenient future date. Consultations are conducted via secure video calls with licensed healthcare professionals."
+  },
+  {
+    question: "Is Sozo Digicare suitable for everyone?",
+    answer: "Our doctors take extra precautions as they do not perform physical examinations or have access to your full medical history. We serve most people, but for complex or emergency issues, in-person care may be required."
+  },
+  {
+    question: "How soon will I get a confirmation after booking?",
+    answer: "Once you complete your pre-consultation form, you’ll receive immediate confirmation via email. A doctor will be assigned based on your availability and selected service."
+  },
+  {
+    question: "What are your hours of operation?",
+    answer: "Sozo Digicare is available 24/7, including weekends and holidays, ensuring that you always have access to healthcare when you need it."
+  },
+  {
+    question: "Can I access Sozo Digicare from anywhere?",
+    answer: "Yes. As long as you have an internet connection and a device with a camera and microphone, you can access our services from anywhere in the world."
+  },
+  {
+    question: "What makes Sozo Digicare different from other telehealth platforms?",
+    answer: "We combine affordability, global access, multilingual support, and a wide range of specialties—delivered by licensed and experienced doctors—to give you a seamless, high-quality healthcare experience."
+  },
+  {
+    question: "Is my consultation private and secure?",
+    answer: "Absolutely. We use end-to-end encrypted platforms that meet global privacy and security standards. Your information and consultations remain strictly confidential."
+  },
+  {
+    question: "What kinds of consultations do you offer?",
+    answer: "We offer a broad range of services including general medical consultations, mental health support, dermatology, chronic disease management (like diabetes and hypertension), and more."
+  },
+  {
+    question: "How much does an online consultation cost?",
+    answer: "Pricing starts at an affordable base rate of $35.99. Prices may vary slightly depending on the consultation type and your region."
+  },
+  {
+    question: "Can I get a sick leave certificate from an online consultation?",
+    answer: "Yes. If deemed appropriate by the doctor during your consultation, a digital sick leave certificate can be issued and sent to you."
+  },
+  {
+    question: "Do you offer urgent consultations?",
+    answer: "Yes, we offer fast-track consultations for urgent but non-life-threatening issues. For critical emergencies, always seek immediate local emergency services."
+  },
+  {
+    question: "How are prescriptions handled?",
+    answer: "Prescriptions are securely transmitted to your preferred local or partner pharmacy. In regions where e-prescriptions are supported, you will receive confirmation once it's ready for pick-up or delivery."
+  },
+  {
+    question: "Can I get home delivery for medications?",
+    answer: "Yes, in supported locations. If you choose 'Home Delivery,' we’ll coordinate with one of our verified pharmacy partners to ensure your medication is delivered to your address."
+  },
+  {
+    question: "What if I have issues at the pharmacy?",
+    answer: "You can contact us at contact@SozoDigicare.com and we’ll coordinate with the pharmacy on your behalf to resolve any delays or errors."
+  },
+  {
+    question: "Will I be notified when my prescription is ready?",
+    answer: "Yes. You will receive an automatic email and/or SMS update once your prescription is available for pickup or out for delivery, depending on your chosen method."
+  }
+];

@@ -16,6 +16,7 @@ import { loadStripe } from '@stripe/stripe-js'
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 import ConsultationBookingPageContent from "@/components/BookingPage"
+import CertificateList from "@/components/CertificateList";
 
 export default function CertificatesConsultationPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,58 +25,6 @@ export default function CertificatesConsultationPage() {
   const [currentStep, setCurrentStep] = useState(1);
 
   const dispatch = useDispatch()
-  
-
-  const certificates = [
-    {
-      title: "Fitness Certificate",
-      description: "Work and Student Sickness Certificate",
-      price: "45.99",
-      image: "/images/fitness.jpg",
-    },
-    {
-      title: "Visa Medical Certificate",
-      description: "Certificate of Good Health / Health Declaration",
-      price: "45.99",
-      image: "/images/travel.jpg",
-    },
-    {
-      title: "Travel Cancellation Certificate",
-      description: "Travel and Holiday Cancellation Certificate",
-      price: "45.99",
-      image: "/images/travel.jpg",
-    },
-    {
-      title: "Fit to Work Certificate",
-      description: "Fit-to-work Certificate",
-      price: "45.99",
-      image: "/images/work.jpg",
-    },
-    {
-      title: "Travel With Medication Letter",
-      description: "Travel With Medication Letter",
-      price: "45.99",
-      image: "/images/fitness.jpg",
-    },
-    {
-      title: "GP Referral Letter",
-      description: "Doctor Referral Letter",
-      price: "45.99",
-      image: "/images/youth.jpg",
-    },
-    {
-      title: "Youth Camp Certificate",
-      description: "Youth Camp or Trip Medical Certificate",
-      price: "50.99",
-      image: "/images/youth.jpg",
-    },
-    {
-      title: "Fit to Cruise Certificate",
-      description: "Fit-to-Cruise Medical Certificate",
-      price: "50.99",
-      image: "/images/travel.jpg",
-    },
-  ];
 
   const openDialog = (cert) => {
     setSelectedCert(cert);
@@ -142,52 +91,9 @@ export default function CertificatesConsultationPage() {
         >
           Available Certificates
         </motion.h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {certificates.map((cert, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: idx * 0.05 }}
-              className="bg-white rounded-2xl p-6 shadow hover:shadow-lg transition-shadow flex flex-col"
-            >
-              <img src={cert.image} alt={cert.title} className="w-full h-40 object-cover rounded-xl mb-4" />
-              <h3 className="text-lg font-semibold text-center text-gray-800">{cert.title}</h3>
-              <p className="text-sm text-gray-600 text-center">{cert.description}</p>
-              <p className="text-lg font-bold text-center text-[var(--color-primary-7)] mt-4">€{cert.price}</p>
-              <button
-                onClick={() => {openDialog(cert); dispatch(setPrice(cert.price));}}
-                className="mt-4 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
-              >
-                Book Appointment
-              </button>
-            </motion.div>
-          ))}
-        </div>
+        
+        <CertificateList />
       </section>
-
-      {/* Booking Dialog */}
-      <Dialog
-        open={isOpen}
-        onClose={closeDialog}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-        >
-        <div className="relative bg-white max-w-4xl w-full rounded-2xl p-6 flex gap-6 overflow-auto max-h-[90vh]">
-            {/* Close button */}
-            <button
-            onClick={closeDialog}
-            className="absolute top-4 right-4 text-gray-500 hover:text-red-500"
-            >
-            <X size={20} />
-            </button>
-            {/* Calendar Step */}
-            <div className="w-full">
-              <ConsultationBookingPageContent showSpecialistCategories={false} />
-            </div>
-        </div>
-      </Dialog>
 
     </div>
   );

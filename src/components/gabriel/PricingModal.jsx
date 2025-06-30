@@ -66,7 +66,7 @@ const PricingModal = ({
     }
   };
 
-  const formatPrice = (amount, currency = "EUR") =>
+  const formatPrice = (amount, currency = "USD") =>
     new Intl.NumberFormat("en", {
       style: "currency",
       currency,
