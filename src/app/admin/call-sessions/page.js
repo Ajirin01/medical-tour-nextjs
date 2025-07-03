@@ -66,7 +66,7 @@ const VideoSessionsPage = () => {
                   <TableCell isHeader>Start Time</TableCell>
                   <TableCell isHeader>End Time</TableCell>
                   <TableCell isHeader>Duration</TableCell>
-                  <TableCell isHeader>Action</TableCell>
+                  { session?.user?.role !== "user" && <TableCell isHeader>Action</TableCell>}
                 </TableRow>
               </TableHeader>
 
@@ -82,7 +82,7 @@ const VideoSessionsPage = () => {
                       {videoSession.endTime ? new Date(videoSession.endTime).toLocaleString() : "N/A"}
                     </TableCell>
                     <TableCell>{videoSession.durationInMinutes || "N/A"}</TableCell>
-                    <TableCell className="relative">
+                    { session?.user?.role !== "user" && <TableCell className="relative">
                       <button
                         onClick={() => toggleDropdown(videoSession._id)}
                         className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -103,7 +103,7 @@ const VideoSessionsPage = () => {
                           </ul>
                         </div>
                       )}
-                    </TableCell>
+                    </TableCell>}
                   </TableRow>
                 ))}
               </TableBody>

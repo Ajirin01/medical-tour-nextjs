@@ -1,42 +1,42 @@
 export const gpServices = [
   {
-    title: "Online GP Consultation Ireland",
+    title: "GP Consultation",
     description: "Doctor Consultation",
     price: "20",
     image: "/images/services/online-gp-consultation.jpg"
   },
   {
-    title: "Online Children consultation Doctor",
+    title: "Children consultation Doctor",
     description: "Children Consultation",
     price: "20",
     image: "/images/services/children-consultation.jpg"
   },
   {
-    title: "Sick leave consultation Online",
+    title: "Sick leave consultation",
     description: "Sick Leaves Consultation",
     price: "20",
     image: "/images/services/sick-leave.jpg"
   },
   {
-    title: "Covid 19 Consultation Online Doctor",
+    title: "Covid 19 Consultation",
     description: "Covid19 / Respiratory Consultation",
     price: "20",
     image: "/images/services/covid19-consultation.jpg"
   },
   {
-    title: "Primary Mental Care Consultation Online Doctor",
+    title: "Primary Mental Care Consultation",
     description: "Same Day Care",
     price: "20",
     image: "/images/services/mental-care.jpg"
   },
   {
-    title: "Erectile Dysfunction Consultation Online Doctor",
+    title: "Erectile Dysfunction Consultation",
     description: "Medical ED",
     price: "20",
     image: "/images/services/erectile-dysfunction.jpg"
   },
   {
-    title: "Dermatology Consultation Online Doctor",
+    title: "Dermatology Consultation",
     description: "Primary Dermatology Consultation",
     price: "20",
     image: "/images/services/dermatology.jpg"
@@ -48,7 +48,7 @@ export const gpServices = [
     image: "/images/services/std-consultation.jpg"
   },
   {
-    title: "General pain consultation doxonline- Online Doctor",
+    title: "General pain consultation",
     description: "General Pain Consultation",
     price: "20",
     image: "/images/services/general-pain.jpg"

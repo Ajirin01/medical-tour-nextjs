@@ -416,12 +416,13 @@ export default function HomePage() {
 
                 <button
                   onClick={() =>
-                    {service.link === "ai" ? handleChat() : ( router.push(service.link)); console.log(service.link)}
+                    service.link === "ai" ? handleChat() : router.push(service.link)
                   }
-                  className="mt-6 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
+                  className="mt-6 w-full py-3 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition text-center block"
                 >
                   Get Started
                 </button>
+
 
                 <motion.svg
                   className="absolute bottom-0 left-0 w-full h-12 text-primary-1 opacity-10"

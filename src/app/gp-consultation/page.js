@@ -47,7 +47,7 @@ export default function CertificatesConsultationPage() {
     socket.emit("get-online-specialists");
 
     socket.on("update-specialists", (data) => {
-        const gpsOnly = data.filter((specialist) => specialist.specialty === "Pathology");
+        const gpsOnly = data.filter((specialist) => specialist.category === "General Practice");
         // console.log(gpsOnly)
         setOnlineGPs(gpsOnly);
     });
@@ -109,10 +109,10 @@ export default function CertificatesConsultationPage() {
             transition={{ duration: 0.6 }}
             className="max-w-4xl mx-auto text-center px-4"
             >
-                <h1 className="text-4xl font-bold mb-4">Online Consultation With an Irish-Registered Doctor</h1>
+                <h1 className="text-4xl font-bold mb-4">Online Consultation With a Registered Doctor</h1>
                 <p className="text-lg opacity-90">Schedule a Phone or Video Consultation</p>
 
-                <h4 className="text-2xl font-bold mb-4">For Just 37.99€</h4>
+                <h4 className="text-2xl font-bold mb-4">For Just $20</h4>
 
                 <button
                     onClick={() => {}}
@@ -170,7 +170,7 @@ export default function CertificatesConsultationPage() {
                     />
                     <h3 className="text-lg font-semibold text-center text-gray-800">{service.title}</h3>
                     <p className="text-sm text-gray-600 text-center">{service.description}</p>
-                    <p className="text-lg font-bold text-center text-[var(--color-primary-7)] mt-4">€{service.price}</p>
+                    <p className="text-lg font-bold text-center text-[var(--color-primary-7)] mt-4">${service.price}</p>
 
                     <button
                     onClick={() => {
@@ -230,7 +230,7 @@ export default function CertificatesConsultationPage() {
                 setPrice={(p) => dispatch(setPrice(p))}
                 setDuration={(d) => dispatch(setDuration(d))}
                 specialist={() => useSelector((state) => state.specialist.specialist)}
-                currency="EUR"
+                currency="USD"
                 plans={[
                     {
                         title: "Basic",
@@ -279,7 +279,7 @@ export default function CertificatesConsultationPage() {
           modal={
             <CheckoutModal
               closeModal={closeDialog}
-              currency="EUR"
+              currency="USD"
               duration={() => useSelector(state => state.specialist.duration)}
               date={new Date()}
               consultMode="now"
