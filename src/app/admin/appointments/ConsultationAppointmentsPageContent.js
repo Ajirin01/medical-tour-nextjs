@@ -41,6 +41,8 @@ const ConsultationAppointmentsPageContent  = () => {
         page,
         ...filters,
       });
+
+      query.set("hasSlot", "true");
   
       // Add user-specific filters based on the role
       if (session?.user?.role === "user") {
@@ -51,7 +53,7 @@ const ConsultationAppointmentsPageContent  = () => {
   
       // Fetch the data from the backend API
       const res = await fetchData(`consultation-appointments/all/paginated?${query.toString()}`, token);
-      // console.log(session?.user?.id)
+      console.log(res.data)
       // Handle the response and set data for appointments and pagination
       if (res && res.data) {
         setAppointments(res.data); // Update appointments state

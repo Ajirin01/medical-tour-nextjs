@@ -333,6 +333,10 @@ export default function Ecommerce() {
     router.push("admin/laboratories/add")
   };
 
+  const handleAvailability = () => {
+    router.push("admin/availabilities")
+  }
+
   const handleLabDashboard = () => {
 
   }
@@ -553,7 +557,7 @@ export default function Ecommerce() {
                     Appointments
                   </button>
                   <button 
-                    onClick={handleConsult}
+                    onClick={handleAvailability}
                     className="bg-white/20 text-white border border-white/40 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-white/30 transition-all flex items-center"
                   >
                     <FaClock className="mr-2" />

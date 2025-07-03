@@ -7,6 +7,7 @@ import Calendar from "react-calendar";
 import { CheckCircle, X } from "lucide-react";
 import 'react-calendar/dist/Calendar.css';
 import { useSelector, useDispatch } from "react-redux";
+import Illnesses from '@/components/Illnesses'
 
 import LottieImage from '@/components/LottieBackground';
 
@@ -197,6 +198,8 @@ export default function CertificatesConsultationPage() {
 
           })}
         </div>
+
+        <Illnesses />
       </section>
 
       {/* Booking Dialog */}

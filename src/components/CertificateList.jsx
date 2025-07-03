@@ -19,7 +19,7 @@ const certificateItems = [
     title: "Visa Medical Certificate",
     description: "Certificate of Good Health / Health Declaration",
     price: "20",
-    image: "/images/visa.jpg",
+    image: "/images/visa.jpeg",
   },
   {
     title: "Travel Cancellation Certificate",
@@ -43,7 +43,7 @@ const certificateItems = [
     title: "GP Referral Letter",
     description: "Doctor Referral Letter",
     price: "20",
-    image: "/images/referral.jpg",
+    image: "/images/referral.jpeg",
   },
   {
     title: "Youth Camp Certificate",
