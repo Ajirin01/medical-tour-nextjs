@@ -95,12 +95,12 @@ export default function CertificatesConsultationPage() {
   return (
     <div className="min-h-screen px-6 bg-gray-50">
       <div className="relative bg-gradient-to-r from-[var(--color-primary-7)] to-[var(--color-primary-5)] text-white py-20 rounded-b-3xl shadow-lg">
-        <div className="absolute inset-0 w-full opacity-100 h-full z-15">
+        {/* <div className="absolute inset-0 w-full opacity-100 h-full z-15">
             <LottieImage
             src="/background1-2.json"
             style={{ width: '100%', height: '100%' }}
             />
-        </div>
+        </div> */}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <motion.div

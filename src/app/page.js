@@ -302,12 +302,12 @@ export default function HomePage() {
       {/* how it works */}
       <section className="relative z-100 comprehensive-services py-20 bg-white text-white mb-20 rounded-3xl mx-4 mt-8 overflow-hidden">
         {/* Lottie Background */}
-        <div className="absolute inset-0 w-full  h-full z-10">
+        {/* <div className="absolute inset-0 w-full  h-full z-10">
           <LottieImage
             src="/background.json"
             style={{ width: '100%', height: '100%' }}
           />
-        </div>
+        </div> */}
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-15">
