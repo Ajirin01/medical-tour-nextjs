@@ -66,19 +66,53 @@ export default function CertificatesConsultationPage() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="bg-white rounded-2xl shadow p-6 space-y-5"
+          className="bg-white rounded-3xl shadow-lg p-8 space-y-6 border border-gray-100"
         >
-          <h2 className="text-2xl font-semibold text-gray-800">Terms & Conditions – Certificates Consultation</h2>
-          <ul className="list-disc list-inside space-y-3 text-gray-700 text-sm sm:text-base">
-            <li><strong>Doctor’s Discretion:</strong> Certificates are issued after consultation, based on the doctor’s medical judgment. If declined, you’ll be informed.</li>
-            <li><strong>No Refund Policy:</strong> If no certificate is issued, no refund applies, as the consultation service was provided.</li>
-            <li><strong>Pre-Consultation Confirmation:</strong> Please contact support before booking if unsure your certificate can be issued.</li>
-            <li><strong>Independent Medical Judgment:</strong> Doctors make decisions based on professional standards and platform policy.</li>
-            <li><strong>Face-to-Face May Be Required:</strong> If necessary for safety, doctors may require in-person consultation.</li>
-            <li>By booking, you agree to all the above terms.</li>
-          </ul>
+          <div className="flex items-center justify-center gap-3">
+            <CheckCircle className="text-primary-7 w-6 h-6" />
+            <h2 className="text-2xl font-bold text-gray-800">
+              Terms & Conditions – Certificates Consultation
+            </h2>
+          </div>
+
+          <div className="space-y-5 text-gray-700 text-sm sm:text-base leading-relaxed">
+            <div className="bg-gray-50 p-4 rounded-xl hover:bg-gray-100 transition">
+              <p>
+                <span className="font-semibold text-primary-9">Doctor’s Discretion:</span> Certificates are issued only after a consultation, at the sole discretion of the doctor based on clinical judgment.
+              </p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-xl hover:bg-gray-100 transition">
+              <p>
+                <span className="font-semibold text-primary-9">No Refund Policy:</span> If no certificate is issued, the consultation fee remains non-refundable.
+              </p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-xl hover:bg-gray-100 transition">
+              <p>
+                <span className="font-semibold text-primary-9">Pre-Consultation Confirmation:</span> If you're unsure whether your request qualifies for a certificate, please contact support before proceeding.
+              </p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-xl hover:bg-gray-100 transition">
+              <p>
+                <span className="font-semibold text-primary-9">Independent Medical Judgment:</span> All medical decisions are made by the consulting doctor in accordance with their clinical expertise and platform guidelines.
+              </p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-xl hover:bg-gray-100 transition">
+              <p>
+                <span className="font-semibold text-primary-9">Face-to-Face May Be Required:</span> If deemed necessary, doctors may request an in-person consultation for patient safety or legal reasons.
+              </p>
+            </div>
+
+            <div className="text-sm text-gray-600 text-center pt-4">
+              By booking a certificate consultation, you agree to all the above terms.
+            </div>
+          </div>
         </motion.div>
       </section>
+
 
       {/* Certificates */}
       <section className="max-w-7xl mx-auto px-4 py-10">

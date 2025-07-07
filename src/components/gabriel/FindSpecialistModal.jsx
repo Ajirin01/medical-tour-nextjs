@@ -17,7 +17,7 @@ const FindSpecialistModal = ({ category, closeModal, setTheSpecialist }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
 
-  console.log('$$$$$$$$$$$$$$$$$$$$$',category)
+  // console.log('$$$$$$$$$$$$$$$$$$$$$',category)
 
   useEffect(() => {
     socket.emit("get-online-specialists");
@@ -37,7 +37,7 @@ const FindSpecialistModal = ({ category, closeModal, setTheSpecialist }) => {
 
   const handleCallSpecialist = () => {
     closeModal();
-    setTheSpecialist(specialist);
+    // setTheSpecialist(specialist);
   };
 
   const openDialog = () => {

@@ -31,7 +31,7 @@ export const cards = [
   {
     image: GeneralPractitioner,
     content: "General Practitioner",
-    specialty: "General Practice",
+    specialty: "General Practitioner",
   },
   {
     image: Allergist,

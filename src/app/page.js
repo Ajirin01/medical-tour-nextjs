@@ -9,41 +9,23 @@ import Image from 'next/image';
 import LottieImage from '@/components/LottieBackground';
 import SpecialistCategories from "@/components/specialistCategories";
 import { 
-  FaPlane, 
-  FaStethoscope, 
-  FaAmbulance, 
   FaArrowRight, 
-  FaRobot, 
-  FaUserMd, 
-  FaVideo, 
-  FaPills,
-  FaClipboardList, 
   FaChevronDown, 
   FaChevronUp, 
   FaHeartbeat,  
   FaComments, 
   FaFileMedicalAlt,
-  FaChild, 
-  FaBrain, 
-  FaPhoneAlt,
   FaPlaneDeparture, 
   FaPrescriptionBottleAlt, 
   FaFlask  } from 'react-icons/fa';
 
 
-import { 
-  consult, 
-  doctorIcon, 
-  medicMask, 
-  pngwing1, 
-  roboDoc,
-  aidoc,
-  userIcon } from '@/assets';
+import { aidoc } from '@/assets';
 import SimpleCarousel from '@/components/gabriel/SimpleCarousel';
 import Button from '@/components/gabriel/Button';
 import { cards } from '@/data/cards';
 import { blogs } from '@/data/blogs';
-import { faqItems } from '@/data/faqData';
+import FaqSection from '@/components/FAQs';
 import { useMediaQuery } from 'react-responsive'; 
 import TypewriterEffect from '@/components/gabriel/TypewriterEffect';
 import { useRouter } from 'next/navigation';
@@ -188,52 +170,10 @@ export default function HomePage() {
   };
   
   const FAQ = () => {
-    const [activeIndex, setActiveIndex] = useState(null);
-  
-    const faqs = faqItems
-  
-    const toggleAccordion = (index) => {
-      setActiveIndex(activeIndex === index ? null : index);
-    };
   
     return (
       <section className="relative faq-section py-20 bg-white rounded-3xl mx-4 mt-8 mb-8">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-primary-10">Frequently Asked Questions</h2>
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div 
-                key={index} 
-                className="bg-gray-50 rounded-2xl overflow-hidden shadow-md"
-              >
-                <button
-                  className="w-full p-6 flex justify-between items-center text-left focus:outline-none"
-                  onClick={() => toggleAccordion(index)}
-                >
-                  <h3 className="text-lg font-semibold text-primary-9">{faq.question}</h3>
-                  {activeIndex === index ? 
-                    <FaChevronUp className="text-secondary-6" /> : 
-                    <FaChevronDown className="text-secondary-6" />
-                  }
-                </button>
-                <AnimatePresence>
-                  {activeIndex === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="px-6 pb-6 text-gray-600">
-                        {faq.answer}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </div>
+        <FaqSection />
       </section>
     );
   };
@@ -455,7 +395,7 @@ export default function HomePage() {
 
         {/* Foreground content */}
         <div className="relative z-10">
-          <Illnesses />
+          <Illnesses limit={12} />
           <div className="mt-12 text-center">
             <Link href="/gp-consultation">
               <button className="bg-[var(--color-primary-6)] hover:bg-[var(--color-primary-7)] text-white px-6 py-3 rounded-lg shadow-sm transition">

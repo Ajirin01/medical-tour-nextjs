@@ -63,7 +63,7 @@ const SpecialistPage = () => {
     }
 
     const availableSpecialists = onlineSpecialists.filter(
-      (sp) => sp.specialty === category
+      (sp) =>{ console.log(sp.category, category); return sp.category === category}
     );
 
     if (availableSpecialists.length > 0) {

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import ModalContainer from "@/components/gabriel/ModalContainer";
 import { FindSpecialistModal } from "@/components/gabriel";
@@ -47,16 +46,13 @@ const itemVariant = {
   }),
 };
 
-const GPServicesIllnesses = () => {
+const GPServicesIllnesses = ({ limit }) => {
   const [showModal, setShowModal] = useState(false);
 
-  const openFindModal = () => {
-    setShowModal(true);
-  };
+  const openFindModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
 
-  const closeModal = () => {
-    setShowModal(false);
-  };
+  const displayedIllnesses = limit ? illnesses.slice(0, limit) : illnesses;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -65,7 +61,7 @@ const GPServicesIllnesses = () => {
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {illnesses.map((illness, index) => (
+        {displayedIllnesses.map((illness, index) => (
           <motion.div
             key={index}
             custom={index}
@@ -81,9 +77,7 @@ const GPServicesIllnesses = () => {
               className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
             />
             <div className="flex flex-col justify-between flex-1">
-              <h3 className="text-md font-semibold text-gray-800">
-                {illness.name}
-              </h3>
+              <h3 className="text-md font-semibold text-gray-800">{illness.name}</h3>
               <button
                 onClick={openFindModal}
                 className="mt-2 w-fit text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
@@ -95,14 +89,10 @@ const GPServicesIllnesses = () => {
         ))}
       </div>
 
-      {/* Modal for General Practitioner Consultation */}
       {showModal && (
         <ModalContainer
           modal={
-            <FindSpecialistModal
-              category="General Practice"
-              closeModal={closeModal}
-            />
+            <FindSpecialistModal category="General Practice" closeModal={closeModal} />
           }
         />
       )}

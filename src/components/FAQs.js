@@ -1,114 +1,83 @@
-import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react"; // optional, or use any icons
-
-const faqItems = [
-  {
-    question: "What is Sozo Digicare Limited?",
-    answer: "We are an online telehealth platform fully compliant with regulatory standards, including GDPR and the guidelines of the Medical Council of Ireland..."
-  },
-  {
-    question: "How does Sozo Digicare work?",
-    answer: "First, complete a health questionnaire, and schedule an appointment immediately or for a future convenient date..."
-  },
-  {
-    question: "Does Sozo Digicare work for all patients?",
-    answer: "Since our doctors cannot physically examine you or access your full medical history, they take extra precautions..."
-  },
-
-  {
-    question: "How quickly will Sozo Digicare confirm your appointment or consultation",
-    answer: "We work on scheduling an appointment immediately or for a future convenient date as you request. Once you complete your pre-consultation form, you will receive an email confirmation after the consultation."
-  },
-
-  {
-    question: "Hours of service?",
-    answer: "The Sozo Digicare service is open 24 hours a day, 365 days a year ensuring you have access to medical care whenever you need it, be it day, night, or even the weekends. If you are looking to collect a prescription from a late-night pharmacy after 8pm please email contact@SozoDigicare.ie and we will do our very best to help."
-  },
-
-  {
-    question: "Accessible from anywhere in Ireland?",
-    answer: "We have partner pharmacies and independent healthcare providers across Ireland."
-  },
-
-  {
-    question: "What makes Sozo Digicare.ie different from other online doctor services in Ireland?",
-    answer: "Our commitment to accessible, affordable, round-the-clock care, experienced Irish-registered doctors, and a range of specialized services sets us apart."
-  },
-
-  {
-    question: "How can I ensure confidentiality and security during an online consultation?",
-    answer: "We prioritize your privacy with encrypted communication channels, ensuring that all consultations are confidential and secure. Video Consultations are done via HIPAA compliant video call mediums."
-  },
-
-  {
-    question: "What types of online doctor consultations do you provide?",
-    answer: "We provide a range of consultations, including general health check-ups, mental health support, dermatology, diabetes management, and more, all available via video consultation online."
-  },
-
-  {
-    question: "What is the cost of an online doctor consultation in Ireland?",
-    answer: "Our online consultations start at €35.99, offering affordable and transparent pricing for various services."
-  },
-
-  {
-    question: "Can I get a sick leave certificate through an online doctor consultation?",
-    answer: "Yes, you can request a sick leave certificate during your consultation, subject to the doctor's assessment."
-  },
-
-  {
-    question: "Do you offer emergency consultations online?",
-    answer: "For urgent medical concerns, we offer emergency consultations. However, in case of life-threatening emergencies, it's crucial to call an ambulance immediately."
-  },
-  {
-    question: "How quickly will my prescription be processed?",
-    answer: "We will send your prescription to your preferred pharmacy or the nearest pharmacy to your desired location. We will let you know by email through our partner pharmacies once it is ready for pick-up or once dispatched."
-  },
-  {
-    question: "How are prescriptions sent to the pharmacy?",
-    answer: "Sozo Digicare does not dispense or deliver prescription medication. If the doctor prescribes medication, the prescription is submitted electronically through a secure service called Healthmail to the pharmacy of your choice. If you select “Home Delivery” we will forward the prescription to one of our partner pharmacies for delivery."
-  },
-  {
-    question: "What if I am having an issue at the pharmacy?",
-    answer: "Please advise the pharmacy that the prescription has been sent to the pharmacy's Healthmail email address. If for some reason they have not received it, send an email to contact@SozoDigicare.ie and we will rectify the issue immediately."
-  },
-  {
-    question: "Will I be contacted by Sozo Digicare when my prescription is ready?",
-    answer: "Yes, we will automatically notify you via email and text once your prescription is ready for pick-up or home delivery."
-  }
-];
+import { useRef, useState } from "react";
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { faqItems } from "@/data/faqData";
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FaqSection() {
-  const [openIndex, setOpenIndex] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+  const refs = useRef([]);
 
-  const toggle = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
+  const toggleAccordion = (index) => {
+    const alreadyOpen = activeIndex === index;
+    setActiveIndex(alreadyOpen ? null : index);
+
+    // scroll into view after a delay
+    setTimeout(() => {
+      if (!alreadyOpen && refs.current[index]) {
+        refs.current[index].scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
   };
 
+  const displayedFaqs = showAll ? faqItems : faqItems.slice(0, 5);
+
   return (
-    <div className="container mx-auto px-4 py-10">
-      <div className="max-w-4xl mx-auto space-y-4">
-        {faqItems.map((item, index) => (
-          <div
-            key={index}
-            className="border border-gray-200 rounded-xl shadow-sm p-4 bg-white"
-          >
-            <button
-              onClick={() => toggle(index)}
-              className="w-full flex justify-between items-center text-left text-lg font-medium text-gray-800"
+    <section className="relative faq-section bg-white rounded-3xl mx-4 mt-8 mb-12">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-primary-10">
+          Frequently Asked Questions
+        </h2>
+
+        <div className="space-y-4">
+          {displayedFaqs.map((faq, index) => (
+            <div
+              key={index}
+              ref={(el) => (refs.current[index] = el)}
+              className="bg-gray-50 rounded-2xl overflow-hidden shadow-md transition hover:shadow-lg"
             >
-              <span>{item.question}</span>
-              {openIndex === index ? (
-                <ChevronUp className="w-5 h-5" />
-              ) : (
-                <ChevronDown className="w-5 h-5" />
-              )}
+              <button
+                onClick={() => toggleAccordion(index)}
+                className="w-full p-6 flex justify-between items-center text-left focus:outline-none"
+              >
+                <h3 className="text-md sm:text-lg font-semibold text-primary-9">{faq.question}</h3>
+                {activeIndex === index ? (
+                  <FaChevronUp className="text-secondary-6 transition-transform" />
+                ) : (
+                  <FaChevronDown className="text-secondary-6 transition-transform" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {activeIndex === index && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="px-6 pb-6 text-gray-600 text-sm sm:text-base leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+
+        {/* Show More / Less Button */}
+        {faqItems.length > 5 && (
+          <div className="mt-10 text-center">
+            <button
+              onClick={() => setShowAll((prev) => !prev)}
+              className="text-blue-900 text-sm sm:text-base font-medium hover:underline focus:outline-none"
+            >
+              {showAll ? "Show Less FAQs" : "Show All FAQs"}
             </button>
-            {openIndex === index && (
-              <div className="mt-2 text-gray-600">{item.answer}</div>
-            )}
           </div>
-        ))}
+        )}
       </div>
-    </div>
+    </section>
   );
 }

@@ -86,9 +86,8 @@ export default function Ecommerce() {
 
   useEffect(() => {
     socket.emit("get-online-specialists");
-
     socket.on("update-specialists", (data) => {
-        const gpsOnly = data.filter((specialist) => specialist.specialty === "Pathology");
+        const gpsOnly = data.filter((specialist) => specialist.category === "General Practitioner");
         // console.log(gpsOnly)
         setOnlineGPs(gpsOnly);
     });
@@ -836,7 +835,7 @@ export default function Ecommerce() {
                     setPrice={(p) => dispatch(setPrice(p))}
                     setDuration={(d) => dispatch(setDuration(d))}
                     specialist={() => useSelector((state) => state.specialist.specialist)}
-                    currency="EUR"
+                    currency="USD"
                     plans={[
                         {
                             title: "Basic",
@@ -885,7 +884,7 @@ export default function Ecommerce() {
               modal={
                 <CheckoutModal
                   closeModal={closeDialog}
-                  currency="EUR"
+                  currency="USD"
                   duration={() => useSelector(state => state.specialist.duration)}
                   date={new Date()}
                   consultMode="now"

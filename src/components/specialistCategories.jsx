@@ -46,12 +46,15 @@ const SpecialistCategories = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 6;
+  const pageCount = Math.ceil(specialistCategories.length / itemsPerPage);
+
   useEffect(() => {
     if (!socket) return;
-
     socket.emit("get-online-specialists");
     socket.on("update-specialists", (data) => setOnlineSpecialists(data));
-
     return () => socket.off("update-specialists");
   }, []);
 
@@ -63,17 +66,14 @@ const SpecialistCategories = () => {
   };
 
   const handleBooking = (category) => {
-    console.log("Hello")
     const available = onlineSpecialists.filter((sp) => sp.specialty === category);
     setSelectedCategory(category);
-
     if (available.length > 0) {
       dispatch(setSpecialist(available[0]));
       setModalContent("pricingModal");
     } else {
       setModalContent("findSpecialistModal");
     }
-
     setShowModal(true);
   };
 
@@ -83,6 +83,9 @@ const SpecialistCategories = () => {
     dispatch(resetBooking());
   };
 
+  const startIdx = currentPage * itemsPerPage;
+  const currentItems = specialistCategories.slice(startIdx, startIdx + itemsPerPage);
+
   return (
     <section className="py-16 px-4 md:px-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -90,8 +93,8 @@ const SpecialistCategories = () => {
           Our Departments
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {specialistCategories.slice(0, 12).map((spec, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {currentItems.map((spec, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
@@ -102,7 +105,7 @@ const SpecialistCategories = () => {
             >
               <div className="relative h-52">
                 <img
-                  src={spec.image.src}
+                  src={spec.image?.src || spec.image}
                   alt={spec.name}
                   className="w-full h-full object-cover"
                 />
@@ -115,7 +118,7 @@ const SpecialistCategories = () => {
               <div className="p-4 text-center">
                 <button
                   className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium"
-                  onClick={() => { console.log("gggggggggg"); handleBooking(spec.name)}}
+                  onClick={() => handleBooking(spec.name)}
                 >
                   BOOK APPOINTMENT
                 </button>
@@ -123,12 +126,45 @@ const SpecialistCategories = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Pagination controls */}
+        <div className="flex justify-center mt-10 gap-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+            disabled={currentPage === 0}
+            className={`px-4 py-2 rounded-lg text-sm font-medium border ${
+              currentPage === 0
+                ? "text-gray-400 border-gray-300 cursor-not-allowed"
+                : "text-gray-700 border-gray-500 hover:bg-gray-100"
+            }`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, pageCount - 1))
+            }
+            disabled={currentPage === pageCount - 1}
+            className={`px-4 py-2 rounded-lg text-sm font-medium border ${
+              currentPage === pageCount - 1
+                ? "text-gray-400 border-gray-300 cursor-not-allowed"
+                : "text-gray-700 border-gray-500 hover:bg-gray-100"
+            }`}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Modal Handling */}
       {showModal && modalContent === "findSpecialistModal" && (
         <ModalContainer
-          modal={<FindSpecialistModal category={selectedCategory} closeModal={closeModal} />}
+          modal={
+            <FindSpecialistModal
+              category={selectedCategory}
+              closeModal={closeModal}
+            />
+          }
         />
       )}
       {showModal && modalContent === "pricingModal" && (
