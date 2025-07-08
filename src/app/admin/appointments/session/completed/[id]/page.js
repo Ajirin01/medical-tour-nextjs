@@ -69,8 +69,7 @@ const SessionPage = () => {
   
 
   const handleRateSession = async () => {
-    const storedSession = localStorage.getItem('activeVideoSession');
-    const session = storedSession ? JSON.parse(storedSession) : null;
+    const session = appointmentRef.current?.session || null;
     setIsSubmitting(true);
     try {
       const payload = {
@@ -116,6 +115,32 @@ const SessionPage = () => {
           <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md">
             Thank you for attending the consultation. Please rate your experience or book a follow-up session.
           </p>
+
+          {(appointment.session.prescriptions?.length > 0 || appointment.session.labReferrals?.length > 0) && (
+            <div className="w-full bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-lg mb-6 shadow-sm">
+              <h4 className="font-semibold mb-1">You have a new update</h4>
+              <ul className="list-disc list-inside text-sm">
+                {appointment.session.prescriptions?.length > 0 && (
+                  <li>
+                    Your doctor has issued a prescription. View it in your{" "}
+                    <Link href="/admin/doctor-prescriptions" className="text-blue-600 underline hover:text-blue-800">
+                      Prescription List
+                    </Link>.
+                  </li>
+                )}
+                {appointment.session.labReferrals?.length > 0 && (
+                  <li>
+                    A lab referral has been provided. Visit your{" "}
+                    <Link href="/admin/lab-referrals" className="text-blue-600 underline hover:text-blue-800">
+                      Lab Referrals
+                    </Link>{" "}
+                    to view it.
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
+
       
           <div className="w-full max-w-lg space-y-6">
             {showRatingField && (

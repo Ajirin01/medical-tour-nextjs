@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback } from "react";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 import { useToast } from "@/context/ToastContext";
 import { useUser } from "@/context/UserContext";
@@ -15,6 +16,8 @@ import RatingForm from "@/components/admin/RatingForm";
 import SessionTimer from "@/components/admin/SessionTimer";
 import NotesDialog from "@/components/admin/NotesDialog";
 import PrescriptionDialog from "@/components/admin/PrescriptionDialog";
+import LabReferralDialog from "@/components/admin/LabReferralDialog";
+
 import QuestionsDialog from "@/components/admin/QuestionsDialog";
 
 import useAppointment from "@/hooks/useAppointment";
@@ -38,6 +41,8 @@ const SessionPage = () => {
   const { addToast } = useToast();
 
   const { appointment, loading } = useAppointment(id, token);
+  const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+
 
   const iframeRef = useRef(null);
 
@@ -70,6 +75,16 @@ const SessionPage = () => {
   const [showPrescriptions, setShowPrescriptions] = useState(false);
   const [healthQuestions, setHealthQuestions] = useState(null);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+
+  const [showReferrals, setShowReferrals] = useState(false);
+  const [labReferrals, setLabReferrals] = useState([]);
+  const [newReferral, setNewReferral] = useState({
+    testName: "",
+    labName: "",
+    note: "",
+    status: "pending"
+  });
+  const [savingReferral, setSavingReferral] = useState(false);
   
 
   const [newPrescription, setNewPrescription] = useState({ medication: '', dosage: '', frequency: '' });
@@ -193,6 +208,31 @@ const SessionPage = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchLabReferrals = async () => {
+      if (!appointmentRef.current?.session?._id || !token) return;
+
+      try {
+        const response = await fetchData(
+          `video-sessions/${appointmentRef.current.session._id}`,
+          token
+        );
+        if (response.success && response.session) {
+          setLabReferrals(response.session.labReferrals || []);
+        } else {
+          setLabReferrals([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch lab referrals:', error);
+        setLabReferrals([]);
+      }
+    };
+
+    if (showReferrals) {
+      fetchLabReferrals();
+    }
+  }, [showReferrals]);
+
   const handleSaveNotes = async () => {
     const currentAppointment = appointmentRef.current;
     if (!currentAppointment?.session?._id || !token) return;
@@ -271,6 +311,49 @@ const SessionPage = () => {
     }
   };
 
+ const handleAddReferral = async () => {
+    if (!newReferral.testName.trim()) {
+      addToast("Test name is required", "error");
+      return;
+    }
+
+    setSavingReferral(true);
+    const updated = [...labReferrals, newReferral];
+
+    try {
+      await updateData(
+        `video-sessions/${appointmentRef.current.session._id}`,
+        { labReferrals: updated },
+        token
+      );
+      setLabReferrals(updated);
+      setNewReferral({ testName: "", labName: "", note: "", status: "pending" });
+    } catch (error) {
+      console.error("Failed to add referral", error);
+      addToast("Failed to add referral", "error");
+    } finally {
+      setSavingReferral(false);
+    }
+  };
+
+  const handleDeleteReferral = async (index) => {
+    const updated = labReferrals.filter((_, i) => i !== index);
+
+    try {
+      await updateData(
+        `video-sessions/${appointmentRef.current.session._id}`,
+        { labReferrals: updated },
+        token
+      );
+      setLabReferrals(updated);
+    } catch (error) {
+      console.error("Failed to delete referral", error);
+      addToast("Failed to delete referral", "error");
+    }
+  };
+
+
+
   const patient = appointment?.session?.user;
   const specialist = appointment?.session?.specialist;
 
@@ -341,7 +424,7 @@ const SessionPage = () => {
         </div>
         
         {/* Timer */}
-        <div className="absolute top-10 left-1/2 transform -translate-x-1/2 mb-6 z-999999">
+        <div className="absolute top-10 left-1/4 transform -translate-x-1/2 mb-6 z-999999">
           <SessionTimer
             appointment={appointment}
             setRemainingTime={setRemainingTime}
@@ -375,13 +458,14 @@ const SessionPage = () => {
           !sessionEnded && (
             <div className="absolute top-16 right-4 bg-gray-800 rounded-xl shadow-xl p-4 w-60 z-[99999] space-y-3 animate-fade-in border dark:border-gray-700">
               <button
-                onClick={handleEndSession}
+                onClick={() => setShowConfirmEnd(true)}
                 className="flex items-center gap-2 w-full border border-white text-white dark:text-white px-4 py-2 rounded-lg transition hover:text-gray-200"
                 disabled={endingSession}
               >
                 <span>🔚</span>
                 {endingSession ? "Ending..." : "End Session"}
               </button>
+
 
               <button
                 onClick={() => setShowDocs(true)}
@@ -397,6 +481,14 @@ const SessionPage = () => {
               >
                 <span>💊</span>
                 Prescriptions
+              </button>
+
+              <button
+                onClick={() => setShowReferrals(true)}
+                className="flex items-center gap-2 w-full border border-white text-white dark:text-white px-4 py-2 rounded-lg transition hover:text-gray-200"
+              >
+                <span>⚕️</span>
+                Lab Referral
               </button>
             </div>
 
@@ -421,6 +513,27 @@ const SessionPage = () => {
           setNewPrescription={setNewPrescription}
           handleAddPrescription={handleAddPrescription}
           savingPrescription={savingPrescription}
+        />
+
+        <LabReferralDialog
+          showReferrals={showReferrals}
+          setShowReferrals={setShowReferrals}
+          labReferrals={labReferrals}
+          handleDeleteReferral={handleDeleteReferral}
+          newReferral={newReferral}
+          setNewReferral={setNewReferral}
+          handleAddReferral={handleAddReferral}
+          savingReferral={savingReferral}
+        />
+
+        <ConfirmationDialog
+          isOpen={showConfirmEnd}
+          onClose={() => setShowConfirmEnd(false)}
+          onConfirm={handleEndSession}
+          title="End Session?"
+          message="Are you sure you want to end this consultation session? This action cannot be undone."
+          confirmText="Yes, End Session"
+          cancelText="Cancel"
         />
 
         {/* <QuestionsDialog

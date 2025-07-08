@@ -22,7 +22,9 @@ const LabReferralsList = () => {
     const loadLabReferrals = async () => {
       setLoading(true);
       try {
-        let endpoint = `lab-results/referrals/get-all/no-pagination`;
+        let endpoint = `lab-results/referrals/get-all/no-pagination${isUser ? '?patient='+user._id : ''}`;
+
+        console.log(endpoint)
 
         const res = await fetchData(endpoint, token);
         console.log(res)

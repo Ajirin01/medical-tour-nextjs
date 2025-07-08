@@ -13,7 +13,7 @@ export default function ConfirmationDialog({
   cancelText = "Cancel" 
 }) {
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-10">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-99999999">
       <DialogBackdrop className="fixed inset-0 bg-black/50" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="w-full max-w-md bg-white rounded-lg p-6 text-center shadow-lg">

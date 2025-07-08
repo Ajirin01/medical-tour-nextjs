@@ -340,6 +340,34 @@ export default function Ecommerce() {
 
   }
 
+  const handlePrescriptions = () => {
+
+  }
+
+  const handleEarnings = () => {
+
+  }
+
+  const handlePatients = () => {
+
+  }
+
+  const handleDoctors = () => {
+
+  }
+
+  const handlePharmacies = () => {
+
+  }
+
+  const handleRevenues = () => {
+
+  }
+
+  const handleConsultations = () => {
+
+  }
+
   const quickActions = [
     {
       title: "Symptoms Checker",
@@ -396,7 +424,8 @@ export default function Ecommerce() {
       icon: <FaCalendarAlt className="text-green-600" size={20} />,
       bgColor: "bg-green-50",
       iconBg: "bg-green-100",
-      visible: userRole === "user" || userRole === "specialist"
+      visible: userRole === "user" || userRole === "specialist",
+      action: handleAppointments
     },
     {
       title: "Medical Records",
@@ -405,7 +434,8 @@ export default function Ecommerce() {
       icon: <FaFileMedical className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
       iconBg: "bg-blue-100",
-      visible: userRole === "specialist"
+      visible: userRole === "specialist",
+      action: handleMedicalRecords
     },
     {
       title: "Prescriptions",
@@ -416,7 +446,8 @@ export default function Ecommerce() {
       icon: <FaPills className="text-purple-600" size={20} />,
       bgColor: "bg-purple-50",
       iconBg: "bg-purple-100",
-      visible: userRole === "user"
+      visible: userRole === "user",
+      action: handlePrescriptions
     },
     {
       title: "Consultations",
@@ -427,7 +458,8 @@ export default function Ecommerce() {
       icon: <FaUserMd className="text-red-600" size={20} />,
       bgColor: "bg-red-50",
       iconBg: "bg-red-100",
-      visible: userRole === "user" || userRole === "specialist"
+      visible: userRole === "user" || userRole === "specialist",
+      action: handleConsultations
     },
     {
       title: "Earning",
@@ -438,7 +470,8 @@ export default function Ecommerce() {
       icon: <FaMoneyBill className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
       iconBg: "bg-blue-100",
-      visible: userRole === "specialist"
+      visible: userRole === "specialist",
+      action: handleEarnings
     },
 
     {
@@ -450,7 +483,8 @@ export default function Ecommerce() {
       icon: <FaUserAlt className="text-green-600" size={20} />,
       bgColor: "bg-green-50",
       iconBg: "bg-green-100",
-      visible: userRole === "admin" || userRole === "superAdmin"
+      visible: userRole === "admin" || userRole === "superAdmin",
+      action: handlePatients
     },
     {
       title: "Doctors",
@@ -461,7 +495,8 @@ export default function Ecommerce() {
       icon: <FaUserMd className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
       iconBg: "bg-blue-100",
-      visible: userRole === "admin" || userRole === "superAdmin"
+      visible: userRole === "admin" || userRole === "superAdmin",
+      action: handleDoctors
     },
     {
       title: "Pharmacies",
@@ -472,7 +507,8 @@ export default function Ecommerce() {
       icon: <FaPills className="text-purple-600" size={20} />,
       bgColor: "bg-purple-50",
       iconBg: "bg-purple-100",
-      visible: userRole === "admin" || userRole === "superAdmin"
+      visible: userRole === "admin" || userRole === "superAdmin",
+      action: handlePharmacies
     },
     {
       title: "Revenue",
@@ -483,7 +519,8 @@ export default function Ecommerce() {
       icon: <FaMoneyBill className="text-red-600" size={20} />,
       bgColor: "bg-red-50",
       iconBg: "bg-red-100",
-      visible: userRole === "admin" || userRole === "superAdmin"
+      visible: userRole === "admin" || userRole === "superAdmin",
+      action: handleRevenues
     }
   ];
 
@@ -624,7 +661,7 @@ export default function Ecommerce() {
                     {stat.icon}
                   </div>
                   <div className="text-gray-400 hover:text-gray-600 cursor-pointer">
-                    <FaEllipsisH size={16} />
+                    {/* <FaEllipsisH size={16} /> */}
                   </div>
                 </div>
                 <h3 className="text-sm font-medium text-gray-500">{stat.title}</h3>
