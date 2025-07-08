@@ -17,18 +17,24 @@ const LabReferralsList = () => {
   const isDoctor = user?.role === "specialist";
   const isUser = user?.role === "user";
   const isAdmin = user?.role === "admin";
+  const isLabAdmin = user?.role === "labAdmin"
 
   useEffect(() => {
     const loadLabReferrals = async () => {
       setLoading(true);
+      let endpoint
       try {
-        let endpoint = `lab-results/referrals/get-all/no-pagination${isUser ? '?patient='+user._id : ''}`;
+        if(isUser){
+          endpoint = `lab-results/by-user/${user._id}/referrals`;
+        }else if(isDoctor || isLabAdmin){
+          endpoint = `lab-results/referrals/get-all/no-pagination`;
+        }
 
         console.log(endpoint)
 
         const res = await fetchData(endpoint, token);
-        console.log(res)
-        setSessions(res || []);
+        console.log(res.sessions || res || [])
+        setSessions(res.sessions || res || []);
       } catch (error) {
         console.error(error);
         addToast("Failed to load lab referrals", "error");
@@ -104,7 +110,7 @@ const LabReferralsList = () => {
 
           <div>
             <a
-              href={`/admin/lab-referrals/${session.session._id}`}
+              href={`/admin/lab-referrals/${isUser ? session._id : session.session._id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-indigo-600 hover:underline mt-2 inline-block"

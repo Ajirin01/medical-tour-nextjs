@@ -10,6 +10,7 @@ const LabSelectionModal = ({ isOpen, onClose, token, sessionId, user, onSuccess 
   const [filters, setFilters] = useState({ country: "", state: "", city: "" });
   const [selectedLab, setSelectedLab] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     if (isOpen) loadLabs();
@@ -31,14 +32,15 @@ const LabSelectionModal = ({ isOpen, onClose, token, sessionId, user, onSuccess 
 
   const handleSubmit = async () => {
     if (!selectedLab) return addToast("Select a lab to proceed", "error");
-    
+
     try {
+      setSending(true);
       await postData(
         "lab-results/refer/send-to-lab",
         {
           session: sessionId,
           patient: user._id,
-          lab: selectedLab?._id, // fallback
+          lab: selectedLab?._id,
         },
         token
       );
@@ -49,6 +51,8 @@ const LabSelectionModal = ({ isOpen, onClose, token, sessionId, user, onSuccess 
     } catch (err) {
       console.error("Failed to send to lab", err);
       addToast("Error sending referral", "error");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -113,10 +117,10 @@ const LabSelectionModal = ({ isOpen, onClose, token, sessionId, user, onSuccess 
           <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200">Cancel</button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-            disabled={!selectedLab}
+            className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+            disabled={!selectedLab || sending}
           >
-            Send to Lab
+            {sending ? "Sending..." : "Send to Lab"}
           </button>
         </div>
       </div>
