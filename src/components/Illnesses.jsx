@@ -92,7 +92,7 @@ const GPServicesIllnesses = ({ limit }) => {
       {showModal && (
         <ModalContainer
           modal={
-            <FindSpecialistModal category="General Practice" closeModal={closeModal} />
+            <FindSpecialistModal category="General Practitioner" closeModal={closeModal} />
           }
         />
       )}

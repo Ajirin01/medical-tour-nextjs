@@ -261,7 +261,7 @@ const ChatBot = () => {
   }, [chatbotAttentionTriggered, dispatch]);
 
   return (
-    <div className="fixed font-roboto-condensed bottom-2 md:bottom-4 right-2 md:right-6 z-20">
+    <div className="fixed font-roboto-condensed bottom-2 md:bottom-4 right-2 md:right-6 z-999999">
       <div
         ref={chatbotRef}
         className={`${chatClass} overflow-hidden rounded-lg shadow-lg w-[95vw] sm:w-96 h-[400px] md:h-[450px] mb-[70px] md:mb-[100px] flex flex-col transition-transform duration-300 transform ${isOpen
