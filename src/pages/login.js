@@ -9,6 +9,7 @@ import Image from "next/image";
 import { doctors2 } from '@/assets';
 import { FaSpinner } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
+import { useSearchParams } from "next/navigation";
 
 const formInput =
   "border-[3px] border-primary-5 text-primary-2 rounded-[20px] overflow-hidden p-3 w-full placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-5";
@@ -22,6 +23,8 @@ export default function LoginPage() {
 
   const { addToast } = useToast();
 
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,6 +35,7 @@ export default function LoginPage() {
       email,
       password,
       redirect: false,
+      callbackUrl,
     });
 
     if (res?.error) {
@@ -46,7 +50,7 @@ export default function LoginPage() {
       setIsSubmitting(false);
     } else {
       addToast("Login successful!", "success")
-      router.push("/admin");
+      router.push(res.url || callbackUrl);
     }
   };
 

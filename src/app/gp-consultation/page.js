@@ -115,12 +115,11 @@ export default function CertificatesConsultationPage() {
 
                 <h4 className="text-2xl font-bold mb-4">For Just $20</h4>
 
-                <button
-                    onClick={() => {}}
+                <a href="#services"
                     className="mt-4 w-full md:w-[30%] mx-auto text-center py-2 px-4 text-[var(--color-primary-6)] bg-white rounded-xl hover:text-[var(--color-primary-7)] transition"
                     >
-                    Book Appointment
-                </button>
+                    Consult Now
+                </a>
             </motion.div>
         </div>
       </div>
@@ -136,7 +135,7 @@ export default function CertificatesConsultationPage() {
           Typical Services | Online Doctor Consultation
         </motion.h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="services" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, idx) => {
             // const isOnline = onlineGPs.some(gp => gp.specialty === service.title);
             const isOnline = onlineGPs[0];

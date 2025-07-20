@@ -113,6 +113,7 @@ const CheckoutModal = ({
         consultant: orderData.consultant,
         date: orderData.date,
         mode: orderData.mode,
+        price: amount,
         slot,
         duration: orderData.duration,
         type: orderData.type,

@@ -147,6 +147,8 @@ export default function Ecommerce() {
         }
       });
 
+      // console.log(response.sessions)
+
       setCalls(response.sessions);
       setLoading(false)
       setPrescriptions(sessionPrescriptions);
@@ -172,7 +174,7 @@ export default function Ecommerce() {
         url = `consultation-appointments/all/paginated`
       }
       const response = await fetchData(url, token);
-      console.log(response.data)
+      // console.log(response.data)
       setUpcomingAppointments(response.data);
     } catch (error) {
       console.error("Error fetching session data:", error);
@@ -463,7 +465,7 @@ export default function Ecommerce() {
     },
     {
       title: "Earning",
-      value: `$${calls.reduce((total, call) => total + (call.durationInMinutes || 0) * 2, 0)}`,
+      value: `$${calls.reduce((total, call) => total + (call.appointment?.price || 0) * 2, 0)}`,
       change: calls.length > 0
         ? `Last: $${(calls[calls.length - 1].durationInMinutes || 0) * 2}`
         : "No past earning",

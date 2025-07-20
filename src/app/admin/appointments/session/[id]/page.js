@@ -424,7 +424,7 @@ const SessionPage = () => {
         </div>
         
         {/* Timer */}
-        <div className="absolute top-10 left-1/4 transform -translate-x-1/2 mb-6 z-999999">
+        <div className="absolute top-5 right-25 transform -translate-x-1/2 mb-6 z-999999">
           <SessionTimer
             appointment={appointment}
             setRemainingTime={setRemainingTime}
@@ -435,6 +435,11 @@ const SessionPage = () => {
             addToast={addToast}
           />
         </div>
+
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 text-white z-[99999999] bg-black/60 backdrop-blur px-4 py-2 rounded">
+           { userRole === "user" ? `Consultant: ${appointment.session.specialist.firstName} ${appointment.session.specialist.lastName}` : `Patient: ${appointment.session.user.firstName} ${appointment.session.user.lastName}`}
+        </div>
+
 
         {/* Video Area */}
         <div className="mb-6">
@@ -456,7 +461,7 @@ const SessionPage = () => {
         {showOptions && (userRole === "specialist" || userRole === "consultant") &&
           appointment.session.appointment.status === "pending" &&
           !sessionEnded && (
-            <div className="absolute top-16 right-4 bg-gray-800 rounded-xl shadow-xl p-4 w-60 z-[99999] space-y-3 animate-fade-in border dark:border-gray-700">
+            <div className="absolute top-16 right-4 bg-gray-800 rounded-xl shadow-xl p-4 w-60 z-[9999999] space-y-3 animate-fade-in border dark:border-gray-700">
               <button
                 onClick={() => setShowConfirmEnd(true)}
                 className="flex items-center gap-2 w-full border border-white text-white dark:text-white px-4 py-2 rounded-lg transition hover:text-gray-200"

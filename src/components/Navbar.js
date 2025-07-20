@@ -58,10 +58,14 @@ export default function TopNav({}) {
 
   const apiUrl = process.env.NEXT_PUBLIC_NODE_BASE_URL;
 
-
   const navigate = (location) => {
-    router.push(location);
-  }
+    if (location === "/login") {
+      const callbackUrl = encodeURIComponent(pathname);
+      router.push(`/login?callbackUrl=${callbackUrl}`);
+    } else {
+      router.push(location);
+    }
+  };
 
   const handleLogoutDecision = (choice) => {
     if (choice === "logout") {
@@ -130,7 +134,7 @@ export default function TopNav({}) {
             <NavLink href="/gp-consultation" icon={<User size={18} />} label="GP Services" active={pathname === "/gp-consultation"} />
             <NavLink icon={<FileText size={18} />} href="/cert" label="Cert" active={pathname === "/cart"} />
             <NavLink href="/medical-tourism" icon={<PlaneIcon size={18} />} label="Medical Tourism" active={pathname === "/medical-tourism"} />
-            {/* <div className="hidden md:flex items-center ml-6 space-x-3">
+            <div className="hidden md:flex items-center ml-6 space-x-3">
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-3 px-3 py-1.5 border-2 rounded border-[var(--color-primary-7)]">
                   <button
@@ -141,7 +145,7 @@ export default function TopNav({}) {
                   </button>
                 </div>
               </div>
-            </div> */}
+            </div>
 
             {/* Dashboard dropdown */}
             {/* { isAuthenticated && 
@@ -334,7 +338,7 @@ export default function TopNav({}) {
           <MobileNavLink icon={<User size={18} />} href="/gp-consultation" label="Our GP Services" active={pathname === "/gp-consultation"} />
           <MobileNavLink icon={<FileText size={18} />} href="/cert" label="Cert" active={pathname === "/cert"} />
 
-          {/* <div className="md:flex items-center space-x-3">
+          <div className="md:flex items-center space-x-3">
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-3 px-3 py-1.5 border-2 rounded border-[var(--color-primary-7)]">
                 <button
@@ -345,7 +349,7 @@ export default function TopNav({}) {
                 </button>
               </div>
             </div>
-          </div> */}
+          </div>
 
           { isAuthenticated && 
             <MobileNavLink icon={<Gauge size={18} />} href="/admin" label="Dashboard" />

@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { fetchData, postData } from '@/utils/api'
 import { useUser } from '@/context/UserContext'
 import { useSession } from 'next-auth/react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { useToast } from '@/context/ToastContext'
 
 import { useSelector, useDispatch } from "react-redux";
@@ -76,6 +76,8 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [specialistsByCategory, setSpecialistsByCategory] = useState([])
+
+  const pathname = usePathname();
 
   const COST_PER_MINUTE = 2
 
@@ -224,8 +226,9 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
     dispatch(resetBooking());
   };
 
-  if(!session){
-    router.push("/login")
+  if (!session) {
+    const callbackUrl = encodeURIComponent(pathname);
+    router.push(`/login?callbackUrl=${callbackUrl}`);
   }
 
   return (

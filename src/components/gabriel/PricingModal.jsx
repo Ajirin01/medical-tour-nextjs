@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoCloseOutline, IoCheckmarkOutline } from "react-icons/io5";
 import ModalContainer from "@/components/gabriel/ModalContainer";
 import { CheckoutModal } from "@/components/gabriel";
 import StripeWrapper from "@/components/StripeWrapper";
+import { useSession } from "next-auth/react";
+import { useRouter, usePathname } from "next/navigation";
 
 const defaultPlans = [
   {
@@ -49,9 +51,21 @@ const PricingModal = ({
   plans = defaultPlans,
   currency = "USD",
 }) => {
-  const [showModal, setShowModal] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [selectedPrice, setSelectedPrice] = useState(null);
   const [selectedDuration, setSelectedDuration] = useState(null);
+
+  const { data: session } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!session) {
+      const callbackUrl = encodeURIComponent(pathname);
+      router.push(`/login?callbackUrl=${callbackUrl}`);
+    }
+  }, [session]);
 
   const onSelected = (price, duration) => {
     const numericPrice = parseFloat(price);
@@ -60,10 +74,21 @@ const PricingModal = ({
       setDuration(duration);
       setSelectedPrice(numericPrice);
       setSelectedDuration(duration);
-      setShowModal(true);
+      setShowAcknowledgment(true); // Show acknowledgment first
     } else {
       console.error("Invalid price or duration selected");
     }
+  };
+
+  const handleAcknowledgmentProceed = () => {
+    setShowAcknowledgment(false);
+    setShowCheckout(true);
+  };
+
+  const handleAcknowledgmentCancel = () => {
+    setShowAcknowledgment(false);
+    setSelectedPrice(null);
+    setSelectedDuration(null);
   };
 
   const formatPrice = (amount, currency = "USD") =>
@@ -159,13 +184,46 @@ const PricingModal = ({
         </div>
       </div>
 
+      {/* Acknowledgment Modal */}
+      {showAcknowledgment && (
+        <ModalContainer
+          modal={
+            <div className="bg-white p-6 rounded-xl max-w-md mx-auto shadow-lg">
+              <h2 className="text-lg font-bold mb-4 text-gray-800">
+                Consultation Terms
+              </h2>
+              <p className="text-sm text-gray-600 mb-6">
+                By proceeding with consultation, users acknowledge that
+                time-based sessions may conclude early upon mutual consent,
+                and SozoDigiCare holds no responsibility for time not used
+                after such agreement.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleAcknowledgmentCancel}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAcknowledgmentProceed}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                >
+                  Proceed
+                </button>
+              </div>
+            </div>
+          }
+        />
+      )}
+
       {/* Checkout Modal */}
-      {showModal && selectedPrice && selectedDuration && (
+      {showCheckout && selectedPrice && selectedDuration && (
         <ModalContainer
           modal={
             <StripeWrapper>
               <CheckoutModal
-                closeModal={closeModal}
+                closeModal={() => setShowCheckout(false)}
                 amount={selectedPrice}
                 currency={currency}
                 specialist={specialist}
