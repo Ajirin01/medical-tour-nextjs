@@ -66,6 +66,9 @@ const Footer = () => {
           <FooterSection title="The Platform">
             <li><FooterLink href="/auth/sign-in">Log in</FooterLink></li>
             <li><FooterLink href="/auth/sign-up">Sign up</FooterLink></li>
+            <li><FooterLink href="/auth/sign-up?role=pharmacist">Register Pharmacy</FooterLink></li>
+            <li><FooterLink href="/auth/sign-up?role=labAdmin">Register Laboratory</FooterLink></li>
+
             <li><FooterLink href="/terms">Terms of Use</FooterLink></li>
           </FooterSection>
 

@@ -24,7 +24,7 @@ import { aidoc } from '@/assets';
 import SimpleCarousel from '@/components/gabriel/SimpleCarousel';
 import Button from '@/components/gabriel/Button';
 import { cards } from '@/data/cards';
-import { blogs } from '@/data/blogs';
+// import { blogs } from '@/data/blogs';
 import FaqSection from '@/components/FAQs';
 import { useMediaQuery } from 'react-responsive'; 
 import TypewriterEffect from '@/components/gabriel/TypewriterEffect';
@@ -49,6 +49,7 @@ export default function HomePage() {
   const [specialists, setSpecialists] = useState([]);
   const [activeIndex, setActiveIndex] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [blogs, setBlogs] = useState([])
 
   const dispatch = useDispatch()
 
@@ -128,6 +129,16 @@ export default function HomePage() {
       }
     }
 
+    async function fetchBlogs() {
+      try {
+        const data = await fetchData('blogs');
+        setBlogs(data.data || []);
+        console.log(data)
+      } catch (error) {
+        console.error('Failed to fetch galleries:', error);
+      }
+    }
+
     async function fetchHospitals() {
       try {
         const data = await fetchData('hospitals');
@@ -162,6 +173,7 @@ export default function HomePage() {
     fetchGalleries();
     fetchHospitals();
     fetchPackages();
+    fetchBlogs();
   }, []);
 
   const handleChat = () => {
@@ -169,6 +181,11 @@ export default function HomePage() {
     dispatch(openChatBot(true));
   };
   
+  const stripHtml = (html) => {
+    if (!html) return '';
+    return html.replace(/<[^>]*>?/gm, '');
+  }
+
   const FAQ = () => {
   
     return (
@@ -192,11 +209,11 @@ export default function HomePage() {
   const renderBlogPost = (blog) => (
     <div key={blog.id} className="w-full">
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden h-[320px] flex flex-col">
-        <img src={blog.image} alt={blog.title} className="w-full h-40 object-cover" />
+        <img src={ process.env.NEXT_PUBLIC_NODE_BASE_URL+"/"+blog.featuredImage} alt={blog.title} className="w-full h-40 object-cover" />
         <div className="p-4 flex flex-col flex-grow">
           <h3 className="font-bold text-lg mb-2 text-primary-10 line-clamp-2">{blog.title}</h3>
-          <p className="text-gray-600 text-sm mb-2 flex-grow overflow-hidden line-clamp-2">{blog.content}</p>
-          <Link href={ `${blog.link}` } className="text-secondary-6 font-semibold hover:underline inline-flex items-center mt-auto">
+          <p className="text-gray-600 text-sm mb-2 flex-grow overflow-hidden line-clamp-2">{stripHtml(blog.content)}</p>
+          <Link href={ `blog/${blog._id}` } className="text-secondary-6 font-semibold hover:underline inline-flex items-center mt-auto">
             Read More <FaArrowRight className="ml-2" />
           </Link>
         </div>

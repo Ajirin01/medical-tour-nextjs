@@ -457,77 +457,74 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className={`fixed mb-6 mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen z-50 transition-all duration-300 border-r border-gray-200
-        ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0`}
-      onMouseEnter={() => !isExpanded && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Logo */}
-      <div
-        className={`py-8 flex ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-        }`}
+  className={`fixed top-0 left-0 z-50 h-screen px-5 pt-16 pb-6 bg-white dark:bg-gray-900 dark:border-gray-800 border-r border-gray-200 text-gray-900 transition-all duration-300 flex flex-col
+    ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
+    ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
+    lg:translate-x-0`}
+  onMouseEnter={() => !isExpanded && setIsHovered(true)}
+  onMouseLeave={() => setIsHovered(false)}
+>
+  {/* Logo */}
+  <div className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"}`}>
+    <a href="/">
+      <img
+        width={100}
+        height={32}
+        className="dark:hidden"
+        src="/images/logo/logo.png"
+        alt="Logo"
+      />
+      <img
+        width={100}
+        height={32}
+        className="hidden dark:block"
+        src="/images/logo/logo-dark.png"
+        alt="Logo"
+      />
+    </a>
+  </div>
+
+  {/* Main content with scrollable menu and sticky bottom logout */}
+  <div className="flex flex-col justify-between flex-grow overflow-hidden">
+    {/* Scrollable menu section */}
+    <div className="flex flex-col overflow-y-auto no-scrollbar">
+      {/* User Info */}
+      <div className="flex flex-col items-center p-4 border-b border-gray-200">
+        <img
+          src={user?.profileImage ? `${apiUrl}${user?.profileImage}` : defaultUser.src}
+          crossOrigin="anonymous"
+          alt="User"
+          className="w-20 h-20 rounded-full mb-2 object-cover"
+        />
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{user?.firstName}</h2>
+      </div>
+
+      {/* Nav Items */}
+      <nav className="mb-6">
+        <h2
+          className={`mb-4 text-md uppercase font-bold flex text-gray-500 ${
+            !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+          }`}
+        >
+          {isExpanded || isHovered || isMobileOpen ? "" : <MoreHorizontal />}
+        </h2>
+        {renderMenuItems(getNavItems())}
+      </nav>
+    </div>
+
+    {/* Logout Button always at bottom */}
+    <div className="py-3 border-t border-gray-200 bg-white dark:bg-gray-900 flex justify-center">
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-2 text-red-600 hover:text-red-800 transition-colors"
       >
-        <a href="/">
-          <img
-            width={100}
-            height={32}
-            className="dark:hidden"
-            src="/images/logo/logo.png"
-            alt="Logo"
-          />
-          <img
-            width={100}
-            height={32}
-            className="hidden dark:block"
-            src="/images/logo/logo-dark.png"
-            alt="Logo"
-          />
-        </a>
-      </div>
+        <LogOut className="w-5 h-5" />
+        {(isExpanded || isHovered || isMobileOpen) && <span>Logout</span>}
+      </button>
+    </div>
+  </div>
+</aside>
 
-      {/* Main Content & Logout Wrapper */}
-      <div className="flex flex-col justify-between h-full">
-        {/* User Info & Menu */}
-        <div className="flex pb-50 flex-col overflow-y-auto no-scrollbar">
-          <div className="flex flex-col items-center p-4 border-b border-gray-200">
-            <img
-              src={user?.profileImage ? `${apiUrl}${user?.profileImage}` : defaultUser.src}
-              crossOrigin="anonymous"
-              alt="User"
-              className="w-20 h-20 rounded-full mb-2 object-cover"
-            />
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{user?.firstName}</h2>
-          </div>
-
-          <nav className="mb-6">
-            <h2
-              className={`mb-4 text-md uppercase font-bold flex text-gray-500 ${
-                !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-              }`}
-            >
-              {isExpanded || isHovered || isMobileOpen ? "" : <MoreHorizontal />}
-            </h2>
-            {renderMenuItems(getNavItems())}
-          </nav>
-        </div>
-
-        {/* Logout Button */}
-        <div className="fixed bottom-3 right-1 w-full py-2 border-t border-gray-200 bg-white dark:bg-gray-900 flex justify-center">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-red-600 hover:text-red-800 transition-colors"
-          >
-            <LogOut className="w-5 h-5" />
-            {(isExpanded || isHovered || isMobileOpen) && <span>Logout</span>}
-          </button>
-        </div>
-
-
-      </div>
-    </aside>
 
   );
 };

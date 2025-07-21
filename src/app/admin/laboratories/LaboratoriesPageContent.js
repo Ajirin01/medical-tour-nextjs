@@ -28,7 +28,7 @@ const PharmaciesPage = () => {
         const data = await fetchData(url);
 
         console.log(data)
-        setPharmacies(data);
+        setPharmacies(data.labs);
       } catch (error) {
         console.error("Error fetching laboratories:", error);
       } finally {

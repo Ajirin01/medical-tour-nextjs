@@ -28,6 +28,8 @@ const LabReferralsList = () => {
           endpoint = `lab-results/by-user/${user._id}/referrals`;
         }else if(isDoctor || isLabAdmin){
           endpoint = `lab-results/referrals/get-all/no-pagination`;
+        }else if(isAdmin){
+          endpoint = `lab-results/referrals/get-all/no-pagination`;
         }
 
         console.log(endpoint)

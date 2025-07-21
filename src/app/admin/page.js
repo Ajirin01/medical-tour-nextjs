@@ -680,12 +680,12 @@ export default function Ecommerce() {
         <div className="grid grid-cols-12 gap-4 md:gap-6">
         {(userRole === "admin" || userRole === "superAdmin") &&
           <>
-              <div className="col-span-6 xl:col-span-5">
+              <div className="col-span-6">
                 <MonthlyTarget />
               </div>
 
               
-                <div className="col-span-7">
+                <div className="col-span-6">
                   <StatisticsChart />
                 </div>
             </>
