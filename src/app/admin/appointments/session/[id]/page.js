@@ -375,7 +375,11 @@ const SessionPage = () => {
         setIsTimerRunning(false);
         setShowRatingField(true);
         handleEndCall();
-        addToast("Specialist ended the session", "info", 5000);
+        if(specialist.role === "user"){
+          addToast("Patient has ended the session", "info", 5000);
+        }else{
+          addToast("Specialist has ended the session", "info", 5000);
+        }
         router.push(`/admin/appointments/session/completed/${id}`)
       } else {
         console.warn("⚠️ session-ended received but session or user ID did not match");
@@ -405,7 +409,7 @@ const SessionPage = () => {
   
 
   return (
-    <div className={`absolute top-0 left-0 w-full transition-all duration-300`}>
+    <div className={`absolute top-0 left-0 w-full transition-all duration-300 z-9999999999`}>
       <div className="bg-black">
         <div className="absolute top-4 right-4 flex gap-2 z-9999999">
           {/* <button
@@ -455,6 +459,7 @@ const SessionPage = () => {
             id={id}
             videoRef={videoRef}
             handleSessionEnded={handleSessionEnded}
+            handleEndUserSession={handleEndSession}
           />
         </div>
 

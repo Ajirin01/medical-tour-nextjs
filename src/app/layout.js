@@ -39,6 +39,16 @@ export default function RootLayout({ children }) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const s1 = document.createElement("script");
+    s1.src = "https://embed.tawk.to/687f67477efc30191580053b/1j0oqms9t";
+    s1.async = true;
+    s1.charset = "UTF-8";
+    s1.setAttribute("crossorigin", "*");
+    document.body.appendChild(s1);
+  }, []);
+
   
   // Check if we're on the homepage
   const isHomepage = pathname === "/";
@@ -67,7 +77,7 @@ export default function RootLayout({ children }) {
                   {!isAdmin && <Navbar />}
                   {children} {/* Children will render as usual */}
 
-                  <ChatBot />
+                  {/* <ChatBot /> */}
 
                 </CartProvider>
               </ToastProvider>

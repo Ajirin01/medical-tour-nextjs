@@ -1,9 +1,10 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { RotateCcw, Star } from 'lucide-react';
-import { useRef, useEffect } from 'react';
 import useSessionSocket from "@/hooks/useSessionSocket";
 import { getSocket } from "@/lib/socket";
+import { useState, useRef, useEffect } from 'react';
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 const AgoraVideoChat = dynamic(() => import('@/components/AgoraVideoChat'), { ssr: false });
 
@@ -18,11 +19,25 @@ const VideoSection = ({
   videoRef,
   iframeRef,
   iframeUrl,
-  handleSessionEnded
+  handleSessionEnded,
+  handleEndUserSession
 }) => {
   const agoraAppId = process.env.NEXT_PUBLIC_VITE_AGORA_API_ID;
 
   const socketRef = useRef();
+
+  const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+
+  const handleEndSession = () => {
+    // emit to backend
+    if (socketRef.current) {
+      socketRef.current.emit("end-session", { sessionId: session.id });
+    }
+
+    setShowConfirmEnd(false);
+    handleSessionEnded(); // optionally call this directly
+  };
+
 
   useEffect(() => {
     socketRef.current = getSocket();
@@ -37,6 +52,21 @@ const VideoSection = ({
       socketRef.current.off("session-ended", handleSessionEnded);
     };
   }, [handleSessionEnded]);
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data?.type === "requestEndCallConfirmation") {
+        setShowConfirmEnd(true);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
+  
 
   if (appointment.session.appointment.status === "pending" && !sessionEnded) {
     return (
@@ -57,6 +87,17 @@ const VideoSection = ({
           className="w-full h-full"
           allow="camera; microphone; fullscreen; speaker; display-capture"
         />
+
+        <ConfirmationDialog
+          isOpen={showConfirmEnd}
+          onClose={() => setShowConfirmEnd(false)}
+          onConfirm={handleEndUserSession}
+          title="End Session?"
+          message="Are you sure you want to end this consultation session? This action cannot be undone."
+          confirmText="Yes, End Session"
+          cancelText="Cancel"
+        />
+
       </div>
     );
   }
