@@ -881,7 +881,8 @@ export default function Ecommerce() {
                             price: getPrice(900),
                             oldPrice: getOldPrice(900),
                             duration: 900,
-                            features: ["Duration: 15 mins", "Quick call", "Summary"],
+                            features: ["Duration: 15 mins", "Quick call", "Summary", "Follow-up", "Pharmacy Referral",
+                                "Laboratory Referral",],
                         },
                         {
                             title: "Delux",
@@ -894,6 +895,7 @@ export default function Ecommerce() {
                                 "Report",
                                 "Follow-up",
                                 "Pharmacy Referral",
+                                "Laboratory Referral",
                             ],
                             isRecommended: true,
                         },
