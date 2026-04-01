@@ -101,6 +101,59 @@ const SessionPage = () => {
     appointmentRef.current = appointment;
   }, [appointment]);
 
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    
+    const handlePatientEndRequest = ({ appointmentId }) => {
+      if (userRole === "user" && appointmentRef.current?.session?.appointment?._id === appointmentId) {
+        setShowConfirmEnd(true);
+      }
+    };
+
+    const handlePatientRejected = ({ appointmentId }) => {
+      if ((userRole === "specialist" || userRole === "consultant") && appointmentRef.current?.session?.appointment?._id === appointmentId) {
+        addToast("Patient refused to end the session.", "error");
+      }
+    };
+
+    socket.on("request-patient-end-session", handlePatientEndRequest);
+    socket.on("patient-rejected-end-session", handlePatientRejected);
+
+    return () => {
+      socket.off("request-patient-end-session", handlePatientEndRequest);
+      socket.off("patient-rejected-end-session", handlePatientRejected);
+    };
+  }, [userRole]);
+
+  const handleRejectEndSession = () => {
+    setShowConfirmEnd(false);
+    
+    if (userRole === "user") {
+      const socket = getSocket();
+      if (socket && appointmentRef.current?.session?.appointment?._id) {
+        socket.emit("patient-rejected-end-session", {
+          appointmentId: appointmentRef.current.session.appointment._id
+        });
+      }
+    }
+  };
+
+  const handleRequestEndSession = () => {
+    const currentAppointment = appointmentRef.current;
+    if (!currentAppointment?.session?.appointment?._id) return;
+    
+    if (userRole === "specialist" || userRole === "consultant") {
+      socketRef.current.emit("request-patient-end-session", {
+        appointmentId: currentAppointment.session.appointment._id
+      });
+      addToast("Awaiting patient's confirmation to end the session...", "info");
+      setShowOptions(false);
+    } else {
+      setShowConfirmEnd(true);
+    }
+  };
+
   const handleEndCall = () => {
     if (videoRef.current) {
       videoRef.current.endCall();
@@ -365,19 +418,23 @@ const SessionPage = () => {
       console.log("📋 Current appointment:", currentAppointment);
   
       const sessionIdMatch = currentAppointment?.session?.appointment?._id === appointmentId;
-      const userIdMatch = currentAppointment?.session?.user?._id === session?.user?.id;
+      
+      // Ensure the logged-in user is either the patient or the specialist of this session
+      const isPatient = currentAppointment?.session?.user?._id === session?.user?.id;
+      const isSpecialist = currentAppointment?.session?.specialist?._id === session?.user?.id;
+      const isParticipant = isPatient || isSpecialist;
   
       console.log("✅ sessionIdMatch:", sessionIdMatch);
-      console.log("✅ userIdMatch:", userIdMatch);
+      console.log("✅ isParticipant:", isParticipant);
   
-      if (sessionIdMatch && userIdMatch) {
+      if (sessionIdMatch && isParticipant) {
         setSessionEnded(true);
         setIsTimerRunning(false);
         setShowRatingField(true);
         handleEndCall();
-        if(specialist.role === "user"){
+        if (specialist?.role === "user" || isSpecialist) {
           addToast("Patient has ended the session", "info", 5000);
-        }else{
+        } else {
           addToast("Specialist has ended the session", "info", 5000);
         }
         router.push(`/admin/appointments/session/completed/${id}`)
@@ -387,7 +444,7 @@ const SessionPage = () => {
     } catch (error) {
       console.error("❌ Error in handleSessionEnded:", error);
     }
-  }, [appointmentRef, session?.user?.id, handleEndSession, handleEndCall]); // Add only necessary dependencies
+  }, [appointmentRef, session?.user?.id, handleEndCall, router, id, addToast]);
   
 
   const handleOpenQuestions = async () => {
@@ -468,7 +525,7 @@ const SessionPage = () => {
           !sessionEnded && (
             <div className="absolute top-16 right-4 bg-gray-800 rounded-xl shadow-xl p-4 w-60 z-[9999999] space-y-3 animate-fade-in border dark:border-gray-700">
               <button
-                onClick={() => setShowConfirmEnd(true)}
+                onClick={handleRequestEndSession}
                 className="flex items-center gap-2 w-full border border-white text-white dark:text-white px-4 py-2 rounded-lg transition hover:text-gray-200"
                 disabled={endingSession}
               >
@@ -539,11 +596,14 @@ const SessionPage = () => {
         <ConfirmationDialog
           isOpen={showConfirmEnd}
           onClose={() => setShowConfirmEnd(false)}
+          onCancel={handleRejectEndSession}
           onConfirm={handleEndSession}
-          title="End Session?"
-          message="Are you sure you want to end this consultation session? This action cannot be undone."
+          title={userRole === "user" ? "Doctor Requested to End Session" : "End Session?"}
+          message={userRole === "user" ? "The doctor has requested to end the session. Please confirm to proceed, as this action cannot be undone." : "Are you sure you want to end this consultation session? This action cannot be undone."}
           confirmText="Yes, End Session"
           cancelText="Cancel"
+          requireIndemnity={userRole === "user"}
+          indemnityMessage="I agree for this session to be ended and understand that this action cannot be undone."
         />
 
         {/* <QuestionsDialog

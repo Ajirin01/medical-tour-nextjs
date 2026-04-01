@@ -113,42 +113,41 @@ export default function StartConsultationPage() {
     const handleSpecialistJoined = (data) => {
       if (data.appointmentId === appointmentId) {
         setSessionStarted(true);
-    
-        socketRef.current.on("session-created", ({ appointmentId, session, specialistToken, patientToken }) => {
-          console.log("session-created");
-    
-          // Store the session and tokens in localStorage for future use
-          const sessionData = { ...session, specialistToken, patientToken };
-          localStorage.setItem("activeVideoSession", JSON.stringify(sessionData));
-
-          console.log(appointmentId, session, specialistToken, patientToken)
-    
-          // Redirect to the session page after storing session and tokens
-          window.location.href = `/admin/appointments/session/${session._id}`;
-        });
       }
     };
     
-  
     socket.on("call-accepted", handleSpecialistJoined);
+
+    socket.on("session-created", ({ appointmentId: incomingId, session, specialistToken, patientToken }) => {
+      if (incomingId === appointmentId) {
+        console.log("session-created");
+        // Store the session and tokens in localStorage for future use
+        const sessionData = { ...session, specialistToken, patientToken };
+        localStorage.setItem("activeVideoSession", JSON.stringify(sessionData));
+
+        // Redirect to the session page after storing session and tokens
+        window.location.href = `/admin/appointments/session/${session._id}`;
+      }
+    });
   
     socket.on("call-rejected", (data) => {
       if (data.appointmentId === appointmentId) {
         setIsInviting(false);
         setInvitationRejected(true);
-        alert("The specialist has rejected the call. Please try again later.");
       }
     });
   
     socket.on("call-timeout", (data) => {
       if (data.appointmentId === appointmentId) {
         setIsInviting(false);
-        alert("The call has timed out. Please try again later.");
+        // We handle timeout exactly like rejection in the UI to allow retrying
+        setInvitationRejected(true);
       }
     });
   
     return () => {
       socket.off("call-accepted", handleSpecialistJoined);
+      socket.off("session-created");
       socket.off("call-rejected");
       socket.off("call-timeout");
     };
@@ -297,10 +296,10 @@ export default function StartConsultationPage() {
   </div>);
 
   return (
-    <div className="p-6 border border-gray-200 rounded-3xl dark:border-gray-800 bg-white dark:bg-gray-900 max-w-4xl mx-auto">
-      <div className="flex flex-col md:flex-row rounded-3xl overflow-hidden">
+    <div className="border border-gray-200 rounded-3xl dark:border-gray-800 bg-white dark:bg-gray-900 max-w-4xl mx-auto overflow-hidden shadow-sm">
+      <div className="flex flex-col md:flex-row h-full">
         {/* Left: Specialist Info */}
-        <div className="md:w-1/3 bg-gradient-to-br from-[var(--color-primary-7)] to-[var(--color-primary-5)] p-6 text-white">
+        <div className="md:w-1/3 bg-gradient-to-br from-[var(--color-primary-7)] to-[var(--color-primary-5)] p-8 text-white flex flex-col justify-center">
           <div className="flex flex-col items-center">
             <img
               src={specialist.profileImage 

@@ -232,28 +232,70 @@ export default function HomePage() {
   return (
     <div className='px-4'>
       {/* <ChatBot /> */}
-      <section className="Hero relative min-h-screen bg-gradient-to-b from-[var(--color-primary-6)] to-white transition-colors overflow-hidden flex items-center rounded-3xl">
-        <div className="intro-text p-6 sm:p-10 md:pl-20 flex flex-col justify-center items-start text-left w-full max-w-4xl z-10">
-          <h2 className="font-extrabold text-4xl md:text-5xl lg:text-6xl  mb-6">
-            <span className="bg-gradient-to-r from-white to-[var(--color-secondary-1)] text-transparent bg-clip-text">Step into the next generation</span>
-            <span className="text-white block mt-2">Healthcare Services</span>
-            <span className="text-[var(--color-secondary-1)] block mt-2">with our</span>
+      <section className="Hero relative min-h-[calc(100vh-2rem)] lg:min-h-[calc(100vh-4rem)] pt-24 pb-12 md:pt-16 md:pb-8 bg-gradient-to-b from-[var(--color-primary-6)] via-blue-500 to-blue-100 transition-colors overflow-hidden flex items-center rounded-3xl z-0 mt-4">
+        
+        {/* Professional Minimalist Grid Pattern Overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-[0.06] mix-blend-overlay" 
+          style={{ 
+            backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`, 
+            backgroundSize: '40px 40px' 
+          }}
+        ></div>
+
+        {/* Soft light orbs for subtle texture */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[10%] left-[20%] w-[40%] h-[40%] bg-white rounded-full blur-[100px] opacity-20"></div>
+        </div>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="intro-text p-6 sm:p-10 md:pl-20 flex flex-col justify-center items-start text-left w-full max-w-4xl relative z-10"
+        >
+          <h2 className="font-extrabold text-4xl md:text-5xl lg:text-6xl mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-white to-blue-100 text-transparent bg-clip-text drop-shadow-sm">Step into the next generation</span>
+            <span className="text-white block mt-2 drop-shadow-md">Healthcare Services</span>
+            <span className="text-white/80 block mt-2 text-3xl md:text-4xl">with our</span>
           </h2>
-          <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8">
+          <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8 drop-shadow-md h-[40px] md:h-[50px]">
             <TypewriterEffect words={serviceTitles} typingSpeed={100} erasingSpeed={50} delayBetweenWords={2000} />
           </div>
-          <Button
-            className="transition-all py-8 px-8 duration-300 hover:scale-105 hover:shadow-xl mt-4 text-lg sm:text-xl font-bold relative overflow-hidden group flex items-center justify-center"
-            borderRadius='rounded-small'
-            border="border-2 border-white rounded-lg"
-            background='bg-gradient-to-r from-[var(--color-primary-6)] to-[var(--color-primary-8)]'
-            textColor='text-white'
-            onClick={() => router.push('/auth/sign-up')}
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="relative mt-4"
           >
-            <span className="relative z-10">Sign Up for Free</span>
-          </Button> 
-        </div>
-        <img src={aidoc.src} alt="robo doctor" className="absolute right-[-35px] bottom-0 w-[35rem] max-w-3xl opacity-30 md:opacity-100" />
+            {/* Soft pulsing glow behind the button */}
+            <div className="absolute -inset-1 bg-white rounded-xl blur-lg opacity-20 animate-pulse"></div>
+            
+            <Button
+              className="transition-all py-4 px-8 duration-300 hover:scale-105 hover:shadow-xl text-lg sm:text-xl font-bold relative overflow-hidden group flex items-center justify-center shadow-lg"
+              borderRadius='rounded-xl'
+              border="border-2 border-white/90"
+              background='bg-gradient-to-r from-[var(--color-primary-6)] to-[var(--color-primary-7)]'
+              textColor='text-white'
+              onClick={() => router.push('/auth/sign-up')}
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                Sign Up for Free
+                <FaArrowRight className="text-sm transition-transform duration-300 group-hover:translate-x-1" />
+              </span>
+            </Button> 
+          </motion.div>
+        </motion.div>
+        
+        <motion.img 
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          src={aidoc.src} 
+          alt="robo doctor" 
+          className="absolute right-[-35px] bottom-0 w-[35rem] max-w-3xl opacity-30 md:opacity-100 z-0 pointer-events-none" 
+        />
       </section>
 
       {/* how it works */}

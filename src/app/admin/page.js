@@ -465,9 +465,9 @@ export default function Ecommerce() {
     },
     {
       title: "Earning",
-      value: `$${calls.reduce((total, call) => total + (call.appointment?.price || 0) * 2, 0)}`,
-      change: calls.length > 0
-        ? `Last: $${(calls[calls.length - 1].durationInMinutes || 0) * 2}`
+      value: `€${calls.filter(c => c.endTime).length * 15}`,
+      change: calls.filter(c => c.endTime).length > 0
+        ? `Last: €15`
         : "No past earning",
       icon: <FaMoneyBill className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",

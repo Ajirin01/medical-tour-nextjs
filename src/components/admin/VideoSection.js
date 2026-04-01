@@ -53,10 +53,22 @@ const VideoSection = ({
     };
   }, [handleSessionEnded]);
 
+  const handleRequestEndSession = () => {
+    if (userRole === "specialist" || userRole === "consultant") {
+      if (socketRef.current) {
+        socketRef.current.emit("request-patient-end-session", {
+          appointmentId: appointment.session.appointment._id
+        });
+      }
+    } else {
+      setShowConfirmEnd(true);
+    }
+  };
+
   useEffect(() => {
     const handleMessage = (event) => {
       if (event.data?.type === "requestEndCallConfirmation") {
-        setShowConfirmEnd(true);
+        handleRequestEndSession();
       }
     };
 
@@ -65,21 +77,12 @@ const VideoSection = ({
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, []);
+  }, [userRole, appointment]);
   
 
   if (appointment.session.appointment.status === "pending" && !sessionEnded) {
     return (
-    //   <div className="relative w-full h-[80vh] rounded-xl overflow-hidden shadow-lg border border-gray-300">
-    //     <AgoraVideoChat
-    //       ref={videoRef}
-    //       agoraAppId={agoraAppId}
-    //       agoraToken={userRole === "specialist" ? specialistToken : patientToken}
-    //       agoraChannelName={id}
-    //     />
-    //   </div>
-
-    <div className="relative z-99999 w-full h-[100vh] rounded-xl overflow-hidden shadow-lg">
+      <div className="relative z-99999 w-full h-[100vh] rounded-xl overflow-hidden shadow-lg">
         <iframe
           ref={iframeRef}
           src={iframeUrl}
@@ -92,10 +95,12 @@ const VideoSection = ({
           isOpen={showConfirmEnd}
           onClose={() => setShowConfirmEnd(false)}
           onConfirm={handleEndUserSession}
-          title="End Session?"
-          message="Are you sure you want to end this consultation session? This action cannot be undone."
+          title={userRole === "user" ? "Doctor Requested to End Session" : "End Session?"}
+          message={userRole === "user" ? "The doctor has requested to end the session. Please confirm to proceed, as this action cannot be undone." : "Are you sure you want to end this consultation session? This action cannot be undone."}
           confirmText="Yes, End Session"
           cancelText="Cancel"
+          requireIndemnity={userRole === "user"}
+          indemnityMessage="I agree for this session to be ended and understand that this action cannot be undone."
         />
 
       </div>

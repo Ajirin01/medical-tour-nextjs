@@ -24,7 +24,11 @@ export default NextAuth({
             }),
           });
 
-          if (!res.ok) throw new Error("Invalid credentials");
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.log(`❌ BACKEND ERROR ON LOGIN | URL: ${API_BASE_URL}/users/login | Status: ${res.status} | Body:`, errorText);
+            throw new Error("Invalid credentials");
+          }
 
           const user = await res.json();
 
