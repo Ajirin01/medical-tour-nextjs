@@ -4,7 +4,6 @@ import { RotateCcw, Star } from 'lucide-react';
 import useSessionSocket from "@/hooks/useSessionSocket";
 import { getSocket } from "@/lib/socket";
 import { useState, useRef, useEffect } from 'react';
-import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 const AgoraVideoChat = dynamic(() => import('@/components/AgoraVideoChat'), { ssr: false });
 
@@ -20,13 +19,12 @@ const VideoSection = ({
   iframeRef,
   iframeUrl,
   handleSessionEnded,
-  handleEndUserSession
+  handleEndUserSession,
+  handleRequestEndSession
 }) => {
   const agoraAppId = process.env.NEXT_PUBLIC_VITE_AGORA_API_ID;
 
   const socketRef = useRef();
-
-  const [showConfirmEnd, setShowConfirmEnd] = useState(false);
 
   const handleEndSession = () => {
     // emit to backend
@@ -34,7 +32,6 @@ const VideoSection = ({
       socketRef.current.emit("end-session", { sessionId: session.id });
     }
 
-    setShowConfirmEnd(false);
     handleSessionEnded(); // optionally call this directly
   };
 
@@ -53,7 +50,7 @@ const VideoSection = ({
     };
   }, [handleSessionEnded]);
 
-  const handleRequestEndSession = () => {
+  const handleRequestEndSessionLocal = () => {
     if (userRole === "specialist" || userRole === "consultant") {
       if (socketRef.current) {
         socketRef.current.emit("request-patient-end-session", {
@@ -61,14 +58,14 @@ const VideoSection = ({
         });
       }
     } else {
-      setShowConfirmEnd(true);
+      handleRequestEndSession(); // Notify parent to show confirmation
     }
   };
 
   useEffect(() => {
     const handleMessage = (event) => {
       if (event.data?.type === "requestEndCallConfirmation") {
-        handleRequestEndSession();
+        handleRequestEndSessionLocal();
       }
     };
 
@@ -77,7 +74,7 @@ const VideoSection = ({
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [userRole, appointment]);
+  }, [userRole, appointment, handleRequestEndSessionLocal]);
   
 
   if (appointment.session.appointment.status === "pending" && !sessionEnded) {
@@ -89,18 +86,6 @@ const VideoSection = ({
           title="Consultation Video Chat"
           className="w-full h-full"
           allow="camera; microphone; fullscreen; speaker; display-capture"
-        />
-
-        <ConfirmationDialog
-          isOpen={showConfirmEnd}
-          onClose={() => setShowConfirmEnd(false)}
-          onConfirm={handleEndUserSession}
-          title={userRole === "user" ? "Doctor Requested to End Session" : "End Session?"}
-          message={userRole === "user" ? "The doctor has requested to end the session. Please confirm to proceed, as this action cannot be undone." : "Are you sure you want to end this consultation session? This action cannot be undone."}
-          confirmText="Yes, End Session"
-          cancelText="Cancel"
-          requireIndemnity={userRole === "user"}
-          indemnityMessage="I agree for this session to be ended and understand that this action cannot be undone."
         />
 
       </div>

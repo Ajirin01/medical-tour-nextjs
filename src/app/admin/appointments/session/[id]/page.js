@@ -106,7 +106,10 @@ const SessionPage = () => {
     if (!socket) return;
     
     const handlePatientEndRequest = ({ appointmentId }) => {
-      if (userRole === "user" && appointmentRef.current?.session?.appointment?._id === appointmentId) {
+      const currentAppointment = appointmentRef.current;
+      const isPatient = currentAppointment?.session?.user?._id === session?.user?.id;
+      
+      if (isPatient && userRole === "user" && currentAppointment?.session?.appointment?._id === appointmentId) {
         setShowConfirmEnd(true);
       }
     };
@@ -143,13 +146,18 @@ const SessionPage = () => {
     const currentAppointment = appointmentRef.current;
     if (!currentAppointment?.session?.appointment?._id) return;
     
-    if (userRole === "specialist" || userRole === "consultant") {
+    const isSpecialist = currentAppointment?.session?.specialist?._id === session?.user?.id || 
+                         userRole === "specialist" || 
+                         userRole === "consultant";
+
+    if (isSpecialist) {
       socketRef.current.emit("request-patient-end-session", {
         appointmentId: currentAppointment.session.appointment._id
       });
       addToast("Awaiting patient's confirmation to end the session...", "info");
       setShowOptions(false);
     } else {
+      // It's the patient requesting to end the session
       setShowConfirmEnd(true);
     }
   };
@@ -517,6 +525,7 @@ const SessionPage = () => {
             videoRef={videoRef}
             handleSessionEnded={handleSessionEnded}
             handleEndUserSession={handleEndSession}
+            handleRequestEndSession={handleRequestEndSession}
           />
         </div>
 
