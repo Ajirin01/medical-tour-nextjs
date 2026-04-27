@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { fetchData, putData } from "@/utils/api";
+import { fetchData, updateData } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { FaSearch, FaEnvelope, FaEnvelopeOpen, FaReply, FaTrash, FaCheckCircle, FaClock, FaCalendarAlt } from "react-icons/fa";
 import Badge from "./ui/badge/Badge";
@@ -40,7 +40,7 @@ const InboxTable = () => {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      await putData(`contact/admin/${id}`, { status: newStatus }, token);
+      await updateData(`contact/admin/${id}`, { status: newStatus }, token);
       fetchMessages();
     } catch (error) {
       console.error("Error updating message status:", error);
