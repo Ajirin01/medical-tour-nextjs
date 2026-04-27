@@ -13,6 +13,7 @@ import useSocketEmitOnline from "@/hooks/useSocketEmitOnline";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import PushNotificationButton from "@/components/PushNotificationButton"; // Import your component
 import { usePathname } from "next/navigation";
+import { ChatBot } from "@/components/gabriel";
 
 
 export default function AdminLayout({ children }) {
@@ -73,7 +74,7 @@ function AdminLayoutContent({ children }) {
       {!isSessionPage && <Backdrop />}
 
       <div
-        className={`flex-1 transition-all duration-300 ease-in-out ${
+        className={`flex-1 min-w-0 transition-all duration-300 ease-in-out ${
           !isSessionPage ? mainContentMargin : ""
         }`}
       >
@@ -99,6 +100,7 @@ function AdminLayoutContent({ children }) {
             }}
           />
         )}
+        <ChatBot />
       </div>
     </div>
   );

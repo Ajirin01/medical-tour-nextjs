@@ -1,17 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from "socket.io-client";
 import { createWebRTCWidget } from '@/lib/webrtcWidget';
-
+import { useSession } from "next-auth/react";
+import IssueCertificateModal from "./gabriel/doctor/IssueCertificateModal";
 
 const VideoCallWidget = ({ roomId }) => {
+    const { data: session } = useSession();
     const [isCallIncoming, setIsCallIncoming] = useState(false);
     const [isInCall, setIsInCall] = useState(false);
     const [audioMuted, setAudioMuted] = useState(false);
     const [videoMuted, setVideoMuted] = useState(false);
+    const [showCertModal, setShowCertModal] = useState(false);
+    
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
     const webrtcInstance = useRef(null);
     const socket = useRef(null);
+
+    const isDoctor = session?.user?.role === "specialist" || session?.user?.role === "doctor";
 
     useEffect(() => {
         if (!roomId || webrtcInstance.current) return;
@@ -50,7 +56,6 @@ const VideoCallWidget = ({ roomId }) => {
     const sendCallRequest = () => {
         if (webrtcInstance.current) {
             webrtcInstance.current.sendCallRequest();
-            // setIsCallIncoming(true);
         }
     };
 
@@ -92,50 +97,72 @@ const VideoCallWidget = ({ roomId }) => {
     return (
         <div className="flex flex-col items-center justify-center p-4">
             <div className="flex gap-4">
-                <div className="resizable border-blue-500">
-                    <video ref={localVideoRef} autoPlay muted playsInline className="video-element" />
+                <div className="resizable border-blue-500 overflow-hidden rounded-2xl shadow-lg bg-black">
+                    <video ref={localVideoRef} autoPlay muted playsInline className="video-element w-full h-full object-cover" />
                 </div>
-                <div className="resizable border-green-500">
-                    <video ref={remoteVideoRef} autoPlay playsInline className="video-element" />
+                <div className="resizable border-green-500 overflow-hidden rounded-2xl shadow-lg bg-black">
+                    <video ref={remoteVideoRef} autoPlay playsInline className="video-element w-full h-full object-cover" />
                 </div>
             </div>
 
             {/* Incoming call notification */}
             {isCallIncoming && (
-                <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 p-4">
-                    <p className="text-lg font-bold mb-4">📞 Incoming Call...</p>
-                    <div className="flex gap-4">
-                        <button onClick={acceptCall} className="bg-green-500 p-3 rounded-full hover:bg-green-600 transition">
-                            Accept
-                        </button>
-                        <button onClick={rejectCall} className="bg-red-500 p-3 rounded-full hover:bg-red-600 transition">
-                            Reject
-                        </button>
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm p-4 text-white">
+                    <div className="bg-gray-900/80 p-10 rounded-3xl border border-white/20 text-center shadow-2xl scale-110">
+                        <div className="relative mb-6">
+                            <div className="absolute inset-0 bg-green-500/20 blur-2xl animate-pulse"></div>
+                            <span className="text-6xl animate-bounce inline-block">📞</span>
+                        </div>
+                        <p className="text-2xl font-bold mb-8">Incoming Consultation...</p>
+                        <div className="flex gap-6">
+                            <button onClick={acceptCall} className="bg-green-600 px-8 py-3 rounded-xl hover:bg-green-500 transition-all font-bold shadow-lg shadow-green-900/20 active:scale-95">
+                                Accept Call
+                            </button>
+                            <button onClick={rejectCall} className="bg-red-600 px-8 py-3 rounded-xl hover:bg-red-500 transition-all font-bold shadow-lg shadow-red-900/20 active:scale-95">
+                                Reject
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
 
             {/* Controls */}
-            <div className="flex gap-4 mt-6">
+            <div className="flex flex-wrap gap-4 mt-8 justify-center">
                 {!isInCall && (
-                    <button onClick={sendCallRequest} className="bg-blue-500 p-3 rounded-full hover:bg-blue-600 transition">
-                        Start Call
+                    <button onClick={sendCallRequest} className="bg-gradient-to-r from-blue-600 to-indigo-700 px-8 py-3 rounded-full text-white font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95">
+                        Start Video Consultation
                     </button>
                 )}
                 {isInCall && (
                     <>
-                        <button onClick={endCall} className="bg-red-500 p-3 rounded-full hover:bg-red-600 transition">
+                        <button onClick={endCall} className="bg-red-600 px-6 py-3 rounded-full text-white font-bold hover:bg-red-500 transition-all shadow-lg active:scale-95">
                             End Call
                         </button>
-                        <button onClick={toggleMuteAudio} className="bg-gray-700 p-3 rounded-full hover:bg-gray-800 transition">
-                            {audioMuted ? 'Unmute Audio' : 'Mute Audio'}
+                        <button onClick={toggleMuteAudio} className="bg-gray-800/80 px-6 py-3 rounded-full text-white font-bold backdrop-blur-md border border-white/10 hover:bg-gray-700 transition-all active:scale-95">
+                            {audioMuted ? '🔇 Unmute' : '🎤 Mute'}
                         </button>
-                        <button onClick={toggleMuteVideo} className="bg-gray-700 p-3 rounded-full hover:bg-gray-800 transition">
-                            {videoMuted ? 'Unmute Video' : 'Mute Video'}
+                        <button onClick={toggleMuteVideo} className="bg-gray-800/80 px-6 py-3 rounded-full text-white font-bold backdrop-blur-md border border-white/10 hover:bg-gray-700 transition-all active:scale-95">
+                            {videoMuted ? '📷 Start Video' : '📹 Stop Video'}
                         </button>
+
+                        {isDoctor && (
+                            <button 
+                                onClick={() => setShowCertModal(true)}
+                                className="bg-indigo-600 px-6 py-3 rounded-full text-white font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center gap-2"
+                            >
+                                📜 Issue Certificate
+                            </button>
+                        )}
                     </>
                 )}
             </div>
+
+            {showCertModal && (
+                <IssueCertificateModal 
+                    sessionId={roomId} 
+                    onClose={() => setShowCertModal(false)} 
+                />
+            )}
         </div>
     );
 };

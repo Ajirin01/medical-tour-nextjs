@@ -207,17 +207,6 @@ const MedicalTourism = () => {
           </div>
         </section>
 
-        {/* Medical Tourism Destinations */}
-        <section className="mb-20">
-          <h2 className="text-4xl font-bold mb-12 text-center">Our Global Health Havens</h2>
-          <div className="relative w-full h-[500px] border border-gray-300 rounded-lg overflow-hidden">
-          <section className="mb-20">
-            <h2 className="text-4xl font-bold mb-12 text-center">Our Global Health Havens</h2>
-            {/* <MapClientOnly /> */}
-          </section>
-          </div>
-        </section>
-
         {/* Testimonials */}
         <section className="mb-20">
           <h2 className="text-4xl font-bold mb-12 text-center">Patient Testimonials</h2>

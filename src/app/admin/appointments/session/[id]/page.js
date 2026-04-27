@@ -17,6 +17,7 @@ import SessionTimer from "@/components/admin/SessionTimer";
 import NotesDialog from "@/components/admin/NotesDialog";
 import PrescriptionDialog from "@/components/admin/PrescriptionDialog";
 import LabReferralDialog from "@/components/admin/LabReferralDialog";
+import MedicalCertificateDialog from "@/components/admin/MedicalCertificateDialog";
 
 import QuestionsDialog from "@/components/admin/QuestionsDialog";
 
@@ -85,6 +86,7 @@ const SessionPage = () => {
     status: "pending"
   });
   const [savingReferral, setSavingReferral] = useState(false);
+  const [showCertDialog, setShowCertDialog] = useState(false);
   
 
   const [newPrescription, setNewPrescription] = useState({ medication: '', dosage: '', frequency: '' });
@@ -566,6 +568,14 @@ const SessionPage = () => {
                 <span>⚕️</span>
                 Lab Referral
               </button>
+
+              <button
+                onClick={() => setShowCertDialog(true)}
+                className="flex items-center gap-2 w-full border border-white text-white dark:text-white px-4 py-2 rounded-lg transition hover:text-gray-200"
+              >
+                <span>📜</span>
+                Medical Certificate
+              </button>
             </div>
 
         )}
@@ -578,6 +588,8 @@ const SessionPage = () => {
           setSessionNotes={setSessionNotes}
           handleSaveNotes={handleSaveNotes}
           savingNotes={savingNotes}
+          patientId={appointment?.session?.user?._id || appointment?.session?.user}
+          token={token}
         />
 
         <PrescriptionDialog
@@ -589,6 +601,8 @@ const SessionPage = () => {
           setNewPrescription={setNewPrescription}
           handleAddPrescription={handleAddPrescription}
           savingPrescription={savingPrescription}
+          patientId={appointment?.session?.user?._id || appointment?.session?.user}
+          token={token}
         />
 
         <LabReferralDialog
@@ -600,6 +614,17 @@ const SessionPage = () => {
           setNewReferral={setNewReferral}
           handleAddReferral={handleAddReferral}
           savingReferral={savingReferral}
+          patientId={appointment?.session?.user?._id || appointment?.session?.user}
+          token={token}
+        />
+
+        <MedicalCertificateDialog 
+          show={showCertDialog}
+          onClose={() => setShowCertDialog(false)}
+          appointment={appointment.session.appointment}
+          session={appointment.session}
+          token={token}
+          specialistEmail={session?.user?.email}
         />
 
         <ConfirmationDialog

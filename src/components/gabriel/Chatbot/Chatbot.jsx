@@ -63,7 +63,7 @@ const MessageWithDisclaimer = ({ text, sender, showDisclaimer }) => {
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { ChatBotOpen, chatbotAttentionTriggered } = useSelector((state) => state.popUp);
+  const { chatBotOpen, chatbotAttentionTriggered } = useSelector((state) => state.popUp);
   const dispatch = useDispatch();
   const [tags, setTags] = useState([]);
   const [isAddingTags, setIsAddingTags] = useState(false);
@@ -168,7 +168,7 @@ const ChatBot = () => {
       setLoading(false);
       addMessage(data.message || data.error, "bot");
       addMessage(
-        "Try a different set of symptoms, or would you like to contact a consultant?",
+        "Try a different set of symptoms, or would you like to contact a consultant? You can also ask me anything directly!",
         "bot"
       );
       console.log("Response:", data);
@@ -180,6 +180,9 @@ const ChatBot = () => {
     }
   };
 
+  const [threadId, setThreadId] = useState(null);
+  const NODE_BASE_URL = process.env.NEXT_PUBLIC_NODE_BASE_URL || "http://localhost:5000";
+
   const handleSendQuestion = () => {
     if (userInput.trim() === "") return;
     addMessage(userInput, "user");
@@ -190,40 +193,39 @@ const ChatBot = () => {
   const sendQuestion = async (question) => {
     setLoading(true);
 
-  
     try {
-      const data = await postData("/chatbot/predict_disease", {
-        symptoms: question,
+      const token = session?.user?.jwt;
+      const response = await fetch(`${NODE_BASE_URL}/chatbot/medical_ai`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          message: question,
+          thread_id: threadId || "default",
+        }),
       });
-  
+
+      if (!response.ok) {
+        throw new Error("Failed to get response from AI");
+      }
+
+      const data = await response.json();
+
+      if (data.thread_id && data.thread_id !== threadId) {
+        setThreadId(data.thread_id);
+      }
+
       setLoading(false);
-  
-      if (data.error) {
-        addMessage(data.error, "bot");
-        return;
-      }
-  
-      if (data.predicted_diseases && data.predicted_diseases.length > 0) {
-        const result = `Possible conditions:\n- ${data.predicted_diseases.join("\n- ")}`;
-        addMessage(result, "bot");
-  
-        if (data.disclaimer) {
-          addMessage(data.disclaimer, "bot");
-        }
-  
-        return;
-      }
-  
-      // Fallback
-      addMessage(data.message || "Hmm, I couldn't determine anything from that. Try more symptoms.", "bot");
+      addMessage(data.response, "bot");
     } catch (error) {
       console.error("Error:", error);
       setLoading(false);
       addMessage("There was a problem with the response, please try again.", "bot");
     }
   };
-  
-  
+   
 
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
@@ -244,10 +246,10 @@ const ChatBot = () => {
   }, [messages, tags]);
 
   useEffect(() => {
-    if (ChatBotOpen && !isOpen) {
+    if (chatBotOpen && !isOpen) {
       toggleChatBot();
     }
-  }, [ChatBotOpen]);
+  }, [chatBotOpen]);
 
   useEffect(() => {
     if (chatbotAttentionTriggered) {

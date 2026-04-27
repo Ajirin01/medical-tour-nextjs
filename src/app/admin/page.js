@@ -25,6 +25,7 @@ import { fetchData } from "@/utils/api";
 import { triggerChatbotAttention, openChatBot } from "@/store/popUpSlice";
 import { useDispatch } from "react-redux";
 import RecentTransactions from "@/components/admin/ecommerce/RecentTransactions";
+import { CURRENCY_CODE, CURRENCY_SYMBOL } from "@/utils/currency";
 
 import { setPrice, setSpecialist, setDuration } from '@/store/specialistSlice';
 import { CheckCircle, X } from "lucide-react";
@@ -130,14 +131,16 @@ export default function Ecommerce() {
   const fetchSessionData = async () => {
     try {
       const response = await fetchData("video-sessions/by-user/all", token); // Adjust to your actual endpoint
-      const sessions = response.sessions;
-      // console.log(response.sessions)
+      const sessions = response.sessions || [];
+      console.log("Fetched sessions:", sessions);
+
       // Prepare data for chart (e.g., sessions count by month)
       const sessionCountsByMonth = Array(12).fill(0);
       const prescriptionCountsByMonth = Array(12).fill(0);
       const sessionPrescriptions = []
 
       sessions.forEach((session) => {
+        if (!session.createdAt) return;
         const month = new Date(session.createdAt).getMonth(); // Get month from the session date
         sessionCountsByMonth[month]++;
 
@@ -149,11 +152,12 @@ export default function Ecommerce() {
 
       // console.log(response.sessions)
 
-      setCalls(response.sessions);
+      setCalls(response.sessions || []);
       setLoading(false)
       setPrescriptions(sessionPrescriptions);
     } catch (error) {
       console.error("Error fetching session data:", error);
+      setLoading(false);
     }
   };
 
@@ -175,7 +179,7 @@ export default function Ecommerce() {
       }
       const response = await fetchData(url, token);
       // console.log(response.data)
-      setUpcomingAppointments(response.data);
+      setUpcomingAppointments(response?.data || []);
     } catch (error) {
       console.error("Error fetching session data:", error);
     }
@@ -213,7 +217,7 @@ export default function Ecommerce() {
        const url = `users/get-all/no-pagination`
       const response = await fetchData(url, token);
       // console.log(response)
-      setPatients(response);
+      setPatients(response || []);
     } catch (error) {
       console.error("Error fetching session data:", error);
     }
@@ -224,7 +228,7 @@ export default function Ecommerce() {
       const url = `users/get-all/doctors/no-pagination`
       const response = await fetchData(url, token);
       // console.log(response)
-      setDoctors(response);
+      setDoctors(response || []);
     } catch (error) {
       console.error("Error fetching session data:", error);
     }
@@ -244,7 +248,7 @@ export default function Ecommerce() {
       const url = `payments/all/no-pagination`;
       const response = await fetchData(url, token);
       console.log(response.payments);
-      setRevenue(response.payments);
+      setRevenue(response?.payments || []);
   
       // console.log("Total Revenue:", calTotalRevnue(response.payments).toFixed(2));
     } catch (error) {
@@ -258,7 +262,7 @@ export default function Ecommerce() {
       const url = `pharmacies/get-all/no-pagination`
       const response = await fetchData(url, token);
       // console.log(response)
-      setPharmacies(response);
+      setPharmacies(response || []);
     } catch (error) {
       console.error("Error fetching session data:", error);
     }
@@ -363,8 +367,8 @@ export default function Ecommerce() {
   }
 
   const handleRevenues = () => {
-
-  }
+    router.push("/admin/transactions");
+  };
 
   const handleConsultations = () => {
 
@@ -417,10 +421,10 @@ export default function Ecommerce() {
   const stats = [
     {
       title: "Next Appointment",
-      value: upcomingAppointments.length > 0 ? 
+      value: upcomingAppointments?.length > 0 ? 
         new Date(upcomingAppointments[0].date).toLocaleDateString() : 
         "None",
-      change: upcomingAppointments.length > 0 ? 
+      change: upcomingAppointments?.length > 0 ? 
         `with ${ userRole === "user" ? 'Dr.'+ upcomingAppointments[0].consultant?.firstName || 'Specialist' : upcomingAppointments[0].patient?.firstName}` : 
         "No scheduled appointments",
       icon: <FaCalendarAlt className="text-green-600" size={20} />,
@@ -431,7 +435,7 @@ export default function Ecommerce() {
     },
     {
       title: "Medical Records",
-      value: recordsCount?.toString(),
+      value: recordsCount?.toString() || "0",
       change: lastUpdated ? `Last updated ${formatLastUpdated(lastUpdated)}` : "No records yet",
       icon: <FaFileMedical className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
@@ -441,7 +445,7 @@ export default function Ecommerce() {
     },
     {
       title: "Prescriptions",
-      value: prescriptions?.length?.toString(),
+      value: prescriptions?.length?.toString() || "0",
       change: prescriptions?.length > 0 ? 
         `${prescriptions?.filter(med => med.remainingDays < 10).length} need${prescriptions?.filter(med => med.remainingDays < 10).length === 1 ? 's' : ''} refill soon` : 
         "No active prescriptions",
@@ -453,9 +457,9 @@ export default function Ecommerce() {
     },
     {
       title: "Consultations",
-      value: calls.length.toString(),
-      change: calls.length > 0 ? 
-        `Last: ${new Date(calls[calls.length-1].endTime).toLocaleDateString()}` : 
+      value: (calls?.length || 0).toString(),
+      change: calls?.length > 0 ? 
+        `Last: ${new Date(calls[calls.length-1].endTime || calls[calls.length-1].createdAt).toLocaleDateString()}` : 
         "No past consultations",
       icon: <FaUserMd className="text-red-600" size={20} />,
       bgColor: "bg-red-50",
@@ -465,9 +469,9 @@ export default function Ecommerce() {
     },
     {
       title: "Earning",
-      value: `€${calls.filter(c => c.endTime).length * 15}`,
-      change: calls.filter(c => c.endTime).length > 0
-        ? `Last: €15`
+      value: `${CURRENCY_SYMBOL}${(calls?.filter(c => c.endTime) || []).length * 15}`,
+      change: (calls?.filter(c => c.endTime) || []).length > 0
+        ? `Last: ${CURRENCY_SYMBOL}15`
         : "No past earning",
       icon: <FaMoneyBill className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
@@ -478,7 +482,7 @@ export default function Ecommerce() {
 
     {
       title: "Patients",
-      value: patients?.length?.toString(),
+      value: patients?.length?.toString() || "0",
       change: patients?.length > 0
         ? `Latest: ${patients[patients?.length - 1].firstName || 'Patient'}`
         : "No patients found",
@@ -490,10 +494,10 @@ export default function Ecommerce() {
     },
     {
       title: "Doctors",
-      value: doctors?.length.toString(),
+      value: doctors?.length?.toString() || "0",
       change: doctors?.length > 0
         ? `${doctors?.filter(doc => doc?.approvalStatus === "pending").length} pending approval(s)`
-        : "No active pharmacies",
+        : "No doctors found",
       icon: <FaUserMd className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
       iconBg: "bg-blue-100",
@@ -502,10 +506,10 @@ export default function Ecommerce() {
     },
     {
       title: "Pharmacies",
-      value: pharmacies?.length?.toString(),
+      value: pharmacies?.length?.toString() || "0",
       change: pharmacies?.length > 0
         ? `${pharmacies?.filter(pharm => pharm?.status === "unverified").length} pending approval(s)`
-        : "No active pharmacies",
+        : "No pharmacies found",
       icon: <FaPills className="text-purple-600" size={20} />,
       bgColor: "bg-purple-50",
       iconBg: "bg-purple-100",
@@ -514,9 +518,9 @@ export default function Ecommerce() {
     },
     {
       title: "Revenue",
-      value: `$${revenue ? calTotalRevnue(revenue)?.toFixed(2) : 'loading...'}`,
-      change: calls.length > 0
-        ? `Last: ${revenue ? new Date(revenue[0].created * 1000).toLocaleDateString() : 'loading...'}`
+      value: `${CURRENCY_SYMBOL}${revenue ? calTotalRevnue(revenue)?.toFixed(2) : '0.00'}`,
+      change: revenue?.length > 0
+        ? `Last: ${new Date(revenue[0].created * 1000).toLocaleDateString()}`
         : "No past payments",
       icon: <FaMoneyBill className="text-red-600" size={20} />,
       bgColor: "bg-red-50",
