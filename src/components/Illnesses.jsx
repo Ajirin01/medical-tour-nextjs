@@ -8,6 +8,7 @@ import ModalContainer from "@/components/gabriel/ModalContainer";
 import { FindSpecialistModal, PricingModal, CheckoutModal } from "@/components/gabriel";
 import { useDispatch, useSelector } from "react-redux";
 import { setSpecialist, setPrice, setDuration, resetBooking } from "@/store/specialistSlice";
+import io from "socket.io-client";
 import { CURRENCY_CODE } from "@/utils/currency";
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
@@ -137,7 +138,7 @@ const GPServicesIllnesses = ({ limit }) => {
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  {isDoctorOnline ? "CONSULT" : "BOOK"}
+                  {isDoctorOnline ? "CONSULT" : "BOOK APPOINTMENT"}
                 </button>
               </div>
             </div>
