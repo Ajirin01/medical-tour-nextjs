@@ -22,7 +22,10 @@ const SessionDetailsPage = () => {
     prescriptions: [],
     labReferrals: [],
     sessionNotes: "",
+    isMedicalTourism: false,
+    recommendedHospital: "",
   });
+  const [hospitals, setHospitals] = useState([]);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -33,6 +36,8 @@ const SessionDetailsPage = () => {
           prescriptions: res.session.prescriptions || [],
           labReferrals: res.session.labReferrals || [],
           sessionNotes: res.session.sessionNotes || "",
+          isMedicalTourism: res.session.isMedicalTourism || false,
+          recommendedHospital: res.session.recommendedHospital || "",
         });
       } catch (error) {
         console.error(error);
@@ -42,6 +47,16 @@ const SessionDetailsPage = () => {
       }
     };
     if (id && token) loadSession();
+
+    const loadHospitals = async () => {
+      try {
+        const res = await fetchData("hospitals", token);
+        setHospitals(res.data || []);
+      } catch (error) {
+        console.error("Failed to fetch hospitals:", error);
+      }
+    };
+    loadHospitals();
   }, [id, token]);
 
   const handleChange = (index, field, value, type) => {
@@ -73,6 +88,8 @@ const SessionDetailsPage = () => {
           prescriptions: form.prescriptions,
           labReferrals: form.labReferrals,
           sessionNotes: form.sessionNotes,
+          isMedicalTourism: form.isMedicalTourism,
+          recommendedHospital: form.recommendedHospital || null,
         },
         token
       );
@@ -260,6 +277,51 @@ const SessionDetailsPage = () => {
           >
             📄 Preview Referral Sheet
           </Link>
+        </div>
+      </div>
+
+      {/* Medical Tourism Flagging */}
+      <div className="mb-6 border-t pt-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <span className="text-blue-600">✈️</span> Medical Tourism Recommendation
+        </h2>
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              checked={form.isMedicalTourism}
+              disabled={isPatient}
+              onChange={(e) => setForm({ ...form, isMedicalTourism: e.target.checked })}
+            />
+            <span className="font-medium text-gray-800 dark:text-gray-200">
+              Flag this consultation as requiring Medical Tourism
+            </span>
+          </label>
+          
+          {form.isMedicalTourism && (
+            <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Recommend a Hospital (Optional)
+              </label>
+              <select
+                className="w-full p-2 border rounded bg-white dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                value={form.recommendedHospital}
+                disabled={isPatient}
+                onChange={(e) => setForm({ ...form, recommendedHospital: e.target.value })}
+              >
+                <option value="">-- Select a Hospital --</option>
+                {hospitals.map((hospital) => (
+                  <option key={hospital._id} value={hospital._id}>
+                    {hospital.name} ({hospital.location?.country})
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-xs text-gray-500 italic">
+                Note: Tagging this will notify the administration team to follow up with the patient regarding international treatment options.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

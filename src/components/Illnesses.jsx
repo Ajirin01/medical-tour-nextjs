@@ -8,6 +8,7 @@ import ModalContainer from "@/components/gabriel/ModalContainer";
 import { FindSpecialistModal, PricingModal, CheckoutModal } from "@/components/gabriel";
 import { useDispatch, useSelector } from "react-redux";
 import { setSpecialist, setPrice, setDuration, resetBooking } from "@/store/specialistSlice";
+import { openChatBot, triggerChatbotAttention } from "@/store/popUpSlice";
 import io from "socket.io-client";
 import { CURRENCY_CODE } from "@/utils/currency";
 
@@ -90,6 +91,11 @@ const GPServicesIllnesses = ({ limit }) => {
     }
   };
 
+  const handleAiCheck = () => {
+    dispatch(triggerChatbotAttention());
+    dispatch(openChatBot(true));
+  };
+
   const openCheckoutModal = (price, duration) => {
     dispatch(setPrice(price));
     dispatch(setDuration(duration));
@@ -128,16 +134,24 @@ const GPServicesIllnesses = ({ limit }) => {
             />
             <div className="flex flex-col justify-between flex-1">
               <h3 className="text-md font-semibold text-gray-800">{illness.name}</h3>
-              <button
-                onClick={openActionModal}
-                className={`mt-2 w-fit text-sm px-4 py-2 rounded-lg transition font-medium ${
-                  isDoctorOnline
-                    ? "bg-green-500 text-white hover:bg-green-600 shadow-md transform hover:scale-105"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {isDoctorOnline ? "CONSULT NOW" : "BOOK APPOINTMENT"}
-              </button>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={openActionModal}
+                  className={`text-xs px-3 py-1.5 rounded-lg transition font-medium flex-1 ${
+                    isDoctorOnline
+                      ? "bg-green-500 text-white hover:bg-green-600 shadow-md transform hover:scale-105"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {isDoctorOnline ? "CONSULT" : "BOOK"}
+                </button>
+                <button
+                  onClick={handleAiCheck}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition font-medium border border-blue-100"
+                >
+                  AI CHECK
+                </button>
+              </div>
             </div>
           </motion.div>
         ))}

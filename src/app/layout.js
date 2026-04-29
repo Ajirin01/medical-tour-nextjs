@@ -77,7 +77,7 @@ export default function RootLayout({ children }) {
                   {!isAdmin && <Navbar />}
                   {children} {/* Children will render as usual */}
 
-                  {/* <ChatBot /> */}
+                  {!isAdmin && <ChatBot />}
 
                 </CartProvider>
               </ToastProvider>

@@ -208,7 +208,14 @@ const VideoSessionsPage = () => {
                     <TableRow key={videoSession._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                       <TableCell className="font-medium text-gray-900 dark:text-gray-100">
                         <div className="flex flex-col">
-                            <span>{videoSession.user?.firstName} {videoSession.user?.lastName}</span>
+                            <div className="flex items-center gap-2">
+                                <span>{videoSession.user?.firstName} {videoSession.user?.lastName}</span>
+                                {videoSession.isMedicalTourism && (
+                                    <Badge size="xs" color="warning" className="text-[10px] bg-amber-100 text-amber-700 border-amber-200">
+                                        Medical Tourism
+                                    </Badge>
+                                )}
+                            </div>
                             <span className="text-xs text-gray-400 font-normal">{videoSession.user?.email || "No email"}</span>
                         </div>
                       </TableCell>
