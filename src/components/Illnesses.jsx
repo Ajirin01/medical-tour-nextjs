@@ -8,8 +8,6 @@ import ModalContainer from "@/components/gabriel/ModalContainer";
 import { FindSpecialistModal, PricingModal, CheckoutModal } from "@/components/gabriel";
 import { useDispatch, useSelector } from "react-redux";
 import { setSpecialist, setPrice, setDuration, resetBooking } from "@/store/specialistSlice";
-import { openChatBot, triggerChatbotAttention } from "@/store/popUpSlice";
-import io from "socket.io-client";
 import { CURRENCY_CODE } from "@/utils/currency";
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
@@ -91,11 +89,7 @@ const GPServicesIllnesses = ({ limit }) => {
     }
   };
 
-  const handleAiCheck = () => {
-    dispatch(triggerChatbotAttention());
-    dispatch(openChatBot(true));
-  };
-
+ 
   const openCheckoutModal = (price, duration) => {
     dispatch(setPrice(price));
     dispatch(setDuration(duration));
@@ -144,12 +138,6 @@ const GPServicesIllnesses = ({ limit }) => {
                   }`}
                 >
                   {isDoctorOnline ? "CONSULT" : "BOOK"}
-                </button>
-                <button
-                  onClick={handleAiCheck}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition font-medium border border-blue-100"
-                >
-                  AI CHECK
                 </button>
               </div>
             </div>
