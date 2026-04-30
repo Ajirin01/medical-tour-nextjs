@@ -1,14 +1,14 @@
 export const faqItems = [
   {
-    question: "What is Sozo Digicare?",
-    answer: "Sozo Digicare is a global telehealth platform providing accessible and secure online medical consultations, fully compliant with international privacy and health regulations such as GDPR and HIPAA."
+    question: "What is Sozodigicare?",
+    answer: "Sozodigicare is a global telehealth platform providing accessible and secure online medical consultations, fully compliant with international privacy and health regulations such as GDPR and HIPAA."
   },
   {
-    question: "How does Sozo Digicare work?",
+    question: "How does Sozodigicare work?",
     answer: "Simply complete a health questionnaire and book an appointment instantly or choose a convenient future date. Consultations are conducted via secure video calls with licensed healthcare professionals."
   },
   {
-    question: "Is Sozo Digicare suitable for everyone?",
+    question: "Is Sozodigicare suitable for everyone?",
     answer: "Our doctors take extra precautions as they do not perform physical examinations or have access to your full medical history. We serve most people, but for complex or emergency issues, in-person care may be required."
   },
   {
@@ -17,14 +17,14 @@ export const faqItems = [
   },
   {
     question: "What are your hours of operation?",
-    answer: "Sozo Digicare is available 24/7, including weekends and holidays, ensuring that you always have access to healthcare when you need it."
+    answer: "Sozodigicare is available 24/7, including weekends and holidays, ensuring that you always have access to healthcare when you need it."
   },
   {
-    question: "Can I access Sozo Digicare from anywhere?",
+    question: "Can I access Sozodigicare from anywhere?",
     answer: "Yes. As long as you have an internet connection and a device with a camera and microphone, you can access our services from anywhere in the world."
   },
   {
-    question: "What makes Sozo Digicare different from other telehealth platforms?",
+    question: "What makes Sozodigicare different from other telehealth platforms?",
     answer: "We combine affordability, global access, multilingual support, and a wide range of specialties—delivered by licensed and experienced doctors—to give you a seamless, high-quality healthcare experience."
   },
   {
@@ -57,7 +57,7 @@ export const faqItems = [
   },
   {
     question: "What if I have issues at the pharmacy?",
-    answer: "You can contact us at contact@SozoDigicare.com and we’ll coordinate with the pharmacy on your behalf to resolve any delays or errors."
+    answer: "You can contact us at contact@Sozodigicare.com and we’ll coordinate with the pharmacy on your behalf to resolve any delays or errors."
   },
   {
     question: "Will I be notified when my prescription is ready?",

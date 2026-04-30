@@ -37,7 +37,7 @@ import { loadStripe } from '@stripe/stripe-js'
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 
-const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
+const ConsultationBookingPageContent = ({showSpecialistCategories, targetCategory}) => {
   const dispatch = useDispatch();
 
   // console.log(!showSpecialistCategories)
@@ -205,26 +205,16 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
           const slotId = slot._id;
           if (bookedSlotIds.has(slotId)) return false; // Exclude already booked slots
   
-          if (!showSpecialistCategories) {
-            if (slot.category !== "cert") return false;
-  
-            if (slot.type === 'recurring') {
-              return slot.dayOfWeek === selectedDayName;
-            } else if (slot.type === 'one-time') {
-              const parsedDate = format(new Date(slot.date), 'yyyy-MM-dd');
-              const rawDateString = typeof slot.date === 'string' ? slot.date.substring(0, 10) : parsedDate;
-              return parsedDate === selectedDateString || rawDateString === selectedDateString;
-            }
-          } else {
-            if (slot.category !== "general") return false;
-  
-            if (slot.type === 'recurring') {
-              return slot.dayOfWeek === selectedDayName;
-            } else if (slot.type === 'one-time') {
-              const parsedDate = format(new Date(slot.date), 'yyyy-MM-dd');
-              const rawDateString = typeof slot.date === 'string' ? slot.date.substring(0, 10) : parsedDate;
-              return parsedDate === selectedDateString || rawDateString === selectedDateString;
-            }
+          // Use explicit targetCategory if provided, otherwise fallback to existing logic
+          const filterCategory = targetCategory || (showSpecialistCategories ? 'general' : 'cert');
+          if (slot.category !== filterCategory) return false;
+
+          if (slot.type === 'recurring') {
+            return slot.dayOfWeek === selectedDayName;
+          } else if (slot.type === 'one-time') {
+            const parsedDate = format(new Date(slot.date), 'yyyy-MM-dd');
+            const rawDateString = typeof slot.date === 'string' ? slot.date.substring(0, 10) : parsedDate;
+            return parsedDate === selectedDateString || rawDateString === selectedDateString;
           }
   
           return false;
@@ -275,10 +265,8 @@ const ConsultationBookingPageContent = ({showSpecialistCategories}) => {
       const endDate = `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
       
       // Determine category filter
-      let category = "general";
-      if (!showSpecialistCategories) {
-        category = "cert";
-      } else if (selectedCategory) {
+      let category = targetCategory || (showSpecialistCategories ? "general" : "cert");
+      if (selectedCategory) {
         // If it's the specific "Personal" or "Business" etc, the backend expectation is 'general' vs 'cert'
         // or the specific name. Currently backend uses 'category' field from Availability model.
         // I'll use cert for cert, general for everything else if not specified.

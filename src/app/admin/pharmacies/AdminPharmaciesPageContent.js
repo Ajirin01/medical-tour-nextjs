@@ -25,7 +25,7 @@ const PharmaciesPage = () => {
         const url = statusFilter
           ? `/pharmacies/get-all/no-pagination?status=${statusFilter}`
           : `/pharmacies/get-all/no-pagination`;
-        const data = await fetchData(url);
+        const data = await fetchData(url, token);
 
         console.log(data)
         setPharmacies(data);

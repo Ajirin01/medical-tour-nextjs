@@ -2,9 +2,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fetchData } from "@/utils/api"; // Using custom API utility
+import { useSession } from "next-auth/react";
 
 const AddProduct = () => {
   const router = useRouter();
+  const { data: session } = useSession();
+  const token = session?.user?.jwt;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,11 +31,12 @@ const AddProduct = () => {
   // Fetch categories, brands, and pharmacies
   useEffect(() => {
     const fetchDataFromAPI = async () => {
+      if (!token) return;
       try {
         const [categoryRes, brandRes, pharmacyRes] = await Promise.all([
-          fetchData("categories/get-all/no-pagination"),
-          fetchData("brands/get-all/no-pagination"),
-          fetchData("pharmacies/get-all/no-pagination"),
+          fetchData("categories/get-all/no-pagination", token),
+          fetchData("brands/get-all/no-pagination", token),
+          fetchData("pharmacies/get-all/no-pagination", token),
         ]);
         setCategories(categoryRes);
         setBrands(brandRes);
@@ -41,8 +45,8 @@ const AddProduct = () => {
         console.error("Error fetching data:", error);
       }
     };
-    fetchDataFromAPI();
-  }, []);
+    if (token) fetchDataFromAPI();
+  }, [token]);
 
   // Handle input changes
   const handleChange = (e) => {

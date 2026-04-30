@@ -84,8 +84,9 @@ function StartConsultationPageContent() {
 
   useEffect(() => {
     const loadSpecialist = async () => {
+      if (!token) return;
       try {
-        const data = await fetchData(`users/${specialistId}`);
+        const data = await fetchData(`users/${specialistId}`, token);
         setSpecialist(data);
       } catch (err) {
         console.error("❌ Failed to fetch specialist:", err);
@@ -94,13 +95,13 @@ function StartConsultationPageContent() {
       }
     };
 
-    if (specialistId) loadSpecialist();
-  }, [specialistId]);
+    if (specialistId && token) loadSpecialist();
+  }, [specialistId, token]);
 
   useEffect(() => {
-    if (!socketRef.current || !appointmentId) return;
+    if (!socketRef.current || !appointmentId || !token) return;
 
-    fetchData(`consultation-appointments/${appointmentId}`)
+    fetchData(`consultation-appointments/${appointmentId}`, token)
     .then(( appointment ) => {
       setAppointment(appointment);
     })
@@ -152,7 +153,7 @@ function StartConsultationPageContent() {
       socket.off("call-rejected");
       socket.off("call-timeout");
     };
-  }, [appointmentId, router]);
+  }, [appointmentId, router, token]);
 
 
   useEffect(() => {

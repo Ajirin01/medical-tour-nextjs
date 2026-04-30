@@ -45,7 +45,7 @@ function CertificatesConsultationPageContent() {
               ← Back to Appointments
             </Link>
           </div>
-          <ConsultationBookingPageContent showSpecialistCategories={false} />
+          <ConsultationBookingPageContent showSpecialistCategories={false} targetCategory="cert" />
         </div>
       </div>
     );

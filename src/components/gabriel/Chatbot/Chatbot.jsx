@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { BsRobot, BsX } from "react-icons/bs";
+import { usePathname } from "next/navigation";
 import { IoMdArrowBack } from "react-icons/io";
 import { RiCustomerService2Fill } from "react-icons/ri";
 import { IoCloseCircleOutline } from "react-icons/io5";
@@ -11,6 +12,9 @@ import { openChatBot, resetChatbotAttention } from "@/store/popUpSlice";
 import { useRouter } from "next/navigation";
 import { postData } from "@/utils/api";
 import { useSession } from "next-auth/react";
+import io from "socket.io-client";
+
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
 
 const apiUrl = process.env.NEXT_PUBLIC_NODE_BASE_URL;
 
@@ -22,7 +26,7 @@ const exampleMessages = [
   },
 ];
 
-const MessageWithDisclaimer = ({ text, sender, showDisclaimer }) => {
+const MessageWithDisclaimer = ({ text, sender, showDisclaimer, isDoctorOnline }) => {
   const router = useRouter();
 
   return (
@@ -41,7 +45,7 @@ const MessageWithDisclaimer = ({ text, sender, showDisclaimer }) => {
         sender === 'bot' 
           ? 'text-gray-800' 
           : 'text-white'
-      } text-sm md:text-base`}>
+      } text-sm md:text-base whitespace-pre-wrap`}>
         {text}
       </p>
       {sender === "bot" && showDisclaimer && (
@@ -50,10 +54,10 @@ const MessageWithDisclaimer = ({ text, sender, showDisclaimer }) => {
             Disclaimer: This AI assistant is not qualified to give medical advice. Please consult with a healthcare professional for accurate diagnosis and treatment.
           </p>
           <button
-            onClick={() => router.push("/admin/available-specialists")}
-            className="mt-2 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors bg-white/50 px-3 py-1 rounded-full"
+            onClick={() => router.push(isDoctorOnline ? "/gp-consultation" : "/admin/availabilities")}
+            className="mt-2 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors bg-white/50 px-3 py-1 rounded-full font-bold"
           >
-            <RiCustomerService2Fill /> Speak to a Consultant
+            <RiCustomerService2Fill /> {isDoctorOnline ? "Consult a Doctor Now" : "Book an Appointment"}
           </button>
         </div>
       )}
@@ -78,6 +82,23 @@ const ChatBot = () => {
   const router = useRouter();
   const [isAttentionEffect, setIsAttentionEffect] = useState(false);
   const [userInput, setUserInput] = useState("");
+  const [onlineGPs, setOnlineGPs] = useState([]);
+  const pathname = usePathname();
+  const isHomepage = pathname === "/";
+
+  useEffect(() => {
+    socket.emit("get-online-specialists");
+    socket.on("update-specialists", (data) => {
+        const gpsOnly = data.filter((specialist) => specialist.category === "General Practitioner");
+        setOnlineGPs(gpsOnly);
+    });
+
+    return () => {
+      socket.off("update-specialists");
+    };
+  }, []);
+
+  const isDoctorOnline = onlineGPs.length > 0;
 
   const tabs = ["home", "symptoms", "faq"];
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
@@ -150,7 +171,7 @@ const ChatBot = () => {
     const newMessage = { 
       text, 
       sender,
-      showDisclaimer: sender === 'bot' && text?.includes('response') // Only show disclaimer for bot responses
+      showDisclaimer: sender === 'bot' // Always show for bot messages
     };
     setTimeout(() => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -323,6 +344,7 @@ const ChatBot = () => {
                         text={message.text} 
                         sender={message.sender} 
                         showDisclaimer={message.showDisclaimer}
+                        isDoctorOnline={isDoctorOnline}
                       />
                     </div>
                   ))}
@@ -372,19 +394,21 @@ const ChatBot = () => {
           </div>
         )}
       </div>
-      <button
-        onClick={toggleChatBot}
-        className={`absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-[5px] md:p-[10px] shadow-lg hover:scale-110 transition-transform duration-300 ${isAttentionEffect ? "animate-pulse" : ""
-          }`}
-      >
-        <div className="border-2 border-white rounded-full p-2">
-          {isOpen ? (
-            <BsX className="rotate-pop" size={25} />
-          ) : (
-            <BsRobot className="rotate-pop" size={25} />
-          )}
-        </div>
-      </button>
+      {!isOpen && isHomepage ? null : (
+        <button
+          onClick={toggleChatBot}
+          className={`absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-[5px] md:p-[10px] shadow-lg hover:scale-110 transition-transform duration-300 ${isAttentionEffect ? "animate-pulse" : ""
+            }`}
+        >
+          <div className="border-2 border-white rounded-full p-2">
+            {isOpen ? (
+              <BsX className="rotate-pop" size={25} />
+            ) : (
+              <BsRobot className="rotate-pop" size={25} />
+            )}
+          </div>
+        </button>
+      )}
     </div>
   );
 };

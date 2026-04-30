@@ -20,7 +20,7 @@ const ProductsPage = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const data = await fetchData("/products/get-all/brand-category?page=1&perpage=5");
+        const data = await fetchData(`/products/get-all/brand-category?page=1&perpage=5`, token);
         console.log(data.data)
         setProducts(data.data);
       } catch (error) {

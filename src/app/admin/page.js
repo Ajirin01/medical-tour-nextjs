@@ -864,7 +864,7 @@ export default function Ecommerce() {
                 <X size={20} />
               </button>
               <div className="w-full">
-                <ConsultationBookingPageContent showSpecialistCategories={false} />
+                <ConsultationBookingPageContent showSpecialistCategories={false} targetCategory="general" />
               </div>
             </div>
           </Dialog>

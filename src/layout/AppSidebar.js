@@ -48,6 +48,7 @@ const AppSidebar = () => {
   const [unverifiedPharmCount, setUnverifiedPharmCount] = useState(0);
   const [pendingUploadedPrescriptionCount, setPendingUploadedPrescriptionCount] = useState(0);
   const [pendingLinkedPrescriptionCount, setPendingLinkedPrescriptionCount] = useState(0);
+  const [pendingSpecialistCount, setPendingSpecialistCount] = useState(0);
 
   const isActive = useCallback((path) => path === pathname, [pathname]);
 
@@ -133,11 +134,24 @@ const AppSidebar = () => {
     }
   };
 
+  const fetchPendingSpecialists = async (roles) => {
+    try {
+      if (roles.includes(user?.role)) {
+        const response = await fetchData("admin/unapproved-specialists", token);
+        // If response is an array, use its length. If it's the result of find, it might be an array.
+        setPendingSpecialistCount(Array.isArray(response) ? response.length : (response.data?.length || 0));
+      }
+    } catch (err) {
+      console.error("Failed to fetch unapproved specialist count", err);
+    }
+  };
+
   
     fetchUnverifiedLabs(["admin"]); 
     fetchUnverifiedPharmacies(["admin"]); 
     fetchPendingUploadedPrescription(["admin", "pharmacyAdmin", "pharmacyEmployee"]); 
     fetchPendingLinkedPrescription(["admin", "pharmacyAdmin", "pharmacyEmployee"]);
+    fetchPendingSpecialists(["admin", "superAdmin"]);
 
   }, [token]);
   
@@ -177,6 +191,7 @@ const AppSidebar = () => {
         icon: <User />,
         name: "Specialists",
         path: "/admin/specialists",
+        badge: pendingSpecialistCount,
         roles: ["admin", "superAdmin"]
       },
       // Patients

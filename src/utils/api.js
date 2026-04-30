@@ -46,11 +46,9 @@ async function handleResponse(res) {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const error = {
-      status: res.status,
-      data: data,
-      message: data?.message || `Error: ${res.statusText}`,
-    };
+    const error = new Error(data?.message || `Error: ${res.statusText}`);
+    error.status = res.status;
+    error.data = data;
     throw error;
   }
 

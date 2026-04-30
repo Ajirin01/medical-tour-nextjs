@@ -5,9 +5,13 @@ import { Calendar } from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { postData } from '@/utils/api';
 import { useToast } from '@/context/ToastContext';
+import { useSession } from 'next-auth/react';
 import { FaPlus, FaTrash, FaCalendarAlt, FaClock, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 const AvailabilityCalendar = () => {
+  const { data: session } = useSession();
+  const token = session?.user?.jwt;
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [timeSlots, setTimeSlots] = useState([]);
   const [isRecurring, setIsRecurring] = useState(false);
@@ -77,7 +81,7 @@ const AvailabilityCalendar = () => {
         timeSlots,
         isRecurring,
         recurringPattern: isRecurring ? recurringPattern : null
-      });
+      }, token);
 
       addToast('Availability set successfully!', 'success');
       setTimeSlots([]);
