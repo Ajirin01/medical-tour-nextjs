@@ -469,9 +469,9 @@ export default function Ecommerce() {
     },
     {
       title: "Earning",
-      value: `${CURRENCY_SYMBOL}${(calls?.filter(c => c.endTime) || []).length * 15}`,
-      change: (calls?.filter(c => c.endTime) || []).length > 0
-        ? `Last: ${CURRENCY_SYMBOL}15`
+      value: `${CURRENCY_SYMBOL}${calls.reduce((total, call) => total + (call.appointment?.price || 0), 0).toFixed(2)}`,
+      change: calls.length > 0
+        ? `Last: ${CURRENCY_SYMBOL}${(calls[calls.length - 1].appointment?.price || 0).toFixed(2)}`
         : "No past earning",
       icon: <FaMoneyBill className="text-blue-600" size={20} />,
       bgColor: "bg-blue-50",
