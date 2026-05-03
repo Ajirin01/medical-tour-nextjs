@@ -28,7 +28,7 @@ const Contact = () => {
                 </div> */}
                 <div className="flex items-center">
                   <FaEnvelope className="text-[var(--color-primary-6)] mr-4" />
-                  <span className="text-gray-700">Contact@sozodigicare.ie</span>
+                  <span className="text-gray-700">Contact@Sozodigicare.ie</span>
                 </div>
                 <div className="flex items-center">
                   <FaMapMarkerAlt className="text-[var(--color-primary-6)] mr-4" />

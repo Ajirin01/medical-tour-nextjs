@@ -92,7 +92,7 @@ export default function SignUpPage() {
               Create Account
             </h2>
             <p className="text-center text-gray-500 mb-8 font-medium">
-              Join SozoDigiCare — complete your profile after sign-up
+              Join Sozodigicare — complete your profile after sign-up
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">

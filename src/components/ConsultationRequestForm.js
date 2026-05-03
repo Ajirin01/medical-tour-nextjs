@@ -4,10 +4,12 @@ import { ClockIcon, DollarSignIcon, CheckCircleIcon } from "lucide-react";
 export default function ConsultationRequestForm({ handleSubmit, handleChange, formData, submitting, calculatedCost }) {
     return (
     <form className="space-y-6 bg-white p-6 rounded-xl shadow dark:bg-gray-900 dark:text-gray-300" onSubmit={handleSubmit}>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-4">
-          {[15, 30, 40, 60].map((min) => {
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+          {[15, 25, 40].map((min) => {
             const isActive = formData.duration === min.toString();
-            const price = min * 2; // Customize pricing logic
+            // Pricing lookup: 15m=$20, 25m=$30, 40m=$60
+            const pricing = { 15: 20, 25: 30, 40: 60 };
+            const price = pricing[min] || min * 2; 
             return (
               <div
                 key={min}

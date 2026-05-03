@@ -151,7 +151,7 @@ const PublicCertificateVerification = () => {
 
         <div className="mt-10 max-w-[794px] mx-auto p-6 bg-blue-50 border border-blue-100 rounded-2xl text-center print:hidden">
           <p className="text-blue-800 text-sm font-medium">
-            Questions about this document? Contact <span className="font-bold">support@sozodigicare.com</span> with reference <span className="font-bold">{certificate.certID}</span>
+            Questions about this document? Contact <span className="font-bold">support@Sozodigicare.com</span> with reference <span className="font-bold">{certificate.certID}</span>
           </p>
         </div>
       </div>

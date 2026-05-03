@@ -55,8 +55,9 @@ function StartConsultationPageContent() {
   const COST_PER_MINUTE = 2
 
   useEffect(() => {
-    setCalculatedCost(formData.duration * COST_PER_MINUTE)
-  }, [formData.duration])
+    const pricing = { 15: 20, 25: 30, 40: 60 };
+    setCalculatedCost(pricing[formData.duration] || 0);
+  }, [formData.duration]);
 
   useEffect( () => {
     if(user) setFormData({
@@ -68,7 +69,7 @@ function StartConsultationPageContent() {
   }, [user])
   
   const [submitting, setSubmitting] = useState(false);
-  const [calculatedCost, setCalculatedCost] = useState(30); // Base cost for 15 minutes
+  const [calculatedCost, setCalculatedCost] = useState(20); // Base cost for 15 minutes
 
   useEffect(() => {
     socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL, {

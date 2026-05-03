@@ -28,8 +28,7 @@ import {
 } from "@/components/gabriel";
 import ModalContainer from "@/components/gabriel/ModalContainer";
 
-import io from 'socket.io-client';
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
+import { getSocket } from "@/lib/socket";
 
 export default function CertificatesConsultationPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,12 +43,12 @@ export default function CertificatesConsultationPage() {
   const services = gpServices;
 
   useEffect(() => {
+    const socket = getSocket();
     socket.emit("get-online-specialists");
 
     socket.on("update-specialists", (data) => {
-        console.log(data)
+        console.log("Online specialists received:", data);
         const gpsOnly = data.filter((specialist) => specialist.category === "General Practitioner");
-        // console.log(gpsOnly)
         setOnlineGPs(gpsOnly);
     });
 
@@ -170,7 +169,7 @@ export default function CertificatesConsultationPage() {
                     />
                     <h3 className="text-lg font-semibold text-center text-gray-800">{service.title}</h3>
                     <p className="text-sm text-gray-600 text-center">{service.description}</p>
-                    <p className="text-lg font-bold text-center text-[var(--color-primary-7)] mt-4">${service.price}</p>
+                    <p className="text-lg font-bold text-center text-[var(--color-primary-7)] mt-auto pt-4">${service.price}</p>
 
                     <button
                     onClick={() => {
@@ -185,7 +184,7 @@ export default function CertificatesConsultationPage() {
                         dispatch(setPrice(service.price));
                         }
                     }}
-                    className={`mt-4 w-auto mx-auto text-center py-2 px-4 rounded-xl transform transition duration-300 ease-in-out hover:scale-105 ${
+                    className={`mt-4 w-auto mx-auto text-center py-2 px-4 rounded-xl transform transition duration-300 ease-in-out hover:scale-105 whitespace-nowrap ${
                         isOnline
                         ? "bg-[var(--color-primary-6)] hover:bg-[var(--color-primary-7)] text-white text-sm font-medium"
                         : "text-[var(--color-primary-6)] hover:text-[var(--color-primary-7)] border-2 border-[var(--color-primary-6)] hover:border-[var(--color-primary-9)] text-sm font-medium"
@@ -234,19 +233,18 @@ export default function CertificatesConsultationPage() {
                 plans={[
                     {
                         title: "Basic",
-                        price: getPrice(15),
-                        oldPrice: getOldPrice(15),
+                        price: 20,
+                        oldPrice: 25,
                         duration: 15,
                         features: ["Duration: 15 mins", "Quick call", "Summary"],
                     },
                     {
                         title: "Delux",
-                        price: getPrice(45, 10),
-                        oldPrice: getOldPrice(45),
-                        duration: 45,
+                        price: 30,
+                        oldPrice: 40,
+                        duration: 25,
                         features: [
-                            "Duration: 45 mins",
-                            "10% OFF",
+                            "Duration: 25 mins",
                             "Report",
                             "Follow-up",
                             "Pharmacy Referral",
@@ -255,12 +253,11 @@ export default function CertificatesConsultationPage() {
                     },
                     {
                         title: "Premium",
-                        price: getPrice(60, 20),
-                        oldPrice: getOldPrice(60),
-                        duration: 60,
+                        price: 60,
+                        oldPrice: 75,
+                        duration: 40,
                         features: [
-                            "Duration: 60 mins",
-                            "20% OFF",
+                            "Duration: 40 mins",
                             "Report",
                             "Follow-up",
                             "Pharmacy Referral",

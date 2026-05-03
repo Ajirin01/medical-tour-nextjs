@@ -118,7 +118,7 @@ const SpecialistCategories = () => {
               </div>
               <div className="p-4 text-center">
                 <button
-                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium"
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
                   onClick={() => handleBooking(spec.name)}
                 >
                   BOOK APPOINTMENT

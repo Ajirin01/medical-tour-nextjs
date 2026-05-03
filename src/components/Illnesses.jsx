@@ -127,12 +127,12 @@ const GPServicesIllnesses = ({ limit }) => {
               alt={illness.name}
               className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
             />
-            <div className="flex flex-col justify-between flex-1">
+            <div className="flex flex-col justify-between flex-1 h-full">
               <h3 className="text-md font-semibold text-gray-800">{illness.name}</h3>
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-auto pt-2">
                 <button
                   onClick={openActionModal}
-                  className={`text-xs px-3 py-1.5 rounded-lg transition font-medium flex-1 ${
+                  className={`text-xs px-3 py-1.5 rounded-lg transition font-medium flex-1 whitespace-nowrap ${
                     isDoctorOnline
                       ? "bg-green-500 text-white hover:bg-green-600 shadow-md transform hover:scale-105"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"

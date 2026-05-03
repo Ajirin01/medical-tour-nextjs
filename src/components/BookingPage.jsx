@@ -116,7 +116,6 @@ const ConsultationBookingPageContent = ({showSpecialistCategories, targetCategor
         fetchAvailableSlots()
       }
     }
-    
   }, [selectedDate, specialistsByCategory, token])
 
   const fetchSpecialistCategories = async () => {
@@ -137,7 +136,18 @@ const ConsultationBookingPageContent = ({showSpecialistCategories, targetCategor
         members,
       }))
 
-      if(!showSpecialistCategories){
+      if(targetCategory){
+        let targetDocs = grouped[targetCategory] || [];
+        if (targetCategory === 'general') {
+          targetDocs = [
+            ...(grouped['general'] || []),
+            ...(grouped['General Practice'] || []),
+            ...(grouped['General Practitioner'] || []),
+            ...(grouped['Uncategorized'] || [])
+          ];
+        }
+        setSpecialistsByCategory(targetDocs)
+      } else if (!showSpecialistCategories) {
         setSpecialistsByCategory(res)
       }
 
@@ -182,26 +192,29 @@ const ConsultationBookingPageContent = ({showSpecialistCategories, targetCategor
 
       const allSlots = [];
   
-      // 1. Fetch appointments for selected date
-      const appointmentRes = await fetchData(
-        `consultation-appointments/all/no/pagination/?dateFrom=${selectedDateString}&dateTo=${selectedDateString}`,
-        token
-      );
-      const bookedAppointments = appointmentRes || [];
+      // 1. Fetch appointments for selected date (isolated so failures don't block slot loading)
+      let bookedSlotIds = new Set();
+      try {
+        const appointmentRes = await fetchData(
+          `consultation-appointments/all/no/pagination?dateFrom=${selectedDateString}&dateTo=${selectedDateString}`,
+          token
+        );
+        const bookedAppointments = Array.isArray(appointmentRes) ? appointmentRes : [];
+        bookedSlotIds = new Set(
+          bookedAppointments.map((appointment) => appointment.slot?._id).filter(Boolean)
+        );
+      } catch (apptErr) {
+        console.warn('Could not fetch booked appointments (non-fatal):', apptErr.message);
+      }
   
-      // 2. Create a set of booked slot IDs for fast lookup
-      const bookedSlotIds = new Set(
-        bookedAppointments.map((appointment) => appointment.slot?._id)
-      );
-  
-      // 3. Loop through all specialists in the selected category
+      // 2. Loop through all specialists in the selected category
       for (const specialist of specialistsByCategory) {
         const res = await fetchData(
           `availabilities/slots/by?userRole=specialist&consultantId=${specialist._id}&isBooked=false`,
           token
         );
   
-        const filtered = res.data.filter((slot) => {
+        const filtered = (res?.data || []).filter((slot) => {
           const slotId = slot._id;
           if (bookedSlotIds.has(slotId)) return false; // Exclude already booked slots
   
@@ -212,9 +225,10 @@ const ConsultationBookingPageContent = ({showSpecialistCategories, targetCategor
           if (slot.type === 'recurring') {
             return slot.dayOfWeek === selectedDayName;
           } else if (slot.type === 'one-time') {
-            const parsedDate = format(new Date(slot.date), 'yyyy-MM-dd');
-            const rawDateString = typeof slot.date === 'string' ? slot.date.substring(0, 10) : parsedDate;
-            return parsedDate === selectedDateString || rawDateString === selectedDateString;
+            // Parse date using LOCAL time components to avoid UTC offset shifting the day
+            const d = new Date(slot.date);
+            const slotDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            return slotDateStr === selectedDateString;
           }
   
           return false;

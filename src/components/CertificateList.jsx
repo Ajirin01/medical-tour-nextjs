@@ -104,7 +104,7 @@ export default function CertificateList({ max }) {
             </p>
             <button
               onClick={() => openDialog(cert)}
-              className="mt-4 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition"
+              className="mt-4 w-full py-2 px-4 bg-[var(--color-primary-6)] text-white rounded-xl hover:bg-[var(--color-primary-7)] transition whitespace-nowrap"
             >
               Book Appointment
             </button>

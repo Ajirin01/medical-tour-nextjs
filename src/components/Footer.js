@@ -50,7 +50,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {/* Logo & About */}
           <div className="flex flex-col gap-y-4">
-            <Image src={logoDark} alt="SozoDigiCare" width={200} height={60} className="mb-2" />
+            <Image src={logoDark} alt="Sozodigicare" width={200} height={60} className="mb-2" />
             <p className="text-white/80 text-sm mb-4 max-w-xs">
               Bridging the gap between advanced healthcare and accessibility through innovative solutions.
             </p>
@@ -87,7 +87,7 @@ const Footer = () => {
             <div className="mt-6 text-white/80 text-sm">
               <div className="flex items-center gap-2 mb-2">
                 <FaEnvelope className="text-secondary-6" />
-                <span>Contact@sozodigicare.ie</span>
+                <span>Contact@Sozodigicare.ie</span>
               </div>
               <div className="flex items-center gap-2">
                 {/* <FaPhoneAlt className="text-secondary-6" /> */}
@@ -102,7 +102,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="flex flex-col md:flex-row justify-between items-center text-white/70 text-sm">
-          <p>© {currentYear} SozoDigiCare. All rights reserved.</p>
+          <p>© {currentYear} Sozodigicare. All rights reserved.</p>
           <p className="mt-3 md:mt-0">Designed with care for better healthcare accessibility</p>
         </div>
       </div>

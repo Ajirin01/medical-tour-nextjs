@@ -15,7 +15,7 @@ const BookAppointmentBTN = () => {
       <div className="mt-12 z-9999">
         <button
           onClick={openModal}
-          className="bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-blue-800 transition inline-flex items-center"
+          className="bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-blue-800 transition inline-flex items-center whitespace-nowrap"
         >
           Consult Now
         </button>
