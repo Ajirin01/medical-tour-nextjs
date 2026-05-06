@@ -182,18 +182,25 @@ const PricingModal = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {plans.map((plan, idx) => {
-                const displayDuration = specialist?.consultationDuration || plan.duration / 60;
+                // Always use the plan's own duration in minutes (converted from seconds if needed)
+                // plan.duration may be in seconds (e.g. 900, 2700, 3600) or minutes (e.g. 15, 45, 60)
+                // We normalize: if duration >= 60, assume seconds and convert; otherwise treat as minutes
+                const planDurationMinutes = plan.duration >= 60 ? plan.duration / 60 : plan.duration;
+
+                // specialist.consultationDuration is only used to update the duration label text, 
+                // NOT to override the plan's actual duration value
+                const displayLabel = specialist?.consultationDuration || planDurationMinutes;
                 const features = [...plan.features];
                 const durationIndex = features.findIndex(f => f.toLowerCase().includes("duration"));
                 if (durationIndex !== -1) {
-                  features[durationIndex] = `Duration: ${displayDuration} mins`;
+                  features[durationIndex] = `Duration: ${displayLabel} mins`;
                 }
                 
                 return (
                   <PricingCard 
                     key={idx} 
                     {...plan} 
-                    duration={displayDuration} 
+                    duration={planDurationMinutes}  // always the plan's own duration in minutes
                     features={features} 
                   />
                 );
