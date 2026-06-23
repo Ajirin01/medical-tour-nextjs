@@ -46,14 +46,16 @@ export default function CertificatesConsultationPage() {
     const socket = getSocket();
     socket.emit("get-online-specialists");
 
-    socket.on("update-specialists", (data) => {
+    const handleUpdate = (data) => {
         console.log("Online specialists received:", data);
         const gpsOnly = data.filter((specialist) => specialist.category === "General Practitioner");
         setOnlineGPs(gpsOnly);
-    });
+    };
+
+    socket.on("update-specialists", handleUpdate);
 
     return () => {
-      socket.off("update-specialists");
+      socket.off("update-specialists", handleUpdate);
     };
   }, []);
 

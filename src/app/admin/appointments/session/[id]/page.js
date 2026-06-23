@@ -43,6 +43,7 @@ const SessionPage = () => {
 
   const { appointment, loading } = useAppointment(id, token);
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+  const [showDoctorIndemnity, setShowDoctorIndemnity] = useState(false);
 
 
   const iframeRef = useRef(null);
@@ -162,15 +163,22 @@ const SessionPage = () => {
                          userRole === "consultant";
 
     if (isSpecialist) {
-      socketRef.current.emit("request-patient-end-session", {
-        appointmentId: currentAppointment.session.appointment._id
-      });
-      addToast("Awaiting patient's confirmation to end the session...", "info");
+      // Show doctor's own indemnity confirmation first, before notifying the patient
       setShowOptions(false);
+      setShowDoctorIndemnity(true);
     } else {
       // It's the patient requesting to end the session
       setShowConfirmEnd(true);
     }
+  };
+
+  const handleDoctorIndemnityConfirmed = () => {
+    const currentAppointment = appointmentRef.current;
+    setShowDoctorIndemnity(false);
+    socketRef.current.emit("request-patient-end-session", {
+      appointmentId: currentAppointment.session.appointment._id
+    });
+    addToast("Awaiting patient's confirmation to end the session...", "info");
   };
 
   const handleEndCall = () => {
@@ -194,7 +202,7 @@ const SessionPage = () => {
 
   const handleEndSession = async () => {
     const currentAppointment = appointmentRef.current;
-    if (!currentAppointment?.session._id || !token || currentAppointment.status === "completed") return;
+    if (!currentAppointment?.session?._id || !token || currentAppointment?.session?.appointment?.status === "completed") return;
     try {
       setEndingSession(true);
       socketRef.current.emit("session-ended", {
@@ -660,9 +668,23 @@ const SessionPage = () => {
           specialistEmail={session?.user?.email}
         />
 
+        {/* Doctor's own indemnity confirmation before notifying patient */}
+        <ConfirmationDialog
+          isOpen={showDoctorIndemnity}
+          onClose={() => setShowDoctorIndemnity(false)}
+          onConfirm={handleDoctorIndemnityConfirmed}
+          title="End Consultation Session?"
+          message="You are about to request to end this consultation. The patient will be asked to confirm. Please acknowledge below before proceeding."
+          confirmText="Confirm & Notify Patient"
+          cancelText="Cancel"
+          requireIndemnity={true}
+          indemnityMessage="I confirm that I want to end this session and understand this action cannot be undone once the patient confirms."
+        />
+
+        {/* Patient-facing confirmation dialog (triggered by doctor's socket request) */}
         <ConfirmationDialog
           isOpen={showConfirmEnd}
-          onClose={() => setShowConfirmEnd(false)}
+          onClose={handleRejectEndSession}
           onCancel={handleRejectEndSession}
           onConfirm={handleEndSession}
           title={userRole === "user" ? "Doctor Requested to End Session" : "End Session?"}

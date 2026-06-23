@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
+import { getSocket } from "@/lib/socket";
 import { FaUserMd, FaCalendarAlt, FaStar, FaTimes, FaRegSadTear } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { Dialog } from "@headlessui/react";
 import ConsultationBookingPageContent from "@/components/BookingPageSelectedCategory"
 import UserAvatar from "./UserAvatar";
-
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ["websocket"] });
 
 const FindSpecialistModal = ({ category, closeModal, setTheSpecialist }) => {
   const [specialist, setSpecialist] = useState(null);
@@ -20,6 +18,7 @@ const FindSpecialistModal = ({ category, closeModal, setTheSpecialist }) => {
   // console.log('$$$$$$$$$$$$$$$$$$$$$',category)
 
   useEffect(() => {
+    const socket = getSocket();
     socket.emit("get-online-specialists");
 
     const handleUpdate = (data) => {

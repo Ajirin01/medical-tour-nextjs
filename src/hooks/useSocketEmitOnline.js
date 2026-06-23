@@ -11,7 +11,7 @@ export default function useSocketEmitOnline() {
   const socketRef = useRef(null);
   const ringtoneRef = useRef(null);
 
-  const [showSoundPrompt, setShowSoundPrompt] = useState(true);
+  const [showSoundPrompt, setShowSoundPrompt] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [incomingCall, setIncomingCall] = useState(null);
 
@@ -109,16 +109,32 @@ export default function useSocketEmitOnline() {
       ringtoneRef.current.preload = "auto";
     }
 
+    if (typeof window !== "undefined") {
+      const isSoundEnabled = localStorage.getItem("soundEnabled") === "true";
+      const hasPromptShown = localStorage.getItem("soundPromptShown") === "true";
+      if (!isSoundEnabled && !hasPromptShown) {
+        setShowSoundPrompt(true);
+      }
+    }
+
     const emitSpecialistOnline = () => {
-      if (socketRef.current?.connected && user.role === "specialist") {
-        socketRef.current.emit("specialist-online", user);
+      const allowedRoles = ["specialist", "consultant"];
+      if (socketRef.current?.connected && allowedRoles.includes(user?.role)) {
+        const platform = process.env.NEXT_PUBLIC_PLATFORM || "global";
+        const payload = { ...user, platform };
+        socketRef.current.emit("specialist-online", payload);
       }
     };
 
-    socketRef.current.on("connect", () => {
-      console.log("✅ Specialist socket connected:", socketRef.current.id);
+    if (socketRef.current.connected) {
+      console.log("✅ Specialist socket already connected:", socketRef.current.id);
       setTimeout(emitSpecialistOnline, 500);
-    });
+    } else {
+      socketRef.current.on("connect", () => {
+        console.log("✅ Specialist socket connected:", socketRef.current.id);
+        setTimeout(emitSpecialistOnline, 500);
+      });
+    }
 
     socketRef.current.io.on("reconnect", () => {
       console.log("🔄 Reconnected. Re-emitting specialist-online...");
@@ -128,17 +144,19 @@ export default function useSocketEmitOnline() {
     socketRef.current.off("incoming-call");
 
     socketRef.current.on("incoming-call", async ({ appointmentId }) => {
+      console.log(`\n🛎️ [FRONTEND] Received incoming-call for appointment ${appointmentId}!`);
       try {
         const appointment = await fetchData(`consultation-appointments/${appointmentId}`);
+        console.log(`🛎️ [FRONTEND] Fetched appointment data:`, appointment);
 
         if (soundEnabled && ringtoneRef.current) {
+          console.log(`🛎️ [FRONTEND] Playing ringtone...`);
           ringtoneRef.current.play().catch((err) => {
             console.warn("🔇 Ringtone play error:", err);
           });
         }
 
-        if (showSoundPrompt) return;
-
+        console.log(`🛎️ [FRONTEND] Setting incomingCall state. Current showSoundPrompt=${showSoundPrompt}`);
         setIncomingCall({ appointmentId, appointment });
       } catch (err) {
         console.error("Failed to fetch appointment:", err);
@@ -152,7 +170,7 @@ export default function useSocketEmitOnline() {
   }, [session, user, soundEnabled, showSoundPrompt]);
 
   const IncomingCallDialogWrapper =
-    incomingCall && !showSoundPrompt ? (
+    incomingCall ? (
       <IncomingCallDialog
         appointment={incomingCall}
         onAccept={() => handleAccept(incomingCall.appointmentId)}
@@ -161,7 +179,7 @@ export default function useSocketEmitOnline() {
     ) : null;
 
   return {
-    showSoundPrompt,
+    showSoundPrompt: showSoundPrompt && !incomingCall,
     setShowSoundPrompt,
     enableSoundNotifications,
     IncomingCallDialogWrapper,

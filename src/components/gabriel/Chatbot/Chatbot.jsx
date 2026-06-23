@@ -12,6 +12,9 @@ import { openChatBot, resetChatbotAttention } from "@/store/popUpSlice";
 import { useRouter } from "next/navigation";
 import { postData } from "@/utils/api";
 import { useSession } from "next-auth/react";
+import PricingModal from "@/components/gabriel/PricingModal";
+import ModalContainer from "@/components/gabriel/ModalContainer";
+import { setPrice, setSpecialist, setDuration } from '@/store/specialistSlice';
 import io from "socket.io-client";
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
@@ -26,7 +29,7 @@ const exampleMessages = [
   },
 ];
 
-const MessageWithDisclaimer = ({ text, sender, showDisclaimer, isDoctorOnline }) => {
+const MessageWithDisclaimer = ({ text, sender, showDisclaimer, onConsultDoctor }) => {
   const router = useRouter();
 
   return (
@@ -54,10 +57,10 @@ const MessageWithDisclaimer = ({ text, sender, showDisclaimer, isDoctorOnline })
             Disclaimer: This AI assistant is not qualified to give medical advice. Please consult with a healthcare professional for accurate diagnosis and treatment.
           </p>
           <button
-            onClick={() => router.push(isDoctorOnline ? "/gp-consultation" : "/admin/availabilities")}
+            onClick={onConsultDoctor}
             className="mt-2 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors bg-white/50 px-3 py-1 rounded-full font-bold"
           >
-            <RiCustomerService2Fill /> {isDoctorOnline ? "Consult a Doctor Now" : "Book an Appointment"}
+            <RiCustomerService2Fill /> Consult a Doctor
           </button>
         </div>
       )}
@@ -85,6 +88,25 @@ const ChatBot = () => {
   const [onlineGPs, setOnlineGPs] = useState([]);
   const pathname = usePathname();
   const isHomepage = pathname === "/";
+  
+  const [isOpenModals, setIsOpenModals] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
+  
+  const closeDialog = () => {
+    setIsOpenModals(false);
+    setModalContent(null);
+  };
+  
+  const handleConsultDoctor = () => {
+    if (isDoctorOnline) {
+      const specialist = onlineGPs[0];
+      dispatch(setSpecialist(specialist));
+      setModalContent("pricingModal");
+      setIsOpenModals(true);
+    } else {
+      router.push("/admin/consultation/book?consultationMode=appointment");
+    }
+  };
 
   useEffect(() => {
     socket.emit("get-online-specialists");
@@ -344,7 +366,7 @@ const ChatBot = () => {
                         text={message.text} 
                         sender={message.sender} 
                         showDisclaimer={message.showDisclaimer}
-                        isDoctorOnline={isDoctorOnline}
+                        onConsultDoctor={handleConsultDoctor}
                       />
                     </div>
                   ))}
@@ -408,6 +430,55 @@ const ChatBot = () => {
             )}
           </div>
         </button>
+      )}
+      
+      {isOpenModals && modalContent === "pricingModal" && (
+        <ModalContainer
+          modal={
+            <PricingModal
+                closeModal={closeDialog}
+                setPrice={(p) => dispatch(setPrice(p))}
+                setDuration={(d) => dispatch(setDuration(d))}
+                specialist={useSelector((state) => state.specialist.specialist)}
+                currency="USD"
+                plans={[
+                    {
+                        title: "Basic",
+                        price: 20,
+                        oldPrice: 25,
+                        duration: 15,
+                        features: ["Duration: 15 mins", "Quick call", "Summary"],
+                    },
+                    {
+                        title: "Delux",
+                        price: 30,
+                        oldPrice: 40,
+                        duration: 25,
+                        features: [
+                            "Duration: 25 mins",
+                            "Report",
+                            "Follow-up",
+                            "Pharmacy Referral",
+                        ],
+                        isRecommended: true,
+                    },
+                    {
+                        title: "Premium",
+                        price: 60,
+                        oldPrice: 75,
+                        duration: 40,
+                        features: [
+                            "Duration: 40 mins",
+                            "Report",
+                            "Follow-up",
+                            "Pharmacy Referral",
+                            "Laboratory Referral",
+                        ],
+                    },
+                ]}
+            />
+          }
+        />
       )}
     </div>
   );

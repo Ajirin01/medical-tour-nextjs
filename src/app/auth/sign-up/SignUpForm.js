@@ -6,8 +6,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { doctors } from "@/assets";
 import { useToast } from "@/context/ToastContext";
-import { FaSpinner, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaSpinner, FaEye, FaEyeSlash, FaCalendarAlt } from "react-icons/fa";
 import ReCAPTCHA from "react-google-recaptcha";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const formInput =
   "border-[3px] border-primary-5 text-primary-2 rounded-[20px] overflow-hidden p-3 w-full placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-5";
@@ -19,10 +21,13 @@ export default function SignUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roleFromUrl = searchParams.get("role") || "user";
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [DOB, setDOB] = useState(null);
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +37,16 @@ export default function SignUpPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!agreeTerms) {
+      addToast("You must agree to the Terms and Conditions.", "error");
+      return;
+    }
+
+    if (!DOB) {
+      addToast("Please provide your Date of Birth.", "error");
+      return;
+    }
 
     if (!captchaToken) {
       addToast("Please complete the CAPTCHA.", "error");
@@ -47,14 +62,16 @@ export default function SignUpPage() {
           "Content-Type": "application/json",
           "x-platform": process.env.NEXT_PUBLIC_PLATFORM || "global",
         },
-        body: JSON.stringify({ email, password, role: roleFromUrl, captchaToken }),
+        body: JSON.stringify({ email, password, role: roleFromUrl, captchaToken, DOB }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.userId) {
         addToast("Account created! Check your email for the OTP.", "success");
-        router.push(`/auth/verify-otp?email=${email}`);
+        let verifyUrl = `/auth/verify-otp?email=${email}`;
+        if (callbackUrl) verifyUrl += `&callbackUrl=${encodeURIComponent(callbackUrl)}`;
+        router.push(verifyUrl);
       } else {
         const msg = data.message || "Registration failed. Please try again.";
         setError(msg);
@@ -136,6 +153,43 @@ export default function SignUpPage() {
                 </button>
               </div>
 
+              {/* Date of Birth */}
+              <div className="flex flex-col">
+                <label className={formLabel}>Date of Birth</label>
+                <div className="relative">
+                  <DatePicker
+                    selected={DOB}
+                    onChange={(date) => setDOB(date)}
+                    className={`${formInput} pl-10`}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="Select your date of birth"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    yearDropdownItemNumber={100}
+                    scrollableYearDropdown
+                    maxDate={new Date()}
+                    required
+                  />
+                  <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                </div>
+              </div>
+
+              {/* Terms and Conditions */}
+              <div className="flex items-center ml-2">
+                <input
+                  type="checkbox"
+                  id="agreeTerms"
+                  checked={agreeTerms}
+                  onChange={(e) => setAgreeTerms(e.target.checked)}
+                  className="w-4 h-4 text-primary-6 bg-gray-100 border-gray-300 rounded focus:ring-primary-5 focus:ring-2"
+                  required
+                />
+                <label htmlFor="agreeTerms" className="ml-2 text-sm font-medium text-gray-700">
+                  I agree to the <Link href="/terms-and-conditions" className="text-primary-6 hover:underline">Terms and Conditions</Link>
+                </label>
+              </div>
+
               {/* CAPTCHA */}
               <div className="pt-2">
                 <ReCAPTCHA
@@ -163,7 +217,7 @@ export default function SignUpPage() {
               <div className="text-center text-gray-500 font-medium">
                 Already have an account?{" "}
                 <Link
-                  href="/login"
+                  href={callbackUrl ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/login"}
                   className="text-primary-6 underline hover:text-primary-8 decoration-2 underline-offset-4"
                 >
                   Sign In
